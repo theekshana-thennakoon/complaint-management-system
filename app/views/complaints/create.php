@@ -87,10 +87,7 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea name="description" class="form-control" rows="4"><?php echo $data['description']; ?></textarea>
-                </div>
+
                 
                 <h4 style="margin: 30px 0 15px; color: var(--primary-color);">Additional Details</h4>
                 <div class="table-responsive">

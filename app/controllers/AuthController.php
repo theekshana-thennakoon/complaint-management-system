@@ -197,6 +197,8 @@ class AuthController extends Controller {
         
         if ($_SESSION['user_role_id'] == 1) {
             redirect('admin');
+        } elseif ($_SESSION['user_role_id'] == 2) {
+            redirect('governor');
         } elseif ($_SESSION['user_role_id'] == 5) {
             redirect('cc');
         } elseif ($_SESSION['user_role_id'] == 4) {

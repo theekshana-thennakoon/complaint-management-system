@@ -83,10 +83,7 @@
                             </div>
                         </div>
                         
-                        <div class="form-group mb-4">
-                            <label for="description" class="form-label fw-bold">Description</label>
-                            <textarea name="description" class="form-control" rows="4"><?php echo htmlspecialchars($data['description']); ?></textarea>
-                        </div>
+
                         
                         <h5 class="text-primary mb-3 border-bottom pb-2">Additional Details</h5>
                         <div class="table-responsive">

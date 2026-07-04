@@ -178,7 +178,7 @@ class CcController extends Controller {
                 'subject' => trim($_POST['subject']),
                 'category_id' => trim($_POST['category_id']),
                 'forward_department_id' => trim($_POST['forward_department_id']),
-                'description' => trim($_POST['description']),
+                'description' => isset($_POST['description']) ? trim($_POST['description']) : '',
                 'categories' => $this->complaintModel->getCategories(),
                 'departments' => $this->complaintModel->getDepartments(),
                 'err' => ''

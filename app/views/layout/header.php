@@ -54,7 +54,7 @@ $route_param = $_GET['url'] ?? '';
                         <li><a href="<?php echo URLROOT; ?>/publiccomplaint/status" class="nav-link <?php echo strpos($route_param, 'publiccomplaint/status') !== false ? 'active' : ''; ?>">Check Status</a></li>
                         
                         <?php if (isset($_SESSION['user_id'])): ?>
-                            <?php if ($_SESSION['user_role_id'] != 5 && $_SESSION['user_role_id'] != 4 && $_SESSION['user_role_id'] != 3 && $_SESSION['user_role_id'] != 1): ?>
+                            <?php if ($_SESSION['user_role_id'] != 5 && $_SESSION['user_role_id'] != 4 && $_SESSION['user_role_id'] != 3 && $_SESSION['user_role_id'] != 2 && $_SESSION['user_role_id'] != 1): ?>
                                 <li><a href="<?php echo URLROOT; ?>/dashboard" class="nav-link <?php echo strpos($route_param, 'dashboard') !== false ? 'active' : ''; ?>"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                             <?php endif; ?>
                             <?php if ($_SESSION['user_role_id'] == 1): ?>
@@ -65,6 +65,8 @@ $route_param = $_GET['url'] ?? '';
                                 <li><a href="<?php echo URLROOT; ?>/ao" class="nav-link <?php echo strpos($route_param, 'ao') !== false ? 'active' : ''; ?>"><i class="fas fa-user-tie"></i> AO Dashboard</a></li>
                             <?php elseif ($_SESSION['user_role_id'] == 3): ?>
                                 <li><a href="<?php echo URLROOT; ?>/gs" class="nav-link <?php echo strpos($route_param, 'gs') !== false ? 'active' : ''; ?>"><i class="fas fa-landmark"></i> GS Dashboard</a></li>
+                            <?php elseif ($_SESSION['user_role_id'] == 2): ?>
+                                <li><a href="<?php echo URLROOT; ?>/governor" class="nav-link <?php echo strpos($route_param, 'governor') !== false ? 'active' : ''; ?>"><i class="fas fa-crown"></i> Governor Dashboard</a></li>
                             <?php endif; ?>
                             <li><a href="<?php echo URLROOT; ?>/auth/logout" class="btn btn-secondary btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                         <?php else: ?>

@@ -90,13 +90,14 @@ class GsController extends Controller {
                 redirect('gs/index');
             }
 
-            // Mark as approved by GS and send back to Chief Clerk (Role ID 5) for dispatch/filing
+            // Approve by GS: forward to Chief Clerk (5) for dispatch.
+            // Governor (role_id=2) will see this automatically in their reports dashboard.
             $new_status = 'Approved by GS';
             $new_role_id = 5;
             
             if ($this->complaintModel->updateComplaintStatus($id, $new_status, $new_role_id)) {
                 $this->complaintModel->logWorkflow($id, 3, $new_role_id, 'Approve', $remarks, $_SESSION['user_id']);
-                flash('complaint_success', 'Complaint approved successfully and forwarded to Chief Clerk.');
+                flash('complaint_success', 'Complaint approved and forwarded to Chief Clerk. Governor has been notified.');
                 redirect('gs/index');
             } else {
                 die('Something went wrong');

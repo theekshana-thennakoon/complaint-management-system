@@ -69,10 +69,7 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="4"></textarea>
-                    </div>
+
                     
                     <div style="margin-top: 30px; text-align: right;">
                         <button type="submit" class="btn btn-primary">

@@ -112,65 +112,19 @@
             </div>
 
             <div>
-                <h4 style="color: var(--primary-color); margin-bottom: 10px;">Description</h4>
-                <div style="background: var(--input-bg); border: 1px solid var(--panel-border); padding: 15px; border-radius: 8px;">
-                    <?php echo nl2br($data['complaint']->description); ?>
+                <h4 style="color: var(--primary-color); margin-bottom: 10px;">Letter Preview</h4>
+                <div style="border: 1px solid var(--panel-border); background: #fff; border-radius: 8px; overflow: hidden;">
+                    <?php
+                    ob_start();
+                    require APPROOT . '/views/complaints/pdf_template.php';
+                    $letter_html = ob_get_clean();
+                    ?>
+                    <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" height="600px" style="border: none; display: block;"></iframe>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h3>Dynamic Letter Data</h3>
-            </div>
-            
-            <form action="<?php echo URLROOT; ?>/complaints/add_detail/<?php echo $data['complaint']->id; ?>" method="POST" style="margin-bottom: 20px;">
-                <div class="form-row">
-                    <div class="form-group" style="flex: 1;">
-                        <input type="text" name="letter_no" class="form-control" placeholder="Letter Number" required>
-                    </div>
-                    <div class="form-group" style="flex: 2;">
-                        <input type="text" name="subject" class="form-control" placeholder="Name & Subject" required>
-                    </div>
-                    <div class="form-group" style="width: 100px;">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Row</button>
-                    </div>
-                </div>
-            </form>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th width="10%">#</th>
-                        <th width="30%">Letter Number</th>
-                        <th width="45%">Name & Subject</th>
-                        <th width="15%">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if(!empty($data['details'])): ?>
-                        <?php $i = 1; foreach($data['details'] as $detail): ?>
-                            <tr>
-                                <td><?php echo str_pad($i, 2, '0', STR_PAD_LEFT); ?></td>
-                                <td><?php echo $detail->letter_no; ?></td>
-                                <td><?php echo !empty($detail->name) ? $detail->name : $detail->subject; ?></td>
-                                <td>
-                                    <form action="<?php echo URLROOT; ?>/complaints/delete_detail/<?php echo $detail->id; ?>/<?php echo $data['complaint']->id; ?>" method="POST" style="display:inline;">
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php $i++; endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="4" style="text-align: center;">No dynamic rows added yet.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
     </main>
 </div>
 

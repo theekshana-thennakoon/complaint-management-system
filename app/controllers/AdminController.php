@@ -14,6 +14,7 @@ class AdminController extends Controller {
             'total' => count($users),
             'active' => 0,
             'inactive' => 0,
+            'governor' => 0,
             'cc' => 0,
             'ao' => 0,
             'gs' => 0
@@ -25,6 +26,7 @@ class AdminController extends Controller {
             } else {
                 $stats['inactive']++;
             }
+            if($user->role_id == 2) $stats['governor']++;
             if($user->role_id == 5) $stats['cc']++;
             if($user->role_id == 4) $stats['ao']++;
             if($user->role_id == 3) $stats['gs']++;

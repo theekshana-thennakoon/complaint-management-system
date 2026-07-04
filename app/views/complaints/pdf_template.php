@@ -113,10 +113,9 @@
     <?php 
     $letterhead_path = APPROOT . '/../public/img/letterhead.jpg';
     if(file_exists($letterhead_path)){
-        // In DOMPDF, absolute local paths work best if isRemoteEnabled is true or using chroot
-        $img_src = $letterhead_path;
+        $img_data = base64_encode(file_get_contents($letterhead_path));
+        $img_src = 'data:image/jpeg;base64,' . $img_data;
     } else {
-        // Fallback or placeholder
         $img_src = ''; 
     }
     ?>
@@ -129,6 +128,32 @@
     <?php endif; ?>
 
 <div class="content-wrapper">
+    <table style="width: 100%; font-size: 11px; margin-bottom: 30px; border-collapse: collapse; border: none; line-height: 1.2;">
+        <tr>
+            <td style="text-align: left; padding-right: 2px;">ඔබේ අංකය</td>
+            <td rowspan="3" style="font-size: 28px; font-weight: 300; vertical-align: middle;">}</td>
+            <td rowspan="3" style="width: 25%; font-weight: bold; font-size: 13px; vertical-align: middle; padding-left: 5px;"><?php echo $data['complaint']->complaint_no; ?></td>
+            
+            <td style="text-align: left; padding-right: 2px;">මගේ අංකය</td>
+            <td rowspan="3" style="font-size: 28px; font-weight: 300; vertical-align: middle;">}</td>
+            <td rowspan="3" style="width: 25%; font-weight: bold; font-size: 13px; vertical-align: middle; padding-left: 5px;">NCP/GOV/2/7</td>
+            
+            <td style="text-align: left; padding-right: 2px;">දිනය</td>
+            <td rowspan="3" style="font-size: 28px; font-weight: 300; vertical-align: middle;">}</td>
+            <td rowspan="3" style="font-weight: bold; font-size: 13px; vertical-align: middle; padding-left: 5px;"><?php echo date('Y.m.d', strtotime($data['complaint']->date)); ?> .</td>
+        </tr>
+        <tr>
+            <td style="text-align: left; padding-right: 2px;">உமது இல</td>
+            <td style="text-align: left; padding-right: 2px;">எனது இல</td>
+            <td style="text-align: left; padding-right: 2px;">திகதி</td>
+        </tr>
+        <tr>
+            <td style="text-align: left; padding-right: 2px;">Your No</td>
+            <td style="text-align: left; padding-right: 2px;">My No</td>
+            <td style="text-align: left; padding-right: 2px;">Date</td>
+        </tr>
+    </table>
+
     <div class="letter-content">
         <div class="department-address">
             <?php echo $data['complaint']->department_name; ?>,<br>
@@ -136,9 +161,9 @@
         </div>
 
         <div class="letter-intro">
-            <span style="font-weight: bold; text-decoration: underline;">ගරු ආණ්ඩුකාරතුමාගේ ගෙත ඉදිරිපත් වී ඇති ලිපි</span> <br><br>
-            ගරු ආණ්ඩුකාරතුමා ලෙත් ඉදිරිපත් වී ඇති පහත් සඳහන් අභියාචනය එතුමාලේ සටහන අනුෙ අෙශය ඉදිරි 
-            කටයුතු සඳහා ලම් සමඟ ඔබ ලෙත් ලයාමු කරමි.
+            <span style="font-weight: bold; text-decoration: underline;">ගරු ආණ්ඩුකාරතුමා වෙත ඉදිරිපත් වී ඇති ලිපි</span> <br><br>
+            ගරු ආණ්ඩුකාරතුමා වෙත ඉදිරිපත් වී ඇති පහත සඳහන් අභියාචනය එතුමාගේ සටහන අනුව අවශ්‍ය ඉදිරි 
+            කටයුතු සඳහා මේ සමඟ ඔබ වෙත යොමු කරමි.
         </div>
 
         <table class="details-table">
@@ -167,21 +192,21 @@
         </table>
 
         <div class="letter-body">
-            02. ඒ අනුෙ උක්ත් ලිපිලේ සඳහන් කරුණු සම්බන්ධලයන් පරීක්ෂා කර බලා ලයාදා ඇති සටහන අනුෙ අෙශය 
-            කටයුතු සිදුකරන ලලසත්, ඒ සම්බන්ධලයන් ලියුම්කරු දැනුෙත් කිරීමට අෙශය කටයුතු සිදුකරන ලලසත් 
-            කාරුණිකෙ දන්ො සිටිමි.<br><br>
+            02. ඒ අනුව උක්ත ලිපියේ සඳහන් කරුණු සම්බන්ධයෙන් පරීක්ෂා කර බලා යොදා ඇති සටහන අනුව අවශ්‍ය 
+            කටයුතු සිදුකරන ලෙසත්, ඒ සම්බන්ධයෙන් ලියුම්කරු දැනුවත් කිරීමට අවශ්‍ය කටයුතු සිදුකරන ලෙසත් 
+            කාරුණිකව දන්වා සිටිමි.<br><br>
             
-            03. ත්ෙද ලමම ඉේීම සම්බන්ධලයන් ඔබ විසින් ගන්නා ලද ක්රියාමාර්ග පිළිබඳ ොර්ත්ාෙක් ගරු 
-            ආණ්ඩුකාරතුමා ලෙත් ඉදිරිපත් කිරීම සඳහා ලමම ලිපිය ලැබි  දින 14 ක් ඇතුළත් මා ලෙත් ලයාමු කරන ලලසත්, 
-            ඒ සම්බන්ධලයන් අදාල අභියාචනාකරු දැනුෙත් කරන ලලසත් කාරුණිකෙ දන්ො සිටිමි. (ගරු ආණ්ඩුකාරතුමා 
-            ලෙත් ඉදිරිපත් කිරීම සඳහා පිළිතුරු ලිපි සකස්කර එවීලම්දි අභියාචනලේ පිටපත්ක් (ඇමුණුම් රහිත්ෙ) අමුණා 
-            එෙන ලලසත්, ලිපිලේ අංකය සඳහන් ලකාට එෙන ලලසත්, ෙැඩිදුරටත් කාරුණිකෙ දන්ො සිටිමි.)
+            03. තවද මෙම ඉල්ලීම සම්බන්ධයෙන් ඔබ විසින් ගන්නා ලද ක්‍රියාමාර්ග පිළිබඳ වාර්තාවක් ගරු 
+            ආණ්ඩුකාරතුමා වෙත ඉදිරිපත් කිරීම සඳහා මෙම ලිපිය ලැබී දින 14 ක් ඇතුළත මා වෙත යොමු කරන ලෙසත්, 
+            ඒ සම්බන්ධයෙන් අදාල අභියාචනාකරු දැනුවත් කරන ලෙසත් කාරුණිකව දන්වා සිටිමි. (ගරු ආණ්ඩුකාරතුමා 
+            වෙත ඉදිරිපත් කිරීම සඳහා පිළිතුරු ලිපි සකස්කර එවීමේදී අභියාචනයේ පිටපතක් (ඇමුණුම් රහිතව) අමුණා 
+            එවන ලෙසත්, ලිපියේ අංකය සඳහන් කොට එවන ලෙසත්, වැඩිදුරටත් කාරුණිකව දන්වා සිටිමි.)
         </div>
 
         <div class="signature">
-            (නන්දන ගලග ාඩ)<br>
-            ආණ්ඩුකාරෙර ලේකම්<br>
-            උතුරු මැද පළාත්
+            (නන්දන ගලගොඩ)<br>
+            ආණ්ඩුකාර ලේකම්<br>
+            උතුරු මැද පළාත
         </div>
 
         <div class="cc-list">

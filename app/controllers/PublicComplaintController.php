@@ -1,5 +1,5 @@
 <?php
-class PublicComplaintController extends Controller {
+class PubliccomplaintController extends Controller {
     public function __construct(){
         $this->complaintModel = $this->model('Complaint');
     }
@@ -21,7 +21,7 @@ class PublicComplaintController extends Controller {
                 'email' => trim($_POST['email']),
                 'subject' => trim($_POST['subject']),
                 'category_id' => trim($_POST['category_id']),
-                'description' => trim($_POST['description']),
+                'description' => isset($_POST['description']) ? trim($_POST['description']) : '',
                 'complaint_no' => 'C-'.time().'-'.rand(10,99),
                 'date' => date('Y-m-d'),
                 'categories' => $this->complaintModel->getCategories(),

@@ -69,7 +69,7 @@ class User {
     }
     // Admin: Get Users (GS, AO, CC)
     public function getAdminManagedUsers(){
-        $this->db->query('SELECT u.*, r.name as role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.role_id IN (3, 4, 5) ORDER BY u.created_at DESC');
+        $this->db->query('SELECT u.*, r.name as role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.role_id IN (2, 3, 4, 5) ORDER BY u.created_at DESC');
         return $this->db->resultSet();
     }
 
@@ -137,7 +137,7 @@ class User {
 
     // Admin: Get managed roles
     public function getManagedRoles(){
-        $this->db->query('SELECT * FROM roles WHERE id IN (3, 4, 5)');
+        $this->db->query('SELECT * FROM roles WHERE id IN (2, 3, 4, 5)');
         return $this->db->resultSet();
     }
 }

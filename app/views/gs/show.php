@@ -44,34 +44,19 @@
 
                     <div class="row mb-4">
                         <div class="col-md-12">
-                            <p class="mb-1 text-muted small">Description</p>
-                            <div class="p-3 bg-light rounded">
-                                <?php echo nl2br(htmlspecialchars($data['complaint']->description)); ?>
+                            <p class="mb-1 text-muted small fw-bold">Letter Preview</p>
+                            <div class="border rounded overflow-hidden shadow-sm" style="background: #fff;">
+                                <?php
+                                ob_start();
+                                require APPROOT . '/views/complaints/pdf_template.php';
+                                $letter_html = ob_get_clean();
+                                ?>
+                                <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" height="600px" style="border: none; display: block;"></iframe>
                             </div>
                         </div>
                     </div>
 
-                    <?php if (!empty($data['details'])): ?>
-                    <h6 class="border-bottom pb-2 mb-3">Additional Details</h6>
-                    <div class="table-responsive mb-4">
-                        <table class="table table-sm table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Letter No</th>
-                                    <th>Name/Reason</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($data['details'] as $detail): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($detail->letter_no); ?></td>
-                                        <td><?php echo htmlspecialchars($detail->name); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                    <?php endif; ?>
+
 
                     <hr>
 
@@ -98,7 +83,7 @@
                                     <i class="fas fa-times-circle"></i> Reject (Return to AO)
                                 </button>
                                 <button type="button" class="btn btn-success" onclick="submitDecision('approve')">
-                                    <i class="fas fa-check-circle"></i> Approve (Forward to CC)
+                                    <i class="fas fa-check-circle"></i> Approve (Forward to Subject & Governor)
                                 </button>
                             </div>
                         </form>
@@ -121,18 +106,38 @@ function submitDecision(action) {
     
     if (action === 'reject') {
         if (remarks === '') {
-            alert('Please provide remarks before rejecting the complaint.');
+            Swal.fire({icon: 'warning', title: 'Remarks Required', text: 'Please provide remarks before rejecting the complaint.'});
             return;
         }
         form.action = '<?php echo URLROOT; ?>/gs/reject/<?php echo $data['complaint']->id; ?>';
-        if(confirm('Are you sure you want to REJECT this complaint and return it to the Administrative Officer?')) {
-            form.submit();
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Are you sure you want to REJECT this complaint and return it to the Administrative Officer?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, reject it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
     } else {
         form.action = '<?php echo URLROOT; ?>/gs/approve/<?php echo $data['complaint']->id; ?>';
-        if(confirm('Are you sure you want to APPROVE this complaint and forward it to the Chief Clerk for final processing?')) {
-            form.submit();
-        }
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'Are you sure you want to APPROVE this complaint and forward it to the Chief Clerk for final processing?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, approve it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
     }
 }
 </script>

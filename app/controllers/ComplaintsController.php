@@ -47,7 +47,7 @@ class ComplaintsController extends Controller {
                 'subject' => trim($_POST['subject']),
                 'category_id' => trim($_POST['category_id']),
                 'forward_department_id' => trim($_POST['forward_department_id']),
-                'description' => trim($_POST['description']),
+                'description' => isset($_POST['description']) ? trim($_POST['description']) : '',
                 'complaint_no' => 'GOV-C-'.date('YmdHis'),
                 'date' => date('Y-m-d'),
                 'status' => 'Pending CC', // Submit straight to CC
@@ -150,7 +150,7 @@ class ComplaintsController extends Controller {
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        $dompdf->stream('Letter_'.$complaint->complaint_no.'.pdf', array("Attachment" => false));
+        $dompdf->stream('Letter_'.$complaint->complaint_no.'.pdf', array("Attachment" => true));
     }
     public function edit($id){
         $complaint = $this->complaintModel->getComplaintById($id);
@@ -192,7 +192,7 @@ class ComplaintsController extends Controller {
                 'subject' => trim($_POST['subject']),
                 'category_id' => trim($_POST['category_id']),
                 'forward_department_id' => trim($_POST['forward_department_id']),
-                'description' => trim($_POST['description']),
+                'description' => isset($_POST['description']) ? trim($_POST['description']) : '',
                 'categories' => $this->complaintModel->getCategories(),
                 'departments' => $this->complaintModel->getDepartments(),
                 'err' => ''
