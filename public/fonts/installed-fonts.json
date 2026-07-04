@@ -1,0 +1,10 @@
+{
+    "sinhalafont": {
+        "normal": "C:\\xampp\\htdocs\\mahajanadinaya\\app\/..\/public\/fonts\/sinhalafont_normal_d850a42fe0d07808ab26ffeac07786b7",
+        "bold": "sinhalafont_bold_d850a42fe0d07808ab26ffeac07786b7"
+    },
+    "noto sans sinhala": {
+        "normal": "C:\\xampp\\htdocs\\mahajanadinaya\\app\/..\/public\/fonts\/noto_sans_sinhala_normal_049adab02e03ae342153566f8cc2747c",
+        "bold": "noto_sans_sinhala_bold_ea5ddb3ffcd259c68b6e37fe8140599b"
+    }
+}
