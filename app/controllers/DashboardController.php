@@ -8,14 +8,14 @@ class DashboardController extends Controller {
     }
 
     public function index(){
-        $complaints = $this->complaintModel->getComplaints();
+        $user_complaints = $this->complaintModel->getComplaintsByUserId($_SESSION['user_id']);
         
         $pending = 0;
         $approved = 0;
         $rejected = 0;
         $sent = 0;
 
-        foreach($complaints as $c) {
+        foreach($user_complaints as $c) {
             $status = strtolower($c->status);
             if(strpos($status, 'pending') !== false || $status == 'draft') {
                 $pending++;
@@ -26,12 +26,10 @@ class DashboardController extends Controller {
             if(strpos($status, 'reject') !== false) {
                 $rejected++;
             }
-            if($c->forward_department_id) {
+            if(isset($c->forward_department_id) && $c->forward_department_id) {
                 $sent++;
             }
         }
-
-        $user_complaints = $this->complaintModel->getComplaintsByUserId($_SESSION['user_id']);
 
         $data = [
             'title' => 'Dashboard',

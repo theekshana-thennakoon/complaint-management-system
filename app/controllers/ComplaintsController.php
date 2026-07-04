@@ -64,7 +64,8 @@ class ComplaintsController extends Controller {
             } else {
                 $complaint_id = $this->complaintModel->addComplaint($data, $details);
                 if($complaint_id){
-                    flash('complaint_success', 'Complaint saved and submitted to Chief Clerk.');
+                    $_SESSION['sweet_success'] = 'Complaint created successfully!';
+                    $_SESSION['sweet_ref'] = $data['complaint_no'];
                     redirect('complaints/show/' . $complaint_id);
                 } else {
                     die('Something went wrong');

@@ -14,14 +14,20 @@
                 <form action="<?php echo URLROOT; ?>/publiccomplaint/status" method="POST">
                     <div class="form-group">
                         <label for="complaint_no" class="form-label">Reference Number (e.g. COMP-XXXX)</label>
-                        <input type="text" name="complaint_no" class="form-control" placeholder="Enter Reference Number" required>
+                        <input type="text" name="complaint_no" class="form-control" placeholder="Enter Reference Number" value="<?php echo isset($data['ref']) ? htmlspecialchars($data['ref']) : ''; ?>" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">
+                    <?php if(!isLoggedIn()): ?>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label for="nic_or_mobile" class="form-label">NIC or Mobile Number (For Verification)</label>
+                        <input type="text" name="nic_or_mobile" class="form-control" placeholder="Enter your NIC or Mobile Number" value="<?php echo isset($data['nic_or_mobile']) ? htmlspecialchars($data['nic_or_mobile']) : ''; ?>" required>
+                    </div>
+                    <?php endif; ?>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 15px;">
                         <i class="fas fa-search"></i> Check Status
                     </button>
                 </form>
 
-                <?php if(isset($data['complaint'])): ?>
+                <?php if(!empty($data['ref'])): ?>
                     <hr style="border: 0; border-top: 1px solid var(--panel-border); margin: 30px 0;">
                     <?php if($data['complaint']): ?>
                         <div class="alert alert-success">
@@ -43,7 +49,7 @@
 
                     <?php else: ?>
                         <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-circle"></i> No complaint found with that reference number.
+                            <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($data['err']); ?>
                         </div>
                     <?php endif; ?>
                 <?php endif; ?>

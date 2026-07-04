@@ -1,14 +1,15 @@
 <?php
 class PublicComplaintController extends Controller {
     public function __construct(){
-        if(!isLoggedIn()){
-            flash('auth_error', 'You must log in before you can submit a complaint.', 'alert alert-warning');
-            redirect('auth');
-        }
         $this->complaintModel = $this->model('Complaint');
     }
 
     public function create(){
+        if(!isLoggedIn()){
+            flash('auth_error', 'You must log in before you can submit a complaint.', 'alert alert-warning');
+            redirect('auth');
+        }
+
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
 
@@ -32,7 +33,8 @@ class PublicComplaintController extends Controller {
                 $this->view('public/create', $data);
             } else {
                 if($this->complaintModel->addComplaint($data)){
-                    flash('complaint_success', 'Complaint submitted successfully. Your reference number is: <strong>' . $data['complaint_no'] . '</strong>');
+                    $_SESSION['sweet_success'] = 'Complaint submitted successfully!';
+                    $_SESSION['sweet_ref'] = $data['complaint_no'];
                     redirect('publiccomplaint/status?ref=' . $data['complaint_no']);
                 } else {
                     die('Something went wrong');
@@ -57,8 +59,19 @@ class PublicComplaintController extends Controller {
     }
 
     public function status(){
+        $ref = '';
+        $nic_or_mobile = '';
+
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $ref = isset($_POST['complaint_no']) ? trim($_POST['complaint_no']) : '';
+            $nic_or_mobile = isset($_POST['nic_or_mobile']) ? trim($_POST['nic_or_mobile']) : '';
+        } else {
+            $ref = isset($_GET['ref']) ? trim($_GET['ref']) : '';
+        }
+
         $data = [
-            'ref' => isset($_GET['ref']) ? trim($_GET['ref']) : '',
+            'ref' => $ref,
+            'nic_or_mobile' => $nic_or_mobile,
             'complaint' => null,
             'err' => ''
         ];
@@ -66,7 +79,17 @@ class PublicComplaintController extends Controller {
         if(!empty($data['ref'])){
             $complaint = $this->complaintModel->getComplaintByNo($data['ref']);
             if($complaint){
-                $data['complaint'] = $complaint;
+                if(!isLoggedIn()) {
+                    if(empty($data['nic_or_mobile']) && $_SERVER['REQUEST_METHOD'] == 'POST'){
+                        $data['err'] = 'NIC or Mobile number is required to verify identity.';
+                    } else if(!empty($data['nic_or_mobile']) && $complaint->nic !== $data['nic_or_mobile'] && $complaint->mobile !== $data['nic_or_mobile']) {
+                        $data['err'] = 'Verification failed. Incorrect NIC or Mobile number.';
+                    } else if (!empty($data['nic_or_mobile'])) {
+                        $data['complaint'] = $complaint;
+                    }
+                } else {
+                    $data['complaint'] = $complaint;
+                }
             } else {
                 $data['err'] = 'No complaint found with this reference number.';
             }

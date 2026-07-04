@@ -54,4 +54,51 @@ document.addEventListener('DOMContentLoaded', event => {
             e.preventDefault();
         }
     });
+
+    // Dynamic row addition for complaints
+    const addRowBtn = document.getElementById('addRowBtn');
+    if (addRowBtn) {
+        addRowBtn.addEventListener('click', function() {
+            const tbody = document.getElementById('detailsTbody');
+            const rowCount = tbody.querySelectorAll('tr').length;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="row-number">${rowCount + 1}</td>
+                <td><input type="text" name="detail_letter_no[]" class="form-control"></td>
+                <td><input type="text" name="detail_name[]" class="form-control"></td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm remove-row"><i class="fas fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            updateRowNumbers();
+        });
+    }
+
+    // Dynamic row removal and updating numbers
+    const detailsTable = document.getElementById('detailsTable');
+    if (detailsTable) {
+        detailsTable.addEventListener('click', function(e) {
+            if(e.target.classList.contains('remove-row') || e.target.closest('.remove-row')) {
+                const tr = e.target.closest('tr');
+                tr.remove();
+                updateRowNumbers();
+            }
+        });
+    }
+
+    function updateRowNumbers() {
+        const tbody = document.getElementById('detailsTbody');
+        if (tbody) {
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                const numCell = row.querySelector('.row-number') || row.firstElementChild;
+                if(numCell) {
+                    numCell.textContent = index + 1;
+                    numCell.classList.add('row-number');
+                }
+            });
+        }
+    }
 });
