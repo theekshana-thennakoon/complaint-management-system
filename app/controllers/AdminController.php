@@ -5,6 +5,7 @@ class AdminController extends Controller {
             redirect('dashboard');
         }
         $this->userModel = $this->model('User');
+        $this->complaintModel = $this->model('Complaint');
     }
 
     private function _getDashboardData(){
@@ -37,6 +38,7 @@ class AdminController extends Controller {
     public function index(){
         $dashboardData = $this->_getDashboardData();
         $dashboardData['roles'] = $this->userModel->getManagedRoles();
+        $dashboardData['departments'] = $this->complaintModel->getDepartments();
         $this->view('admin/index', $dashboardData);
     }
 
@@ -49,7 +51,9 @@ class AdminController extends Controller {
                 'username' => trim($_POST['username']),
                 'password' => trim($_POST['password']),
                 'role_id' => isset($_POST['role_id']) ? trim($_POST['role_id']) : '',
+                'department_id' => isset($_POST['department_id']) ? trim($_POST['department_id']) : null,
                 'roles' => $this->userModel->getManagedRoles(),
+                'departments' => $this->complaintModel->getDepartments(),
                 'name_err' => '',
                 'username_err' => '',
                 'password_err' => '',
@@ -106,7 +110,9 @@ class AdminController extends Controller {
                 'username' => trim($_POST['username']),
                 'password' => trim($_POST['password']),
                 'role_id' => isset($_POST['role_id']) ? trim($_POST['role_id']) : '',
+                'department_id' => isset($_POST['department_id']) ? trim($_POST['department_id']) : null,
                 'roles' => $this->userModel->getManagedRoles(),
+                'departments' => $this->complaintModel->getDepartments(),
                 'name_err' => '',
                 'username_err' => '',
                 'password_err' => '',
@@ -158,7 +164,9 @@ class AdminController extends Controller {
                 'username' => $user->username,
                 'password' => '',
                 'role_id' => $user->role_id,
+                'department_id' => $user->department_id,
                 'roles' => $this->userModel->getManagedRoles(),
+                'departments' => $this->complaintModel->getDepartments(),
                 'name_err' => '',
                 'username_err' => '',
                 'password_err' => '',

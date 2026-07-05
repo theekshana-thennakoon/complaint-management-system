@@ -147,6 +147,22 @@ class Complaint {
         return $this->db->resultSet();
     }
 
+    public function getDispatchedComplaintsByUserId($user_id) {
+        $this->db->query('
+            SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
+            FROM complaints c 
+            JOIN complaint_dispatches cd ON c.id = cd.complaint_id
+            LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
+            LEFT JOIN departments d ON c.forward_department_id = d.id
+            LEFT JOIN roles r ON c.current_role_id = r.id
+            WHERE c.created_by = :user_id
+            GROUP BY c.id
+            ORDER BY c.created_at DESC
+        ');
+        $this->db->bind(':user_id', $user_id);
+        return $this->db->resultSet();
+    }
+
     public function logWorkflow($complaint_id, $from_role_id, $to_role_id, $action, $remarks, $action_by) {
         $this->db->query('INSERT INTO workflow_logs (complaint_id, from_role_id, to_role_id, action, remarks, action_by) VALUES (:complaint_id, :from_role_id, :to_role_id, :action, :remarks, :action_by)');
         $this->db->bind(':complaint_id', $complaint_id);
@@ -205,5 +221,48 @@ class Complaint {
         $this->db->query('SELECT * FROM workflow_logs WHERE complaint_id = :complaint_id AND action = "Reject" ORDER BY created_at DESC');
         $this->db->bind(':complaint_id', $complaint_id);
         return $this->db->resultSet();
+    }
+
+    public function dispatchToDepartments($complaint_id, $department_ids, $user_id) {
+        // Remove old dispatches for this complaint first (re-dispatch replaces)
+        $this->db->query('DELETE FROM complaint_dispatches WHERE complaint_id = :complaint_id');
+        $this->db->bind(':complaint_id', $complaint_id);
+        $this->db->execute();
+
+        foreach ($department_ids as $dept_id) {
+            $this->db->query('INSERT INTO complaint_dispatches (complaint_id, department_id, dispatched_by) VALUES (:complaint_id, :department_id, :dispatched_by)');
+            $this->db->bind(':complaint_id', $complaint_id);
+            $this->db->bind(':department_id', (int)$dept_id);
+            $this->db->bind(':dispatched_by', $user_id);
+            $this->db->execute();
+        }
+        return true;
+    }
+
+    public function getDispatchedDepartments($complaint_id) {
+        $this->db->query('SELECT d.* FROM complaint_dispatches cd JOIN departments d ON cd.department_id = d.id WHERE cd.complaint_id = :complaint_id');
+        $this->db->bind(':complaint_id', $complaint_id);
+        return $this->db->resultSet();
+    }
+
+    public function getDispatchedComplaintsByDepartment($department_id) {
+        $this->db->query('
+            SELECT c.*, cat.name as category_name, d.name as department_name, cd.created_at as dispatched_at
+            FROM complaint_dispatches cd
+            JOIN complaints c ON cd.complaint_id = c.id
+            LEFT JOIN complaint_categories cat ON c.category_id = cat.id
+            LEFT JOIN departments d ON c.forward_department_id = d.id
+            WHERE cd.department_id = :department_id
+            ORDER BY cd.created_at DESC
+        ');
+        $this->db->bind(':department_id', $department_id);
+        return $this->db->resultSet();
+    }
+
+    public function isDispatched($complaint_id) {
+        $this->db->query('SELECT id FROM complaint_dispatches WHERE complaint_id = :complaint_id LIMIT 1');
+        $this->db->bind(':complaint_id', $complaint_id);
+        $this->db->single();
+        return $this->db->rowCount() > 0;
     }
 }

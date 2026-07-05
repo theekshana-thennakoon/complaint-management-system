@@ -102,8 +102,11 @@
                                             </div>
                                         </td>
                                         <td class="py-3">
-                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-pill">
-                                                <i class="fas fa-user-tag me-1"></i> <?php echo htmlspecialchars($user->role_name); ?>
+                                            <span class="badge bg-primary rounded-pill px-3 py-2 fw-semibold shadow-sm">
+                                                <i class="fas fa-user-shield me-1"></i> <?php echo htmlspecialchars($user->role_name); ?>
+                                                <?php if(!empty($user->department_name)): ?>
+                                                    - <small><?php echo htmlspecialchars($user->department_name); ?></small>
+                                                <?php endif; ?>
                                             </span>
                                         </td>
                                         <td class="py-3">
@@ -175,6 +178,20 @@
                             <span class="invalid-feedback"><?php echo isset($data['role_id_err']) ? $data['role_id_err'] : ''; ?></span>
                         </div>
                     </div>
+                    <div class="row" id="departmentSelectRow" style="display: none;">
+                        <div class="col-md-12 mb-3">
+                            <label for="department_id" class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+                            <select name="department_id" id="department_id" class="form-select rounded-3">
+                                <option value="" disabled selected>Select Department</option>
+                                <?php if(isset($data['departments'])): ?>
+                                    <?php foreach($data['departments'] as $dept): ?>
+                                        <option value="<?php echo $dept->id; ?>" <?php echo (isset($data['department_id']) && $data['department_id'] == $dept->id) ? 'selected' : ''; ?>><?php echo htmlspecialchars($dept->name); ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                            <div class="form-text">Required only for Department users.</div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer border-top-0 pt-0 pb-3 px-4">
@@ -184,6 +201,26 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.querySelector('select[name="role_id"]');
+    const deptRow = document.getElementById('departmentSelectRow');
+    
+    function toggleDepartment() {
+        if (roleSelect.value == '6') { // 6 = Subject Officer / Department
+            deptRow.style.display = 'flex';
+        } else {
+            deptRow.style.display = 'none';
+        }
+    }
+    
+    if(roleSelect) {
+        roleSelect.addEventListener('change', toggleDepartment);
+        toggleDepartment();
+    }
+});
+</script>
 
 <?php if(isset($data['show_modal']) && $data['show_modal'] == true): ?>
 <script>

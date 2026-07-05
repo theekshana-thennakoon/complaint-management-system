@@ -68,8 +68,16 @@ class User {
         return $row->level;
     }
     // Admin: Get Users (GS, AO, CC)
+    // Admin: Get Users (GS, AO, CC, Subject Officer/Dept)
     public function getAdminManagedUsers(){
-        $this->db->query('SELECT u.*, r.name as role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.role_id IN (2, 3, 4, 5) ORDER BY u.created_at DESC');
+        $this->db->query('
+            SELECT u.*, r.name as role_name, d.name as department_name 
+            FROM users u 
+            JOIN roles r ON u.role_id = r.id 
+            LEFT JOIN departments d ON u.department_id = d.id
+            WHERE u.role_id IN (2, 3, 4, 5, 6) 
+            ORDER BY u.created_at DESC
+        ');
         return $this->db->resultSet();
     }
 
@@ -82,11 +90,14 @@ class User {
 
     // Admin: Create user
     public function createUser($data){
-        $this->db->query('INSERT INTO users (name, username, password, role_id) VALUES(:name, :username, :password, :role_id)');
+        $this->db->query('INSERT INTO users (name, username, password, role_id, department_id) VALUES(:name, :username, :password, :role_id, :department_id)');
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':username', $data['username']);
         $this->db->bind(':password', $data['password']);
-        $this->db->bind(':role_id', $data['role_id']); 
+        $this->db->bind(':role_id', $data['role_id']);
+        
+        $dept_id = (!empty($data['department_id'])) ? $data['department_id'] : null;
+        $this->db->bind(':department_id', $dept_id);
 
         if($this->db->execute()){
             return true;
@@ -97,16 +108,19 @@ class User {
 
     // Admin: Update user
     public function updateUser($id, $data){
+        $dept_id = (!empty($data['department_id'])) ? $data['department_id'] : null;
+
         if(empty($data['password'])){
-            $this->db->query('UPDATE users SET name = :name, username = :username, role_id = :role_id WHERE id = :id');
+            $this->db->query('UPDATE users SET name = :name, username = :username, role_id = :role_id, department_id = :department_id WHERE id = :id');
         } else {
-            $this->db->query('UPDATE users SET name = :name, username = :username, password = :password, role_id = :role_id WHERE id = :id');
+            $this->db->query('UPDATE users SET name = :name, username = :username, password = :password, role_id = :role_id, department_id = :department_id WHERE id = :id');
             $this->db->bind(':password', $data['password']);
         }
-        $this->db->bind(':id', $id);
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':username', $data['username']);
         $this->db->bind(':role_id', $data['role_id']);
+        $this->db->bind(':department_id', $dept_id);
+        $this->db->bind(':id', $id);
 
         if($this->db->execute()){
             return true;

@@ -125,9 +125,18 @@
                             </button>
                         </div>
                         
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
-                                <i class="fas fa-paper-plane me-2"></i> Resubmit Complaint
+                        <input type="hidden" name="direct_forward" id="direct_forward" value="">
+
+                        <div class="mt-4" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
+                            <button type="submit" class="btn btn-primary" onclick="document.getElementById('direct_forward').value=''">
+                                <i class="fas fa-paper-plane me-1"></i> Resubmit to CC
+                            </button>
+                            <div style="width: 1px; height: 36px; background: var(--gray-200);"></div>
+                            <button type="submit" class="btn btn-warning" onclick="document.getElementById('direct_forward').value='ao'">
+                                <i class="fas fa-user-tie me-1"></i> Forward Directly to AO
+                            </button>
+                            <button type="submit" class="btn btn-info" onclick="document.getElementById('direct_forward').value='gs'">
+                                <i class="fas fa-landmark me-1"></i> Forward Directly to GS
                             </button>
                         </div>
                     </form>

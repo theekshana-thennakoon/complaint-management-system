@@ -44,7 +44,7 @@
     <section class="about-section card">
         <div class="about-content">
             <h2>About <?php echo SITENAME; ?></h2>
-            <p>Government Complaint System is a dedicated initiative by the Governor's Office of the North Central Province designed to bridge the gap between citizens and government authorities. Our platform ensures that every voice is heard, addressing public grievances with transparency, accountability, and unprecedented speed.</p>
+            <p><?php echo SITENAME; ?> is a dedicated initiative by the Governor's Office of the North Central Province designed to bridge the gap between citizens and government authorities. Our platform ensures that every voice is heard, addressing public grievances with transparency, accountability, and unprecedented speed.</p>
             <ul class="about-highlights">
                 <li><i class="fas fa-check-circle"></i> Transparent processing</li>
                 <li><i class="fas fa-check-circle"></i> Direct departmental routing</li>

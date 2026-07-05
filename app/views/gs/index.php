@@ -54,7 +54,7 @@
                     <button class="nav-link active fw-bold text-primary" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab"><i class="fas fa-list-alt me-1"></i> Pending Review</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold text-success" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab"><i class="fas fa-check-double me-1"></i> Forwarded to CC</button>
+                    <button class="nav-link fw-bold text-success" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab"><i class="fas fa-check-double me-1"></i> Forwarded to Subject and Governor</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link fw-bold text-danger" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab"><i class="fas fa-times-circle me-1"></i> Rejected Reports</button>

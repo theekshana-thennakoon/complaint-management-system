@@ -26,7 +26,7 @@ class DashboardController extends Controller {
             if(strpos($status, 'reject') !== false) {
                 $rejected++;
             }
-            if(isset($c->forward_department_id) && $c->forward_department_id) {
+            if($this->complaintModel->isDispatched($c->id)) {
                 $sent++;
             }
         }
@@ -39,7 +39,8 @@ class DashboardController extends Controller {
                 'rejected' => $rejected,
                 'sent' => $sent
             ],
-            'user_complaints' => $user_complaints
+            'user_complaints' => $user_complaints,
+            'departments' => $this->complaintModel->getDepartments()
         ];
         $this->view('dashboard/index', $data);
     }

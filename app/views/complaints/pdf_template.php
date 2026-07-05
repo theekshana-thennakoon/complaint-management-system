@@ -104,6 +104,16 @@
         .cc-list {
             margin-top: 50px;
             line-height: 1.5;
+            margin-bottom: 150px; /* Space for the footer */
+        }
+
+        .footer-image {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: block;
+            z-index: -1;
         }
     </style>
 </head>
@@ -125,6 +135,20 @@
         <div style="text-align:center; padding: 50px; border: 2px dashed #ccc;">
             <h3>[Please place 'letterhead.jpg' in the public/img folder]</h3>
         </div>
+    <?php endif; ?>
+
+    <!-- Footer Image -->
+    <?php 
+    $footer_path = APPROOT . '/../public/img/footer.jpg';
+    if(file_exists($footer_path)){
+        $footer_img_data = base64_encode(file_get_contents($footer_path));
+        $footer_img_src = 'data:image/jpeg;base64,' . $footer_img_data;
+    } else {
+        $footer_img_src = ''; 
+    }
+    ?>
+    <?php if($footer_img_src): ?>
+        <img src="<?php echo $footer_img_src; ?>" class="footer-image" alt="Footer">
     <?php endif; ?>
 
 <div class="content-wrapper">
@@ -156,7 +180,15 @@
 
     <div class="letter-content">
         <div class="department-address">
-            <?php echo $data['complaint']->department_name; ?>,<br>
+            <?php 
+                if (!empty($data['complaint']->department_name)) {
+                    echo htmlspecialchars($data['complaint']->department_name);
+                } elseif (!empty($data['dispatched_departments'])) {
+                    echo htmlspecialchars($data['dispatched_departments'][0]->name);
+                } else {
+                    echo '[Department]';
+                }
+            ?>,<br>
             උතුරු මැද පළාත.
         </div>
 
@@ -203,15 +235,64 @@
             එවන ලෙසත්, ලිපියේ අංකය සඳහන් කොට එවන ලෙසත්, වැඩිදුරටත් කාරුණිකව දන්වා සිටිමි.)
         </div>
 
-        <div class="signature">
-            (නන්දන ගලගොඩ)<br>
-            ආණ්ඩුකාර ලේකම්<br>
-            උතුරු මැද පළාත
-        </div>
+        <?php
+        $isApprovedByGS = strpos($data['complaint']->status, 'Approved by GS') !== false;
+        
+        $signSrc = '';
+        $sealSrc = '';
+        if ($isApprovedByGS) {
+            $signPath = APPROOT . '/../public/img/sign.png';
+            $sealPath = APPROOT . '/../public/img/seal.png';
+            
+            if (file_exists($signPath)) {
+                $signSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($signPath));
+            }
+            if (file_exists($sealPath)) {
+                $sealSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($sealPath));
+            }
+        }
+        ?>
+
+        <table style="border-collapse: collapse; border: none; margin-top: 20px;">
+            <tr>
+                <td style="vertical-align: top; border: none; padding: 0; padding-right: 40px;">
+                    <?php if ($isApprovedByGS && !empty($signSrc)): ?>
+                        <div style="">
+                            <img src="<?php echo $signSrc; ?>" style="width: 120px; height: auto;" />
+                        </div>
+                    <?php else: ?>
+                        <div style="height: 60px;"></div>
+                    <?php endif; ?>
+                    <div class="signature" style="margin-top: 0; white-space: nowrap;">
+                        (නන්දන ගලගොඩ)<br>
+                        ආණ්ඩුකාර ලේකම්<br>
+                        උතුරු මැද පළාත
+                    </div>
+                </td>
+                <td style="vertical-align: bottom; border: none; padding: 0;">
+                    <?php if ($isApprovedByGS && !empty($sealSrc)): ?>
+                        <div style="margin-bottom: -10px;">
+                            <img src="<?php echo $sealSrc; ?>" style="width: 160px; height: auto;" />
+                        </div>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        </table>
 
         <div class="cc-list">
             පිටපත් - <br>
-            01. අදාල අභියාචනාකරු (<?php echo $data['complaint']->applicant_name; ?>) - කා.දැ.පි.
+            <?php 
+            if (!empty($data['dispatched_departments'])) {
+                $i = 1;
+                foreach($data['dispatched_departments'] as $dept) {
+                    echo str_pad($i, 2, '0', STR_PAD_LEFT) . '. ' . htmlspecialchars($dept->name) . ' - කා.දැ.පි.<br>';
+                    $i++;
+                }
+            } else {
+                // Fallback or empty if not yet dispatched
+                echo '01. අදාල අභියාචනාකරු (' . htmlspecialchars($data['complaint']->applicant_name) . ') - කා.දැ.පි.';
+            }
+            ?>
         </div>
     </div>
 </div>

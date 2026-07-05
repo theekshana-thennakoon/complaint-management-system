@@ -38,6 +38,20 @@
                             <span class="invalid-feedback"><?php echo $data['role_id_err']; ?></span>
                         </div>
                     </div>
+                    <div class="row" id="departmentSelectRow" style="display: none;">
+                        <div class="col-md-12 mb-3">
+                            <label for="department_id" class="form-label">Department <span class="text-danger">*</span></label>
+                            <select name="department_id" id="department_id" class="form-select">
+                                <option value="" disabled selected>Select Department</option>
+                                <?php if(isset($data['departments'])): ?>
+                                    <?php foreach($data['departments'] as $dept): ?>
+                                        <option value="<?php echo $dept->id; ?>" <?php echo ($data['department_id'] == $dept->id) ? 'selected' : ''; ?>><?php echo htmlspecialchars($dept->name); ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                            <div class="form-text">Required only for Department users.</div>
+                        </div>
+                    </div>
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update User</button>
@@ -47,5 +61,25 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.querySelector('select[name="role_id"]');
+    const deptRow = document.getElementById('departmentSelectRow');
+    
+    function toggleDepartment() {
+        if (roleSelect.value == '6') { // 6 = Subject Officer / Department
+            deptRow.style.display = 'flex';
+        } else {
+            deptRow.style.display = 'none';
+        }
+    }
+    
+    if(roleSelect) {
+        roleSelect.addEventListener('change', toggleDepartment);
+        toggleDepartment(); // trigger on load
+    }
+});
+</script>
 
 <?php require APPROOT . '/views/layout/footer.php'; ?>

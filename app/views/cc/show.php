@@ -8,7 +8,9 @@
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 text-primary"><i class="fas fa-file-alt"></i> Review Complaint: <?php echo htmlspecialchars($data['complaint']->complaint_no); ?></h5>
                     <div>
-                        <a href="<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $data['complaint']->id; ?>" class="btn btn-sm btn-accent" target="_blank"><i class="fas fa-file-pdf"></i> Generate PDF Letter</a>
+                        <button onclick="window.open('<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $data['complaint']->id; ?>?action=print', 'PrintPDF', 'width=1000,height=800');" class="btn btn-sm btn-primary">
+                            <i class="fas fa-print"></i> Print PDF
+                        </button>
                         <a href="<?php echo URLROOT; ?>/cc" class="btn btn-sm btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back</a>
                     </div>
                 </div>
@@ -51,7 +53,7 @@
                                 require APPROOT . '/views/complaints/pdf_template.php';
                                 $letter_html = ob_get_clean();
                                 ?>
-                                <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" height="600px" style="border: none; display: block;"></iframe>
+                                <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = this.contentWindow.document.documentElement.scrollHeight + 'px';" style="border: none; display: block; overflow: hidden; min-height: 800px;"></iframe>
                             </div>
                         </div>
                     </div>

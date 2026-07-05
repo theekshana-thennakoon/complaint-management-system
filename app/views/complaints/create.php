@@ -10,10 +10,7 @@
             <i class="fas fa-plus"></i> New Complaint
         </a>
         
-        <div class="sidebar-heading">Reports</div>
-        <a href="#" class="sidebar-menu-item">
-            <i class="fas fa-chart-bar"></i> Statistics
-        </a>
+
     </aside>
 
     <main class="dashboard-content">
@@ -116,9 +113,18 @@
                     </button>
                 </div>
                 
-                <div style="margin-top: 30px;">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Complaint
+                <input type="hidden" name="direct_forward" id="direct_forward" value="">
+
+                <div style="margin-top: 30px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                    <button type="submit" class="btn btn-primary" onclick="document.getElementById('direct_forward').value=''">
+                        <i class="fas fa-save me-1"></i> Save &amp; Submit to CC
+                    </button>
+                    <div style="width: 1px; height: 36px; background: var(--gray-200);"></div>
+                    <button type="submit" class="btn btn-warning" onclick="document.getElementById('direct_forward').value='ao'">
+                        <i class="fas fa-user-tie me-1"></i> Forward Directly to AO
+                    </button>
+                    <button type="submit" class="btn btn-info" onclick="document.getElementById('direct_forward').value='gs'">
+                        <i class="fas fa-landmark me-1"></i> Forward Directly to GS
                     </button>
                 </div>
             </form>
