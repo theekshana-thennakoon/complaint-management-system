@@ -205,6 +205,8 @@ class AuthController extends Controller {
             redirect('ao');
         } elseif ($_SESSION['user_role_id'] == 3) {
             redirect('gs');
+        } elseif ($_SESSION['user_role_id'] == 7) {
+            redirect('department');
         } else {
             redirect('dashboard');
         }

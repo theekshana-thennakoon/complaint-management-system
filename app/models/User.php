@@ -75,7 +75,7 @@ class User {
             FROM users u 
             JOIN roles r ON u.role_id = r.id 
             LEFT JOIN departments d ON u.department_id = d.id
-            WHERE u.role_id IN (2, 3, 4, 5, 6) 
+            WHERE u.role_id IN (2, 3, 4, 5, 6, 7) 
             ORDER BY u.created_at DESC
         ');
         return $this->db->resultSet();
@@ -149,9 +149,9 @@ class User {
         }
     }
 
-    // Admin: Get managed roles
+    // Admin: Get managed roles (includes Subject Officer and Department Officer)
     public function getManagedRoles(){
-        $this->db->query('SELECT * FROM roles WHERE id IN (2, 3, 4, 5)');
+        $this->db->query('SELECT * FROM roles WHERE id IN (2, 3, 4, 5, 6, 7) ORDER BY level DESC');
         return $this->db->resultSet();
     }
 }

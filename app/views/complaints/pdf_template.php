@@ -11,6 +11,26 @@
 
         @page {
             margin: 0px;
+            size: A4 portrait;
+        }
+
+        @media print {
+            html, body {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                background-color: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .content-wrapper {
+                page-break-inside: avoid;
+            }
+            .footer-image {
+                position: fixed;
+                bottom: 0;
+            }
         }
 
         body {

@@ -89,9 +89,9 @@
                                                     <a href="<?php echo URLROOT; ?>/department/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
                                                         <i class="fas fa-eye me-1"></i> View Letter
                                                     </a>
-                                                    <a href="<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                                                        <i class="fas fa-file-pdf me-1"></i> PDF
-                                                    </a>
+                                                    <button type="button" onclick="window.open('<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $complaint->id; ?>?action=print', 'PrintPDF', 'width=1000,height=800');" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                                        <i class="fas fa-print me-1"></i> Print / PDF
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>

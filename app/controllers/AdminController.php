@@ -18,7 +18,9 @@ class AdminController extends Controller {
             'governor' => 0,
             'cc' => 0,
             'ao' => 0,
-            'gs' => 0
+            'gs' => 0,
+            'subject_officer' => 0,
+            'dept_officer' => 0
         ];
         
         foreach($users as $user){
@@ -31,6 +33,8 @@ class AdminController extends Controller {
             if($user->role_id == 5) $stats['cc']++;
             if($user->role_id == 4) $stats['ao']++;
             if($user->role_id == 3) $stats['gs']++;
+            if($user->role_id == 6) $stats['subject_officer']++;
+            if($user->role_id == 7) $stats['dept_officer']++;
         }
         return ['users' => $users, 'stats' => $stats];
     }

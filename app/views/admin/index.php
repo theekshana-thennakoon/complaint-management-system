@@ -57,6 +57,16 @@
                                 <h3 class="fw-bold text-success mb-0"><?php echo $data['stats']['cc']; ?></h3>
                                 <span class="small text-muted fw-semibold">Chief Clerk</span>
                             </div>
+                            <div class="vr"></div>
+                            <div>
+                                <h3 class="fw-bold text-secondary mb-0"><?php echo $data['stats']['subject_officer']; ?></h3>
+                                <span class="small text-muted fw-semibold">Subject Officers</span>
+                            </div>
+                            <div class="vr"></div>
+                            <div>
+                                <h3 class="fw-bold text-warning mb-0"><?php echo $data['stats']['dept_officer']; ?></h3>
+                                <span class="small text-muted fw-semibold">Dept. Officers</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -166,8 +176,8 @@
                             <span class="invalid-feedback"><?php echo isset($data['password_err']) ? $data['password_err'] : ''; ?></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="role_id" class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
-                            <select name="role_id" class="form-select rounded-3 <?php echo (!empty($data['role_id_err'])) ? 'is-invalid' : ''; ?>">
+                            <label for="add_role_id" class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
+                            <select name="role_id" id="add_role_id" class="form-select rounded-3 <?php echo (!empty($data['role_id_err'])) ? 'is-invalid' : ''; ?>">
                                 <option value="" disabled selected>Select Role</option>
                                 <?php if(isset($data['roles'])): ?>
                                     <?php foreach($data['roles'] as $role): ?>
@@ -204,11 +214,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const roleSelect = document.querySelector('select[name="role_id"]');
+    const roleSelect = document.getElementById('add_role_id');
     const deptRow = document.getElementById('departmentSelectRow');
     
     function toggleDepartment() {
-        if (roleSelect.value == '6') { // 6 = Subject Officer / Department
+        if (roleSelect && roleSelect.value == '7') { // 7 = Department Officer
             deptRow.style.display = 'flex';
         } else {
             deptRow.style.display = 'none';

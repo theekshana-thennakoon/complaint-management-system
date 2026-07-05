@@ -179,12 +179,18 @@ class ComplaintsController extends Controller {
         require APPROOT . '/views/complaints/pdf_template.php';
         $html = ob_get_clean();
 
+        if (isset($_GET['action']) && $_GET['action'] == 'print') {
+            // Output raw HTML and trigger print instead of dompdf
+            echo $html;
+            echo "<script>window.onload = function() { window.print(); }</script>";
+            exit;
+        }
+
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
 
-        $is_attachment = isset($_GET['action']) && $_GET['action'] == 'print' ? false : true;
-        $dompdf->stream('Letter_'.$complaint->complaint_no.'.pdf', array("Attachment" => $is_attachment));
+        $dompdf->stream('Letter_'.$complaint->complaint_no.'.pdf', array("Attachment" => true));
     }
 
     public function dispatch($id) {

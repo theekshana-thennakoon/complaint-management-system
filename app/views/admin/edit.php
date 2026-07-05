@@ -29,8 +29,8 @@
                             <span class="invalid-feedback"><?php echo $data['password_err']; ?></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="role_id" class="form-label">Role <sup>*</sup></label>
-                            <select name="role_id" class="form-select <?php echo (!empty($data['role_id_err'])) ? 'is-invalid' : ''; ?>">
+                            <label for="edit_role_id" class="form-label">Role <sup>*</sup></label>
+                            <select name="role_id" id="edit_role_id" class="form-select <?php echo (!empty($data['role_id_err'])) ? 'is-invalid' : ''; ?>">
                                 <?php foreach($data['roles'] as $role): ?>
                                     <option value="<?php echo $role->id; ?>" <?php echo ($data['role_id'] == $role->id) ? 'selected' : ''; ?>><?php echo htmlspecialchars($role->name); ?></option>
                                 <?php endforeach; ?>
@@ -64,11 +64,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const roleSelect = document.querySelector('select[name="role_id"]');
+    const roleSelect = document.getElementById('edit_role_id');
     const deptRow = document.getElementById('departmentSelectRow');
     
     function toggleDepartment() {
-        if (roleSelect.value == '6') { // 6 = Subject Officer / Department
+        if (roleSelect && roleSelect.value == '7') { // 7 = Department Officer
             deptRow.style.display = 'flex';
         } else {
             deptRow.style.display = 'none';

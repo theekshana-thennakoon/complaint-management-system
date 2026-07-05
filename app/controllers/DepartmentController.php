@@ -4,8 +4,8 @@ class DepartmentController extends Controller {
         if (!isLoggedIn()) {
             redirect('auth');
         }
-        // Restrict to Subject Officer / Department user (role_id 6)
-        if ($_SESSION['user_role_id'] != 6) {
+        // Restrict to Department Officer (role_id 7)
+        if ($_SESSION['user_role_id'] != 7) {
             flash('auth_error', 'You do not have permission to access this page.', 'alert alert-danger');
             redirect('dashboard');
         }
