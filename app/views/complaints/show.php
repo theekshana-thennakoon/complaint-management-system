@@ -9,6 +9,9 @@
         <a href="<?php echo URLROOT; ?>/complaints/create" class="sidebar-menu-item">
             <i class="fas fa-plus"></i> New Complaint
         </a>
+        <a href="<?php echo URLROOT; ?>/complaints/sent" class="sidebar-menu-item">
+            <i class="fas fa-paper-plane"></i> Sent to Departments
+        </a>
         
 
     </aside>
@@ -142,40 +145,116 @@
 <?php if ($data['complaint']->status == 'Approved by GS'): ?>
 <!-- Send to Department Modal -->
 <div class="modal fade" id="dispatchModal" tabindex="-1" aria-labelledby="dispatchModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header rounded-top-4" style="background: linear-gradient(135deg, #f7971e, #ffd200);">
-                <h5 class="modal-title fw-bold text-dark" id="dispatchModalLabel">
+            <div class="modal-header rounded-top-4 d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--primary-dark), var(--primary-color)); padding: 1rem 1.5rem;">
+                <h5 class="modal-title fw-bold text-white mb-0" id="dispatchModalLabel">
                     <i class="fas fa-paper-plane me-2"></i> Send to Department(s)
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="ms-auto me-3" style="max-width: 280px; width: 100%;">
+                    <input type="text" id="popupDeptSearch" class="form-control form-control-sm border-0 shadow-sm" placeholder="🔍 Search department..." style="border-radius: 20px; padding: 6px 15px;">
+                </div>
+                <button type="button" class="btn-close btn-close-white ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="dispatchForm" method="POST" action="<?php echo URLROOT; ?>/complaints/dispatch/<?php echo $data['complaint']->id; ?>">
                 <div class="modal-body p-4">
-                    <p class="text-muted small mb-1">Complaint: <span class="fw-bold text-primary"><?php echo htmlspecialchars($data['complaint']->complaint_no); ?></span></p>
+                    <p class="text-muted small mb-1">Complaint: <span class="fw-bold" style="color: var(--primary-color);"><?php echo htmlspecialchars($data['complaint']->complaint_no); ?></span></p>
                     <p class="text-muted small mb-3">Select one or more departments to forward this complaint letter to:</p>
-                    <div class="row g-2">
-                        <?php foreach($data['departments'] as $dept): ?>
-                            <div class="col-md-6">
-                                <div class="form-check border rounded-3 p-3 h-100 dept-check-item" style="cursor:pointer; transition: all 0.2s;">
-                                    <input class="form-check-input dept-checkbox" type="checkbox"
-                                           name="department_ids[]"
-                                           value="<?php echo $dept->id; ?>"
-                                           id="dept_<?php echo $dept->id; ?>">
-                                    <label class="form-check-label w-100" for="dept_<?php echo $dept->id; ?>" style="cursor:pointer;">
-                                        <span class="small fw-semibold"><?php echo htmlspecialchars($dept->name); ?></span>
-                                    </label>
-                                </div>
+
+                    <?php
+                    $offices = [];
+                    $ministries = [];
+                    $depts = [];
+
+                    foreach($data['departments'] as $dept) {
+                        if ($dept->type === 'office') {
+                            $offices[] = $dept;
+                        } elseif ($dept->type === 'ministries') {
+                            $ministries[] = $dept;
+                        } else {
+                            $depts[] = $dept;
+                        }
+                    }
+                    ?>
+
+                    <div class="row g-3">
+                        <!-- Offices Column -->
+                        <div class="col-md-4 border-end">
+                            <h6 class="fw-bold mb-3 pb-2 border-bottom" style="color: var(--primary-color);"><i class="fas fa-building me-2"></i> Offices</h6>
+                            <div class="d-flex flex-column gap-2" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                                <?php if (empty($offices)): ?>
+                                    <span class="text-muted small">No offices defined</span>
+                                <?php else: ?>
+                                    <?php foreach($offices as $dept): ?>
+                                        <div class="border rounded-3 p-3 dept-check-item d-flex align-items-start gap-2" style="cursor:pointer; transition: all 0.2s;">
+                                            <input class="form-check-input dept-checkbox mt-1" type="checkbox"
+                                                   name="department_ids[]"
+                                                   value="<?php echo $dept->id; ?>"
+                                                   id="dept_<?php echo $dept->id; ?>"
+                                                   style="flex-shrink: 0; margin-left: 0;">
+                                            <label class="form-check-label w-100" for="dept_<?php echo $dept->id; ?>" style="cursor:pointer; margin: 0; line-height: 1.4;">
+                                                <span class="small fw-semibold"><?php echo htmlspecialchars($dept->name); ?></span>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
-                        <?php endforeach; ?>
+                        </div>
+
+                        <!-- Ministries Column -->
+                        <div class="col-md-4 border-end">
+                            <h6 class="fw-bold mb-3 pb-2 border-bottom" style="color: var(--primary-dark);"><i class="fas fa-landmark me-2"></i> Ministries</h6>
+                            <div class="d-flex flex-column gap-2" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                                <?php if (empty($ministries)): ?>
+                                    <span class="text-muted small">No ministries defined</span>
+                                <?php else: ?>
+                                    <?php foreach($ministries as $dept): ?>
+                                        <div class="border rounded-3 p-3 dept-check-item d-flex align-items-start gap-2" style="cursor:pointer; transition: all 0.2s;">
+                                            <input class="form-check-input dept-checkbox mt-1" type="checkbox"
+                                                   name="department_ids[]"
+                                                   value="<?php echo $dept->id; ?>"
+                                                   id="dept_<?php echo $dept->id; ?>"
+                                                   style="flex-shrink: 0; margin-left: 0;">
+                                            <label class="form-check-label w-100" for="dept_<?php echo $dept->id; ?>" style="cursor:pointer; margin: 0; line-height: 1.4;">
+                                                <span class="small fw-semibold"><?php echo htmlspecialchars($dept->name); ?></span>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Departments Column -->
+                        <div class="col-md-4">
+                            <h6 class="fw-bold mb-3 pb-2 border-bottom" style="color: var(--accent-color);"><i class="fas fa-sitemap me-2"></i> Departments</h6>
+                            <div class="d-flex flex-column gap-2" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                                <?php if (empty($depts)): ?>
+                                    <span class="text-muted small">No departments defined</span>
+                                <?php else: ?>
+                                    <?php foreach($depts as $dept): ?>
+                                        <div class="border rounded-3 p-3 dept-check-item d-flex align-items-start gap-2" style="cursor:pointer; transition: all 0.2s;">
+                                            <input class="form-check-input dept-checkbox mt-1" type="checkbox"
+                                                   name="department_ids[]"
+                                                   value="<?php echo $dept->id; ?>"
+                                                   id="dept_<?php echo $dept->id; ?>"
+                                                   style="flex-shrink: 0; margin-left: 0;">
+                                            <label class="form-check-label w-100" for="dept_<?php echo $dept->id; ?>" style="cursor:pointer; margin: 0; line-height: 1.4;">
+                                                <span class="small fw-semibold"><?php echo htmlspecialchars($dept->name); ?></span>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
+
                     <div id="deptError" class="text-danger small mt-3 d-none">
                         <i class="fas fa-exclamation-circle me-1"></i> Please select at least one department.
                     </div>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4">
                     <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-warning rounded-pill px-4 fw-semibold" onclick="submitDispatch()">
+                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-semibold" onclick="submitDispatch()">
                         <i class="fas fa-paper-plane me-1"></i> Send Now
                     </button>
                 </div>
@@ -186,17 +265,28 @@
 
 <style>
 .dept-check-item:has(.dept-checkbox:checked) {
-    background: #fff8e1;
-    border-color: #ffc107 !important;
-    box-shadow: 0 0 0 2px rgba(255,193,7,0.3);
+    background: var(--primary-50) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 2px rgba(45,145,80,0.18);
 }
-.dept-check-item:hover { background: #fffde7; border-color: #f7971e !important; }
+.dept-check-item:hover { background: var(--primary-50) !important; border-color: var(--primary-300) !important; }
 </style>
 
 <script>
 function openDispatchModal(complaintId, complaintNo) {
     document.querySelectorAll('.dept-checkbox').forEach(cb => cb.checked = false);
     document.getElementById('deptError').classList.add('d-none');
+    
+    // Clear search and reset visibility
+    const searchInput = document.getElementById('popupDeptSearch');
+    if (searchInput) {
+        searchInput.value = '';
+        const items = document.querySelectorAll('#dispatchModal .dept-check-item');
+        items.forEach(item => {
+            item.style.setProperty('display', 'flex', 'important');
+        });
+    }
+    
     new bootstrap.Modal(document.getElementById('dispatchModal')).show();
 }
 function submitDispatch() {
@@ -208,6 +298,34 @@ function submitDispatch() {
     document.getElementById('deptError').classList.add('d-none');
     document.getElementById('dispatchForm').submit();
 }
+
+function filterDepts() {
+    const query = this.value.toLowerCase().trim();
+    const items = document.querySelectorAll('#dispatchModal .dept-check-item');
+    items.forEach(item => {
+        const label = item.querySelector('.form-check-label');
+        if (label) {
+            const labelText = label.textContent.toLowerCase();
+            if (labelText.includes(query)) {
+                item.style.setProperty('display', 'flex', 'important');
+            } else {
+                item.style.setProperty('display', 'none', 'important');
+            }
+        }
+    });
+}
+
+function initPopupSearch() {
+    const searchInput = document.getElementById('popupDeptSearch');
+    if (searchInput) {
+        searchInput.removeEventListener('input', filterDepts);
+        searchInput.addEventListener('input', filterDepts);
+    }
+}
+
+// Run immediately and on DOMContentLoaded
+initPopupSearch();
+document.addEventListener('DOMContentLoaded', initPopupSearch);
 </script>
 <?php endif; ?>
 

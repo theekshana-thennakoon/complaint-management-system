@@ -9,6 +9,9 @@
         <a href="<?php echo URLROOT; ?>/complaints/create" class="sidebar-menu-item active">
             <i class="fas fa-plus"></i> New Complaint
         </a>
+        <a href="<?php echo URLROOT; ?>/complaints/sent" class="sidebar-menu-item">
+            <i class="fas fa-paper-plane"></i> Sent to Departments
+        </a>
         
 
     </aside>
@@ -18,7 +21,7 @@
             <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
         
-        <div class="card" style="max-width: 800px;">
+        <div class="card" style="max-width: 800px; overflow: visible;">
             <div class="card-header">
                 <h3>Add New Complaint (Internal)</h3>
             </div>
@@ -75,12 +78,34 @@
                     </div>
                     <div class="form-group">
                         <label for="forward_department_id" class="form-label">Forward To Department *</label>
-                        <select name="forward_department_id" class="form-control">
-                            <option value="">Select Department</option>
-                            <?php foreach($data['departments'] as $department) : ?>
-                                <option value="<?php echo $department->id; ?>" <?php echo ($data['forward_department_id'] == $department->id) ? 'selected' : ''; ?>><?php echo $department->name; ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        
+                        <div class="custom-select-wrapper" style="position: relative;">
+                            <!-- Fake Select Trigger -->
+                            <div id="customSelectTrigger" class="form-control d-flex justify-content-between align-items-center" tabindex="0" style="cursor: pointer; min-height: 48px; position: relative;">
+                                <span id="customSelectText" class="text-muted">Select Department</span>
+                                <i class="fas fa-chevron-down text-muted" style="font-size: 0.8rem;"></i>
+                            </div>
+                            
+                            <!-- Hidden Select Input for form submission -->
+                            <input type="hidden" name="forward_department_id" id="forward_department_id" value="<?php echo $data['forward_department_id']; ?>">
+                            
+                            <!-- Dropdown Menu -->
+                            <div id="customSelectDropdown" class="card shadow border-0 p-2 d-none" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; margin-top: 5px; max-height: 300px; display: flex; flex-direction: column; background: var(--panel-bg); border: 1px solid var(--panel-border) !important; border-radius: var(--radius-md) !important; box-shadow: var(--shadow-lg) !important;">
+                                <!-- Search Box inside Dropdown -->
+                                <div class="p-1 mb-2">
+                                    <input type="text" id="deptSearch" class="form-control form-control-sm" placeholder="🔍 Search department..." style="font-size: 0.85rem; padding: 6px 12px;">
+                                </div>
+                                <!-- Options List -->
+                                <div id="customSelectOptions" style="overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 2px;">
+                                    <div class="custom-option text-muted" data-value="" style="cursor: pointer; font-size: 0.9rem;">Select Department</div>
+                                    <?php foreach($data['departments'] as $department) : ?>
+                                        <div class="custom-option" data-value="<?php echo $department->id; ?>" style="cursor: pointer; font-size: 0.9rem;">
+                                            <?php echo htmlspecialchars($department->name); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -131,5 +156,127 @@
         </div>
     </main>
 </div>
+
+<style>
+.custom-option {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.custom-option:hover {
+    background-color: var(--primary-50);
+    color: var(--primary-color);
+}
+.custom-option.selected {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+#customSelectTrigger:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3.5px rgba(45,145,80,0.14);
+    outline: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const wrapper = document.querySelector('.custom-select-wrapper');
+    if (!wrapper) return;
+    
+    const trigger = document.getElementById('customSelectTrigger');
+    const dropdown = document.getElementById('customSelectDropdown');
+    const searchInput = document.getElementById('deptSearch');
+    const optionsContainer = document.getElementById('customSelectOptions');
+    const hiddenInput = document.getElementById('forward_department_id');
+    const selectText = document.getElementById('customSelectText');
+    const options = Array.from(optionsContainer.querySelectorAll('.custom-option'));
+    
+    // Toggle dropdown
+    trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('d-none');
+        if (!dropdown.classList.contains('d-none')) {
+            searchInput.value = '';
+            // reset options visibility
+            options.forEach(opt => opt.style.display = 'block');
+            searchInput.focus();
+        }
+    });
+    
+    // Stop propagation on dropdown clicks so it doesn't close when clicking search input
+    dropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    // Close dropdown on click outside
+    document.addEventListener('click', function() {
+        dropdown.classList.add('d-none');
+    });
+
+    // Handle trigger keyboard focusing & enter to open
+    trigger.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            dropdown.classList.remove('d-none');
+            searchInput.focus();
+        }
+    });
+
+    // Select option function
+    function selectOption(optionEl) {
+        options.forEach(opt => opt.classList.remove('selected'));
+        optionEl.classList.add('selected');
+        
+        const val = optionEl.getAttribute('data-value');
+        const text = optionEl.textContent.trim();
+        
+        hiddenInput.value = val;
+        selectText.textContent = text;
+        
+        if (val === "") {
+            selectText.classList.add('text-muted');
+        } else {
+            selectText.classList.remove('text-muted');
+        }
+        
+        dropdown.classList.add('d-none');
+    }
+
+    // Set initial value
+    const initialVal = hiddenInput.value;
+    const matchedOpt = options.find(opt => opt.getAttribute('data-value') === initialVal);
+    if (matchedOpt) {
+        selectOption(matchedOpt);
+    } else {
+        const placeholderOpt = options.find(opt => opt.getAttribute('data-value') === "");
+        if (placeholderOpt) selectOption(placeholderOpt);
+    }
+    
+    // Bind click events to options
+    optionsContainer.addEventListener('click', function(e) {
+        const optionEl = e.target.closest('.custom-option');
+        if (optionEl) {
+            selectOption(optionEl);
+        }
+    });
+    
+    // Filter options as you type
+    searchInput.addEventListener('input', function() {
+        const query = searchInput.value.toLowerCase().trim();
+        options.forEach(opt => {
+            const val = opt.getAttribute('data-value');
+            const text = opt.textContent.toLowerCase();
+            if (val === "" || text.includes(query)) {
+                opt.style.display = 'block';
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
 
 <?php require APPROOT . '/views/layout/footer.php'; ?>

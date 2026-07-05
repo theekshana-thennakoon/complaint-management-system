@@ -1,7 +1,21 @@
 <?php require APPROOT . '/views/layout/header.php'; ?>
 
-<div class="container-fluid mt-4 px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <a href="<?php echo URLROOT; ?>/complaints" class="sidebar-menu-item active">
+            <i class="fas fa-list"></i> All Complaints
+        </a>
+        <a href="<?php echo URLROOT; ?>/complaints/create" class="sidebar-menu-item">
+            <i class="fas fa-plus"></i> New Complaint
+        </a>
+        <a href="<?php echo URLROOT; ?>/complaints/sent" class="sidebar-menu-item">
+            <i class="fas fa-paper-plane"></i> Sent to Departments
+        </a>
+    </aside>
+
+    <main class="dashboard-content">
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
         <h2 class="fw-bold" style="color: var(--primary-color);"><i class="fas fa-list me-2"></i> All Complaints</h2>
         <a href="<?php echo URLROOT; ?>/complaints/create" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4">
             <i class="fas fa-plus me-2"></i> Add New Complaint
@@ -99,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-</script>
+    </main>
+</div>
 
 <?php require APPROOT . '/views/layout/footer.php'; ?>
