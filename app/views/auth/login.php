@@ -39,6 +39,8 @@
                 
                 <div style="text-align: center; margin-top: 20px; border-top: 1px solid var(--panel-border); padding-top: 20px;">
                     <a href="<?php echo URLROOT; ?>/auth/register" style="font-size: 0.9rem;">Don't have an account? Register here.</a>
+                    <br>
+                    <a href="<?php echo URLROOT; ?>/auth/change_password" style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px; display: inline-block;">Forgot / Change Password?</a>
                 </div>
             </div>
         </div>

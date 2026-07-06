@@ -212,6 +212,95 @@ class AuthController extends Controller {
         }
     }
 
+    public function change_password(){
+        // Check for POST
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            // Sanitize POST data
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            // Init data
+            $data =[
+                'username' => trim($_POST['username']),
+                'old_password' => trim($_POST['old_password']),
+                'new_password' => trim($_POST['new_password']),
+                'confirm_password' => trim($_POST['confirm_password']),
+                'username_err' => '',
+                'old_password_err' => '',
+                'new_password_err' => '',
+                'confirm_password_err' => ''
+            ];
+
+            // Validate Username
+            if(empty($data['username'])){
+                $data['username_err'] = 'Please enter username';
+            } elseif(!$this->userModel->findUserByUsername($data['username'])){
+                $data['username_err'] = 'No user found';
+            }
+
+            // Validate Old Password
+            if(empty($data['old_password'])){
+                $data['old_password_err'] = 'Please enter your old password';
+            }
+
+            // Validate New Password
+            if(empty($data['new_password'])){
+                $data['new_password_err'] = 'Please enter new password';
+            } elseif(strlen($data['new_password']) < 6){
+                $data['new_password_err'] = 'Password must be at least 6 characters';
+            }
+
+            // Validate Confirm Password
+            if(empty($data['confirm_password'])){
+                $data['confirm_password_err'] = 'Please confirm new password';
+            } else {
+                if($data['new_password'] != $data['confirm_password']){
+                    $data['confirm_password_err'] = 'Passwords do not match';
+                }
+            }
+
+            // Check if old password matches
+            if(empty($data['username_err']) && empty($data['old_password_err'])){
+                if(!$this->userModel->login($data['username'], $data['old_password'])){
+                    $data['old_password_err'] = 'Old password incorrect';
+                }
+            }
+
+            // Make sure errors are empty
+            if(empty($data['username_err']) && empty($data['old_password_err']) && empty($data['new_password_err']) && empty($data['confirm_password_err'])){
+                // Validated
+                // Hash Password
+                $hashed_password = password_hash($data['new_password'], PASSWORD_DEFAULT);
+
+                // Update Password
+                if($this->userModel->updatePassword($data['username'], $hashed_password)){
+                    // We can reuse the register_success flash message as it renders on the login page
+                    flash('register_success', 'Password successfully changed. You can now log in.');
+                    redirect('auth/login');
+                } else {
+                    die('Something went wrong');
+                }
+            } else {
+                // Load view with errors
+                $this->view('auth/change_password', $data);
+            }
+        } else {
+            // Init data
+            $data =[
+                'username' => '',
+                'old_password' => '',
+                'new_password' => '',
+                'confirm_password' => '',
+                'username_err' => '',
+                'old_password_err' => '',
+                'new_password_err' => '',
+                'confirm_password_err' => ''
+            ];
+
+            // Load view
+            $this->view('auth/change_password', $data);
+        }
+    }
+
     public function logout(){
         unset($_SESSION['user_id']);
         unset($_SESSION['user_name']);
