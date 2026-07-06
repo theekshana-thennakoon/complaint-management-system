@@ -20,6 +20,13 @@ class User {
         }
     }
 
+    // Get user by username
+    public function getUserByUsername($username){
+        $this->db->query('SELECT * FROM users WHERE username = :username');
+        $this->db->bind(':username', $username);
+        return $this->db->single();
+    }
+
     // Register user
     public function register($data){
         $this->db->query('INSERT INTO users (name, username, password, nic, role_id) VALUES(:name, :username, :password, :nic, :role_id)');
@@ -55,6 +62,19 @@ class User {
             } else {
                 return false;
             }
+        } else {
+            return false;
+        }
+    }
+
+    // Update user password
+    public function updatePassword($username, $password){
+        $this->db->query('UPDATE users SET password = :password WHERE username = :username');
+        $this->db->bind(':password', $password);
+        $this->db->bind(':username', $username);
+
+        if($this->db->execute()){
+            return true;
         } else {
             return false;
         }

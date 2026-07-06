@@ -144,6 +144,52 @@
                 </div>
             </div>
         </div>
+        <div class="card shadow border-0 rounded-4 mb-5">
+            <div class="card-header text-white py-3 rounded-top-4" style="background: linear-gradient(135deg, #1e3c72, #2a5298);">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i> All System Complaints</h5>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <?php if (empty($data['all_complaints'])): ?>
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-folder-open fa-4x mb-3 opacity-50"></i>
+                        <h4>No Complaints Found</h4>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive p-2">
+                        <table class="table table-hover align-middle mb-0 border-bottom">
+                            <thead class="table-light text-uppercase text-secondary" style="font-size: 0.85rem;">
+                                <tr>
+                                    <th class="ps-3">Complaint No</th>
+                                    <th>Date</th>
+                                    <th>Applicant</th>
+                                    <th>Subject</th>
+                                    <th>Category</th>
+                                    <th>Current Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($data['all_complaints'] as $complaint): ?>
+                                    <tr style="transition: all 0.2s ease;">
+                                        <td class="ps-3"><span class="fw-bold text-primary"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                        <td><?php echo htmlspecialchars($complaint->date); ?></td>
+                                        <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
+                                        <td><?php echo htmlspecialchars($complaint->subject); ?></td>
+                                        <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span></td>
+                                        <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
+                                        <td>
+                                            <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
+                                                <i class="fas fa-eye me-1"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -191,14 +237,30 @@
                     <div class="row" id="departmentSelectRow" style="display: none;">
                         <div class="col-md-12 mb-3">
                             <label for="department_id" class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
-                            <select name="department_id" id="department_id" class="form-select rounded-3">
-                                <option value="" disabled selected>Select Department</option>
-                                <?php if(isset($data['departments'])): ?>
-                                    <?php foreach($data['departments'] as $dept): ?>
-                                        <option value="<?php echo $dept->id; ?>" <?php echo (isset($data['department_id']) && $data['department_id'] == $dept->id) ? 'selected' : ''; ?>><?php echo htmlspecialchars($dept->name); ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
+                            
+                            <div class="dropdown w-100">
+                                <button class="form-select rounded-3 text-start w-100" type="button" id="deptDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #fff;">
+                                    Select Department
+                                </button>
+                                <ul class="dropdown-menu w-100 p-2 shadow-sm border-0" aria-labelledby="deptDropdownBtn">
+                                    <li>
+                                        <input type="text" class="form-control form-control-sm mb-2 rounded-pill px-3" id="deptSearchInput" placeholder="🔍 Search department...">
+                                    </li>
+                                    <div style="max-height: 200px; overflow-y: auto;" id="deptListContainer">
+                                        <?php if(isset($data['departments'])): ?>
+                                            <?php foreach($data['departments'] as $dept): ?>
+                                                <li>
+                                                    <a class="dropdown-item dept-item rounded-2" href="#" data-value="<?php echo $dept->id; ?>" data-name="<?php echo htmlspecialchars($dept->name); ?>">
+                                                        <?php echo htmlspecialchars($dept->name); ?>
+                                                    </a>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </ul>
+                                <input type="hidden" name="department_id" id="department_id_hidden" value="<?php echo isset($data['department_id']) ? $data['department_id'] : ''; ?>">
+                            </div>
+
                             <div class="form-text">Required only for Department users.</div>
                         </div>
                     </div>
@@ -229,6 +291,56 @@ document.addEventListener('DOMContentLoaded', function() {
         roleSelect.addEventListener('change', toggleDepartment);
         toggleDepartment();
     }
+    
+    // Custom Searchable Dropdown Logic
+    const deptSearchInput = document.getElementById('deptSearchInput');
+    const deptItems = document.querySelectorAll('.dept-item');
+    const deptDropdownBtn = document.getElementById('deptDropdownBtn');
+    const deptHiddenInput = document.getElementById('department_id_hidden');
+    
+    // Set initial selected value if exists (on validation fail/reload)
+    if (deptHiddenInput && deptHiddenInput.value) {
+        const selectedItem = document.querySelector(`.dept-item[data-value="${deptHiddenInput.value}"]`);
+        if (selectedItem) {
+            deptDropdownBtn.textContent = selectedItem.getAttribute('data-name');
+        }
+    }
+
+    if(deptSearchInput) {
+        // Prevent dropdown from closing when clicking the search input
+        deptSearchInput.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Search filter logic
+        deptSearchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            deptItems.forEach(item => {
+                const name = item.getAttribute('data-name').toLowerCase();
+                if (name.includes(query)) {
+                    item.parentElement.style.display = 'block';
+                } else {
+                    item.parentElement.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Handle item selection
+    deptItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const val = this.getAttribute('data-value');
+            const name = this.getAttribute('data-name');
+            
+            deptHiddenInput.value = val;
+            deptDropdownBtn.textContent = name;
+            
+            // Clear search when selected
+            deptSearchInput.value = '';
+            deptItems.forEach(i => i.parentElement.style.display = 'block');
+        });
+    });
 });
 </script>
 

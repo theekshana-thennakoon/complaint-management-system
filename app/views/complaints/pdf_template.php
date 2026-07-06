@@ -24,9 +24,6 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
-            .content-wrapper {
-                page-break-inside: avoid;
-            }
             .footer-image {
                 position: fixed;
                 bottom: 0;
@@ -133,13 +130,17 @@
             left: 0;
             width: 100%;
             display: block;
-            z-index: -1;
+            z-index: 0;
         }
     </style>
 </head>
 <body>
 
-    <!-- Letterhead Image -->
+    <table style="width: 100%; border: none; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <td style="padding: 0; border: none;">
+                    <!-- Letterhead Image -->
     <?php 
     $letterhead_path = APPROOT . '/../public/img/letterhead.jpg';
     if(file_exists($letterhead_path)){
@@ -155,9 +156,14 @@
         <div style="text-align:center; padding: 50px; border: 2px dashed #ccc;">
             <h3>[Please place 'letterhead.jpg' in the public/img folder]</h3>
         </div>
-    <?php endif; ?>
-
-    <!-- Footer Image -->
+                    <?php endif; ?>
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding: 0; border: none;">
+                    <div class="content-wrapper">
     <?php 
     $footer_path = APPROOT . '/../public/img/footer.jpg';
     if(file_exists($footer_path)){
@@ -167,11 +173,6 @@
         $footer_img_src = ''; 
     }
     ?>
-    <?php if($footer_img_src): ?>
-        <img src="<?php echo $footer_img_src; ?>" class="footer-image" alt="Footer">
-    <?php endif; ?>
-
-<div class="content-wrapper">
     <table style="width: 100%; font-size: 11px; margin-bottom: 30px; border-collapse: collapse; border: none; line-height: 1.2;">
         <tr>
             <td style="text-align: left; padding-right: 2px;">ඔබේ අංකය</td>
@@ -316,6 +317,22 @@
         </div>
     </div>
 </div>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td style="padding: 0; border: none;">
+                    <div style="height: 100px;"></div> <!-- Space for the fixed footer -->
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Fixed Footer Image -->
+    <?php if($footer_img_src): ?>
+        <img src="<?php echo $footer_img_src; ?>" class="footer-image" alt="Footer">
+    <?php endif; ?>
 
 </body>
 </html>

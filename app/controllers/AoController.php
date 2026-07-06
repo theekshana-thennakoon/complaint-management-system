@@ -42,7 +42,8 @@ class AoController extends Controller {
                 'pending' => count($complaints),
                 'approved' => $approved,
                 'rejected' => $rejected
-            ]
+            ],
+            'all_complaints' => $all_complaints
         ];
 
         $this->view('ao/index', $data);

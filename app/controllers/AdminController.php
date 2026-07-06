@@ -43,6 +43,7 @@ class AdminController extends Controller {
         $dashboardData = $this->_getDashboardData();
         $dashboardData['roles'] = $this->userModel->getManagedRoles();
         $dashboardData['departments'] = $this->complaintModel->getDepartments();
+        $dashboardData['all_complaints'] = $this->complaintModel->getComplaints();
         $this->view('admin/index', $dashboardData);
     }
 

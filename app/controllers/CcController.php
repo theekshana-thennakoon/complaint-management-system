@@ -42,7 +42,8 @@ class CcController extends Controller {
                 'pending' => count($complaints),
                 'approved' => $approved,
                 'rejected' => $rejected
-            ]
+            ],
+            'all_complaints' => $all_complaints
         ];
 
         $this->view('cc/index', $data);

@@ -35,7 +35,8 @@ class GovernorController extends Controller {
             'stats' => [
                 'total' => $total,
                 'this_month' => $this_month,
-            ]
+            ],
+            'all_complaints' => $all_complaints
         ];
 
         $this->view('governor/index', $data);
