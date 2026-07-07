@@ -7,7 +7,7 @@ class Complaint {
     }
 
     public function addComplaint($data, $details = []){
-        $this->db->query('INSERT INTO complaints (complaint_no, date, applicant_name, nic, address, mobile, email, subject, category_id, description, status, current_role_id, created_by, forward_department_id) VALUES (:complaint_no, :date, :applicant_name, :nic, :address, :mobile, :email, :subject, :category_id, :description, :status, :current_role_id, :created_by, :forward_department_id)');
+        $this->db->query('INSERT INTO complaints (complaint_no, date, applicant_name, nic, address, mobile, email, subject, category_id, description, status, current_role_id, created_by, forward_department_id, person) VALUES (:complaint_no, :date, :applicant_name, :nic, :address, :mobile, :email, :subject, :category_id, :description, :status, :current_role_id, :created_by, :forward_department_id, :person)');
 
         // Bind values
         $this->db->bind(':complaint_no', $data['complaint_no']);
@@ -25,6 +25,7 @@ class Complaint {
         $this->db->bind(':current_role_id', $data['current_role_id'] ?? 6);
         $this->db->bind(':created_by', $data['created_by'] ?? NULL);
         $this->db->bind(':forward_department_id', $data['forward_department_id'] ?? NULL);
+        $this->db->bind(':person', $data['person'] ?? NULL);
 
         if($this->db->execute()){
             $complaint_id = $this->db->lastInsertId();
@@ -175,7 +176,7 @@ class Complaint {
     }
 
     public function updateComplaint($id, $data, $details = []) {
-        $this->db->query('UPDATE complaints SET applicant_name = :applicant_name, nic = :nic, address = :address, mobile = :mobile, email = :email, subject = :subject, category_id = :category_id, description = :description, forward_department_id = :forward_department_id WHERE id = :id');
+        $this->db->query('UPDATE complaints SET applicant_name = :applicant_name, nic = :nic, address = :address, mobile = :mobile, email = :email, subject = :subject, category_id = :category_id, description = :description, forward_department_id = :forward_department_id, person = :person WHERE id = :id');
         
         $this->db->bind(':applicant_name', $data['applicant_name']);
         $this->db->bind(':nic', $data['nic']);
@@ -186,6 +187,7 @@ class Complaint {
         $this->db->bind(':category_id', $data['category_id']);
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':forward_department_id', $data['forward_department_id']);
+        $this->db->bind(':person', $data['person']);
         $this->db->bind(':id', $id);
 
         if ($this->db->execute()) {

@@ -201,6 +201,9 @@
 
     <div class="letter-content">
         <div class="department-address">
+            <?php if (!empty($data['complaint']->person)) : ?>
+                <?php echo htmlspecialchars($data['complaint']->person); ?>,<br>
+            <?php endif; ?>
             <?php 
                 if (!empty($data['complaint']->department_name)) {
                     echo htmlspecialchars($data['complaint']->department_name);

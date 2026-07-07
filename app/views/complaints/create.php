@@ -108,6 +108,53 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="person" class="form-label">Forward To Person *</label>
+                        
+                        <div class="custom-person-select-wrapper" style="position: relative;">
+                            <!-- Fake Select Trigger -->
+                            <div id="customPersonSelectTrigger" class="form-control d-flex justify-content-between align-items-center" tabindex="0" style="cursor: pointer; min-height: 48px; position: relative;">
+                                <span id="customPersonSelectText" class="text-muted">Select Person</span>
+                                <i class="fas fa-chevron-down text-muted" style="font-size: 0.8rem;"></i>
+                            </div>
+                            
+                            <!-- Hidden Select Input for form submission -->
+                            <input type="hidden" name="person" id="person" value="<?php echo $data['person']; ?>">
+                            
+                            <!-- Dropdown Menu -->
+                            <div id="customPersonSelectDropdown" class="card shadow border-0 p-2 d-none" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; margin-top: 5px; max-height: 300px; display: flex; flex-direction: column; background: var(--panel-bg); border: 1px solid var(--panel-border) !important; border-radius: var(--radius-md) !important; box-shadow: var(--shadow-lg) !important;">
+                                <!-- Search Box inside Dropdown -->
+                                <div class="p-1 mb-2">
+                                    <input type="text" id="personSearch" class="form-control form-control-sm" placeholder="🔍 Search person..." style="font-size: 0.85rem; padding: 6px 12px;">
+                                </div>
+                                <!-- Options List -->
+                                <div id="customPersonSelectOptions" style="overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 2px;">
+                                    <div class="custom-person-option text-muted" data-value="" style="cursor: pointer; font-size: 0.9rem;">Select Person</div>
+                                    <?php 
+                                    $persons = [
+                                        'ප්‍රධාන ලේකම්',
+                                        'ලේකම්',
+                                        'අධ්‍යක්ෂක',
+                                        'කොමසාරිස්',
+                                        'සභාපති',
+                                        'නියෝජ්‍ය ප්‍රධාන ලේකම්',
+                                        'ආණ්ඩුකාර ලේකම්'
+                                    ];
+                                    foreach($persons as $p) : ?>
+                                        <div class="custom-person-option" data-value="<?php echo htmlspecialchars($p); ?>" style="cursor: pointer; font-size: 0.9rem;">
+                                            <?php echo htmlspecialchars($p); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <!-- Empty spacer group to align layout -->
+                    </div>
+                </div>
                 
 
                 
@@ -158,7 +205,7 @@
 </div>
 
 <style>
-.custom-option {
+.custom-option, .custom-person-option {
     padding: 8px 12px;
     border-radius: var(--radius-sm);
     cursor: pointer;
@@ -166,15 +213,15 @@
     color: var(--text-primary);
     transition: background 0.15s ease, color 0.15s ease;
 }
-.custom-option:hover {
+.custom-option:hover, .custom-person-option:hover {
     background-color: var(--primary-50);
     color: var(--primary-color);
 }
-.custom-option.selected {
+.custom-option.selected, .custom-person-option.selected {
     background-color: var(--primary-color) !important;
     color: white !important;
 }
-#customSelectTrigger:focus {
+#customSelectTrigger:focus, #customPersonSelectTrigger:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3.5px rgba(45,145,80,0.14);
     outline: none;
@@ -184,98 +231,192 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const wrapper = document.querySelector('.custom-select-wrapper');
-    if (!wrapper) return;
-    
-    const trigger = document.getElementById('customSelectTrigger');
-    const dropdown = document.getElementById('customSelectDropdown');
-    const searchInput = document.getElementById('deptSearch');
-    const optionsContainer = document.getElementById('customSelectOptions');
-    const hiddenInput = document.getElementById('forward_department_id');
-    const selectText = document.getElementById('customSelectText');
-    const options = Array.from(optionsContainer.querySelectorAll('.custom-option'));
-    
-    // Toggle dropdown
-    trigger.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dropdown.classList.toggle('d-none');
-        if (!dropdown.classList.contains('d-none')) {
-            searchInput.value = '';
-            // reset options visibility
-            options.forEach(opt => opt.style.display = 'block');
-            searchInput.focus();
-        }
-    });
-    
-    // Stop propagation on dropdown clicks so it doesn't close when clicking search input
-    dropdown.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-    
-    // Close dropdown on click outside
-    document.addEventListener('click', function() {
-        dropdown.classList.add('d-none');
-    });
-
-    // Handle trigger keyboard focusing & enter to open
-    trigger.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
-            e.preventDefault();
-            dropdown.classList.remove('d-none');
-            searchInput.focus();
-        }
-    });
-
-    // Select option function
-    function selectOption(optionEl) {
-        options.forEach(opt => opt.classList.remove('selected'));
-        optionEl.classList.add('selected');
+    if (wrapper) {
+        const trigger = document.getElementById('customSelectTrigger');
+        const dropdown = document.getElementById('customSelectDropdown');
+        const searchInput = document.getElementById('deptSearch');
+        const optionsContainer = document.getElementById('customSelectOptions');
+        const hiddenInput = document.getElementById('forward_department_id');
+        const selectText = document.getElementById('customSelectText');
+        const options = Array.from(optionsContainer.querySelectorAll('.custom-option'));
         
-        const val = optionEl.getAttribute('data-value');
-        const text = optionEl.textContent.trim();
-        
-        hiddenInput.value = val;
-        selectText.textContent = text;
-        
-        if (val === "") {
-            selectText.classList.add('text-muted');
-        } else {
-            selectText.classList.remove('text-muted');
-        }
-        
-        dropdown.classList.add('d-none');
-    }
-
-    // Set initial value
-    const initialVal = hiddenInput.value;
-    const matchedOpt = options.find(opt => opt.getAttribute('data-value') === initialVal);
-    if (matchedOpt) {
-        selectOption(matchedOpt);
-    } else {
-        const placeholderOpt = options.find(opt => opt.getAttribute('data-value') === "");
-        if (placeholderOpt) selectOption(placeholderOpt);
-    }
-    
-    // Bind click events to options
-    optionsContainer.addEventListener('click', function(e) {
-        const optionEl = e.target.closest('.custom-option');
-        if (optionEl) {
-            selectOption(optionEl);
-        }
-    });
-    
-    // Filter options as you type
-    searchInput.addEventListener('input', function() {
-        const query = searchInput.value.toLowerCase().trim();
-        options.forEach(opt => {
-            const val = opt.getAttribute('data-value');
-            const text = opt.textContent.toLowerCase();
-            if (val === "" || text.includes(query)) {
-                opt.style.display = 'block';
-            } else {
-                opt.style.display = 'none';
+        // Toggle dropdown
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('d-none');
+            if (!dropdown.classList.contains('d-none')) {
+                searchInput.value = '';
+                // reset options visibility
+                options.forEach(opt => opt.style.display = 'block');
+                searchInput.focus();
             }
         });
-    });
+        
+        // Stop propagation on dropdown clicks so it doesn't close when clicking search input
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Close dropdown on click outside
+        document.addEventListener('click', function() {
+            dropdown.classList.add('d-none');
+        });
+        
+        // Handle trigger keyboard focusing & enter to open
+        trigger.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                dropdown.classList.remove('d-none');
+                searchInput.focus();
+            }
+        });
+
+        // Select option function
+        function selectOption(optionEl) {
+            options.forEach(opt => opt.classList.remove('selected'));
+            optionEl.classList.add('selected');
+            
+            const val = optionEl.getAttribute('data-value');
+            const text = optionEl.textContent.trim();
+            
+            hiddenInput.value = val;
+            selectText.textContent = text;
+            
+            if (val === "") {
+                selectText.classList.add('text-muted');
+            } else {
+                selectText.classList.remove('text-muted');
+            }
+            
+            dropdown.classList.add('d-none');
+        }
+
+        // Set initial value
+        const initialVal = hiddenInput.value;
+        const matchedOpt = options.find(opt => opt.getAttribute('data-value') === initialVal);
+        if (matchedOpt) {
+            selectOption(matchedOpt);
+        } else {
+            const placeholderOpt = options.find(opt => opt.getAttribute('data-value') === "");
+            if (placeholderOpt) selectOption(placeholderOpt);
+        }
+        
+        // Bind click events to options
+        optionsContainer.addEventListener('click', function(e) {
+            const optionEl = e.target.closest('.custom-option');
+            if (optionEl) {
+                selectOption(optionEl);
+            }
+        });
+        
+        // Filter options as you type
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.toLowerCase().trim();
+            options.forEach(opt => {
+                const val = opt.getAttribute('data-value');
+                const text = opt.textContent.toLowerCase();
+                if (val === "" || text.includes(query)) {
+                    opt.style.display = 'block';
+                } else {
+                    opt.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    const personWrapper = document.querySelector('.custom-person-select-wrapper');
+    if (personWrapper) {
+        const trigger = document.getElementById('customPersonSelectTrigger');
+        const dropdown = document.getElementById('customPersonSelectDropdown');
+        const searchInput = document.getElementById('personSearch');
+        const optionsContainer = document.getElementById('customPersonSelectOptions');
+        const hiddenInput = document.getElementById('person');
+        const selectText = document.getElementById('customPersonSelectText');
+        const options = Array.from(optionsContainer.querySelectorAll('.custom-person-option'));
+        
+        // Toggle dropdown
+        trigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('d-none');
+            if (!dropdown.classList.contains('d-none')) {
+                searchInput.value = '';
+                // reset options visibility
+                options.forEach(opt => opt.style.display = 'block');
+                searchInput.focus();
+            }
+        });
+        
+        // Stop propagation on dropdown clicks so it doesn't close when clicking search input
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Close dropdown on click outside
+        document.addEventListener('click', function() {
+            dropdown.classList.add('d-none');
+        });
+        
+        // Handle trigger keyboard focusing & enter to open
+        trigger.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                dropdown.classList.remove('d-none');
+                searchInput.focus();
+            }
+        });
+
+        // Select option function
+        function selectOption(optionEl) {
+            options.forEach(opt => opt.classList.remove('selected'));
+            optionEl.classList.add('selected');
+            
+            const val = optionEl.getAttribute('data-value');
+            const text = optionEl.textContent.trim();
+            
+            hiddenInput.value = val;
+            selectText.textContent = text;
+            
+            if (val === "") {
+                selectText.classList.add('text-muted');
+            } else {
+                selectText.classList.remove('text-muted');
+            }
+            
+            dropdown.classList.add('d-none');
+        }
+
+        // Set initial value
+        const initialVal = hiddenInput.value;
+        const matchedOpt = options.find(opt => opt.getAttribute('data-value') === initialVal);
+        if (matchedOpt) {
+            selectOption(matchedOpt);
+        } else {
+            const placeholderOpt = options.find(opt => opt.getAttribute('data-value') === "");
+            if (placeholderOpt) selectOption(placeholderOpt);
+        }
+        
+        // Bind click events to options
+        optionsContainer.addEventListener('click', function(e) {
+            const optionEl = e.target.closest('.custom-person-option');
+            if (optionEl) {
+                selectOption(optionEl);
+            }
+        });
+        
+        // Filter options as you type
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.toLowerCase().trim();
+            options.forEach(opt => {
+                const val = opt.getAttribute('data-value');
+                const text = opt.textContent.toLowerCase();
+                if (val === "" || text.includes(query)) {
+                    opt.style.display = 'block';
+                } else {
+                    opt.style.display = 'none';
+                }
+            });
+        });
+    }
 });
 </script>
 

@@ -68,7 +68,12 @@
                         </div>
                         <div class="col-md-6">
                             <p class="mb-1 text-muted small">Department</p>
-                            <p class="fw-semibold"><?php echo htmlspecialchars($data['complaint']->department_name ?? 'N/A'); ?></p>
+                            <p class="fw-semibold">
+                                <?php echo htmlspecialchars($data['complaint']->department_name ?? 'N/A'); ?>
+                                <?php if(!empty($data['complaint']->person)) : ?>
+                                    <span class="text-muted"> (<?php echo htmlspecialchars($data['complaint']->person); ?>)</span>
+                                <?php endif; ?>
+                            </p>
                         </div>
                     </div>
                     <div class="row mb-3">

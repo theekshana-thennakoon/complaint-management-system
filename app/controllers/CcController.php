@@ -179,13 +179,14 @@ class CcController extends Controller {
                 'subject' => trim($_POST['subject']),
                 'category_id' => trim($_POST['category_id']),
                 'forward_department_id' => trim($_POST['forward_department_id']),
+                'person' => isset($_POST['person']) ? trim($_POST['person']) : '',
                 'description' => isset($_POST['description']) ? trim($_POST['description']) : '',
                 'categories' => $this->complaintModel->getCategories(),
                 'departments' => $this->complaintModel->getDepartments(),
                 'err' => ''
             ];
 
-            if(empty($data['applicant_name']) || empty($data['subject']) || empty($data['category_id']) || empty($data['forward_department_id'])){
+            if(empty($data['applicant_name']) || empty($data['subject']) || empty($data['category_id']) || empty($data['forward_department_id']) || empty($data['person'])){
                 $data['err'] = 'Please fill all required fields';
                 $this->view('cc/edit', $data);
             } else {
@@ -215,6 +216,7 @@ class CcController extends Controller {
                 'subject' => $complaint->subject,
                 'category_id' => $complaint->category_id,
                 'forward_department_id' => $complaint->forward_department_id,
+                'person' => $complaint->person,
                 'description' => $complaint->description,
                 'categories' => $this->complaintModel->getCategories(),
                 'departments' => $this->complaintModel->getDepartments(),

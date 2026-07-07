@@ -65,6 +65,15 @@
                             <td><?php echo $data['complaint']->category_name; ?></td>
                         </tr>
                         <tr>
+                            <th>Department</th>
+                            <td>
+                                <?php echo htmlspecialchars($data['complaint']->department_name ?? 'N/A'); ?>
+                                <?php if(!empty($data['complaint']->person)) : ?>
+                                    <span class="text-muted"> (<?php echo htmlspecialchars($data['complaint']->person); ?>)</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
                             <th>Date</th>
                             <td><?php echo $data['complaint']->date; ?></td>
                         </tr>
