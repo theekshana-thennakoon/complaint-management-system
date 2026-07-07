@@ -13,9 +13,9 @@ class GsController extends Controller {
     }
 
     public function index() {
-        // Fetch complaints currently pending GS approval (current_role_id = 3)
-        $complaints = $this->complaintModel->getComplaintsByRoleId(3);
-        $all_complaints = $this->complaintModel->getComplaints();
+        $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+        $complaints = $this->complaintModel->getComplaintsByRoleId(3, $month);
+        $all_complaints = $this->complaintModel->getComplaints($month);
 
         $approved = 0;
         $rejected = 0;
@@ -23,11 +23,11 @@ class GsController extends Controller {
         $rejected_reports = [];
 
         foreach($all_complaints as $c) {
-            if(strpos($c->status, 'Approved by GS') !== false) {
+            if($this->complaintModel->hasRoleLoggedAction($c->id, 3, 'Approve')) {
                 $approved++;
                 $approved_reports[] = $c;
             }
-            if(strpos($c->status, 'Rejected by GS') !== false) {
+            if($this->complaintModel->hasRoleLoggedAction($c->id, 3, 'Reject')) {
                 $rejected++;
                 $rejected_reports[] = $c;
             }
@@ -42,7 +42,8 @@ class GsController extends Controller {
                 'pending' => count($complaints),
                 'approved' => $approved,
                 'rejected' => $rejected
-            ]
+            ],
+            'month' => $month
         ];
 
         $this->view('gs/index', $data);
@@ -55,7 +56,7 @@ class GsController extends Controller {
         if ($complaint) {
             if ($complaint->current_role_id == 3) {
                 $can_view = true;
-            } elseif (strpos($complaint->status, 'Approved by GS') !== false || strpos($complaint->status, 'Rejected by GS') !== false) {
+            } elseif ($this->complaintModel->hasRoleActedOnComplaint($id, 3)) {
                 $can_view = true;
             }
         }

@@ -7,7 +7,7 @@ class Complaint {
     }
 
     public function addComplaint($data, $details = []){
-        $this->db->query('INSERT INTO complaints (complaint_no, date, applicant_name, nic, address, mobile, email, subject, category_id, description, status, current_role_id, created_by, forward_department_id, person) VALUES (:complaint_no, :date, :applicant_name, :nic, :address, :mobile, :email, :subject, :category_id, :description, :status, :current_role_id, :created_by, :forward_department_id, :person)');
+        $this->db->query('INSERT INTO complaints (complaint_no, date, applicant_name, nic, address, mobile, email, subject, category_id, description, status, current_role_id, created_by, forward_department_id, person, province) VALUES (:complaint_no, :date, :applicant_name, :nic, :address, :mobile, :email, :subject, :category_id, :description, :status, :current_role_id, :created_by, :forward_department_id, :person, :province)');
 
         // Bind values
         $this->db->bind(':complaint_no', $data['complaint_no']);
@@ -26,6 +26,7 @@ class Complaint {
         $this->db->bind(':created_by', $data['created_by'] ?? NULL);
         $this->db->bind(':forward_department_id', $data['forward_department_id'] ?? NULL);
         $this->db->bind(':person', $data['person'] ?? NULL);
+        $this->db->bind(':province', $data['province'] ?? NULL);
 
         if($this->db->execute()){
             $complaint_id = $this->db->lastInsertId();
@@ -58,39 +59,80 @@ class Complaint {
         return $this->db->resultSet();
     }
 
+    public function addDepartment($name){
+        $this->db->query('INSERT INTO departments (name) VALUES (:name)');
+        $this->db->bind(':name', $name);
+        return $this->db->execute();
+    }
+
+    public function getDepartmentById($id){
+        $this->db->query('SELECT * FROM departments WHERE id = :id');
+        $this->db->bind(':id', $id);
+        return $this->db->single();
+    }
+
+    public function updateDepartment($id, $name){
+        $this->db->query('UPDATE departments SET name = :name WHERE id = :id');
+        $this->db->bind(':id', $id);
+        $this->db->bind(':name', $name);
+        return $this->db->execute();
+    }
+
     public function getComplaintByNo($complaint_no){
         $this->db->query('SELECT * FROM complaints WHERE complaint_no = :complaint_no');
         $this->db->bind(':complaint_no', $complaint_no);
         return $this->db->single();
     }
 
-    public function getComplaints(){
-        $this->db->query('
+    public function getComplaints($month = null){
+        $province = $_SESSION['user_province'] ?? '';
+        $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
             FROM complaints c 
             LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
             LEFT JOIN departments d ON c.forward_department_id = d.id
             LEFT JOIN roles r ON c.current_role_id = r.id
-            ORDER BY c.created_at DESC
-        ');
+            WHERE (:province = "" OR c.province = :province)
+        ';
+        if ($month) {
+            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        }
+        $sql .= ' ORDER BY c.created_at DESC';
+
+        $this->db->query($sql);
+        $this->db->bind(':province', $province);
+        if ($month) {
+            $this->db->bind(':month', $month);
+        }
         return $this->db->resultSet();
     }
 
-    public function getComplaintsByUser($user_id){
-        $this->db->query('
+    public function getComplaintsByUser($user_id, $month = null){
+        $province = $_SESSION['user_province'] ?? '';
+        $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
             FROM complaints c 
             LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
             LEFT JOIN departments d ON c.forward_department_id = d.id
             LEFT JOIN roles r ON c.current_role_id = r.id
-            WHERE c.created_by = :user_id
-            ORDER BY c.created_at DESC
-        ');
+            WHERE c.created_by = :user_id AND (:province = "" OR c.province = :province)
+        ';
+        if ($month) {
+            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        }
+        $sql .= ' ORDER BY c.created_at DESC';
+
+        $this->db->query($sql);
         $this->db->bind(':user_id', $user_id);
+        $this->db->bind(':province', $province);
+        if ($month) {
+            $this->db->bind(':month', $month);
+        }
         return $this->db->resultSet();
     }
 
     public function getComplaintById($id){
+        $province = $_SESSION['user_province'] ?? '';
         $this->db->query('
             SELECT c.*, 
                    cat.name as category_name, 
@@ -100,9 +142,10 @@ class Complaint {
             LEFT JOIN complaint_categories cat ON c.category_id = cat.id
             LEFT JOIN departments d ON c.forward_department_id = d.id
             LEFT JOIN users u ON c.created_by = u.id
-            WHERE c.id = :id
+            WHERE c.id = :id AND (:province = "" OR c.province = :province)
         ');
         $this->db->bind(':id', $id);
+        $this->db->bind(':province', $province);
         return $this->db->single();
     }
 
@@ -120,47 +163,76 @@ class Complaint {
         return $this->db->execute();
     }
 
-    public function getComplaintsByRoleId($role_id) {
-        $this->db->query('
+    public function getComplaintsByRoleId($role_id, $month = null) {
+        $province = $_SESSION['user_province'] ?? '';
+        $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
             FROM complaints c 
             LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
             LEFT JOIN departments d ON c.forward_department_id = d.id
             LEFT JOIN roles r ON c.current_role_id = r.id
-            WHERE c.current_role_id = :role_id
-            ORDER BY c.created_at DESC
-        ');
+            WHERE c.current_role_id = :role_id AND (:province = "" OR c.province = :province)
+        ';
+        if ($month) {
+            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        }
+        $sql .= ' ORDER BY c.created_at DESC';
+
+        $this->db->query($sql);
         $this->db->bind(':role_id', $role_id);
+        $this->db->bind(':province', $province);
+        if ($month) {
+            $this->db->bind(':month', $month);
+        }
         return $this->db->resultSet();
     }
 
-    public function getComplaintsByUserId($user_id) {
-        $this->db->query('
+    public function getComplaintsByUserId($user_id, $month = null) {
+        $province = $_SESSION['user_province'] ?? '';
+        $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
             FROM complaints c 
             LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
             LEFT JOIN departments d ON c.forward_department_id = d.id
             LEFT JOIN roles r ON c.current_role_id = r.id
-            WHERE c.created_by = :user_id
-            ORDER BY c.created_at DESC
-        ');
+            WHERE c.created_by = :user_id AND (:province = "" OR c.province = :province)
+        ';
+        if ($month) {
+            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        }
+        $sql .= ' ORDER BY c.created_at DESC';
+
+        $this->db->query($sql);
         $this->db->bind(':user_id', $user_id);
+        $this->db->bind(':province', $province);
+        if ($month) {
+            $this->db->bind(':month', $month);
+        }
         return $this->db->resultSet();
     }
 
-    public function getDispatchedComplaintsByUserId($user_id) {
-        $this->db->query('
+    public function getDispatchedComplaintsByUserId($user_id, $month = null) {
+        $province = $_SESSION['user_province'] ?? '';
+        $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
             FROM complaints c 
             JOIN complaint_dispatches cd ON c.id = cd.complaint_id
             LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
             LEFT JOIN departments d ON c.forward_department_id = d.id
             LEFT JOIN roles r ON c.current_role_id = r.id
-            WHERE c.created_by = :user_id
-            GROUP BY c.id
-            ORDER BY c.created_at DESC
-        ');
+            WHERE c.created_by = :user_id AND (:province = "" OR c.province = :province)
+        ';
+        if ($month) {
+            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        }
+        $sql .= ' GROUP BY c.id ORDER BY c.created_at DESC';
+
+        $this->db->query($sql);
         $this->db->bind(':user_id', $user_id);
+        $this->db->bind(':province', $province);
+        if ($month) {
+            $this->db->bind(':month', $month);
+        }
         return $this->db->resultSet();
     }
 
@@ -173,6 +245,23 @@ class Complaint {
         $this->db->bind(':remarks', $remarks);
         $this->db->bind(':action_by', $action_by);
         return $this->db->execute();
+    }
+
+    public function hasRoleActedOnComplaint($complaint_id, $role_id) {
+        $this->db->query('SELECT id FROM workflow_logs WHERE complaint_id = :complaint_id AND from_role_id = :role_id LIMIT 1');
+        $this->db->bind(':complaint_id', $complaint_id);
+        $this->db->bind(':role_id', $role_id);
+        $this->db->single();
+        return $this->db->rowCount() > 0;
+    }
+
+    public function hasRoleLoggedAction($complaint_id, $role_id, $action) {
+        $this->db->query('SELECT id FROM workflow_logs WHERE complaint_id = :complaint_id AND from_role_id = :role_id AND action = :action LIMIT 1');
+        $this->db->bind(':complaint_id', $complaint_id);
+        $this->db->bind(':role_id', $role_id);
+        $this->db->bind(':action', $action);
+        $this->db->single();
+        return $this->db->rowCount() > 0;
     }
 
     public function updateComplaint($id, $data, $details = []) {
@@ -247,17 +336,42 @@ class Complaint {
         return $this->db->resultSet();
     }
 
-    public function getDispatchedComplaintsByDepartment($department_id) {
-        $this->db->query('
+    public function getDispatchedComplaintsByDepartment($department_id, $month = null) {
+        $province = $_SESSION['user_province'] ?? '';
+        $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, cd.created_at as dispatched_at
             FROM complaint_dispatches cd
             JOIN complaints c ON cd.complaint_id = c.id
             LEFT JOIN complaint_categories cat ON c.category_id = cat.id
             LEFT JOIN departments d ON c.forward_department_id = d.id
-            WHERE cd.department_id = :department_id
-            ORDER BY cd.created_at DESC
-        ');
+            WHERE cd.department_id = :department_id AND (:province = "" OR c.province = :province)
+        ';
+        if ($month) {
+            $sql .= ' AND DATE_FORMAT(cd.created_at, "%Y-%m") = :month '; // Filter on dispatch date or created_at? Let's use c.created_at
+        }
+        
+        // Actually, let's just replace the condition to correctly apply month
+        $sql = str_replace('// Filter on dispatch date or created_at? Let\'s use c.created_at', '', $sql);
+        
+        $sql = '
+            SELECT c.*, cat.name as category_name, d.name as department_name, cd.created_at as dispatched_at
+            FROM complaint_dispatches cd
+            JOIN complaints c ON cd.complaint_id = c.id
+            LEFT JOIN complaint_categories cat ON c.category_id = cat.id
+            LEFT JOIN departments d ON c.forward_department_id = d.id
+            WHERE cd.department_id = :department_id AND (:province = "" OR c.province = :province)
+        ';
+        if ($month) {
+            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        }
+        $sql .= ' ORDER BY cd.created_at DESC';
+
+        $this->db->query($sql);
         $this->db->bind(':department_id', $department_id);
+        $this->db->bind(':province', $province);
+        if ($month) {
+            $this->db->bind(':month', $month);
+        }
         return $this->db->resultSet();
     }
 

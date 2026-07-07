@@ -7,6 +7,14 @@
             <?php flash('complaint_error'); ?>
             <?php flash('auth_error'); ?>
             
+            <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+                <h2 class="mb-0">Government Secretary Dashboard</h2>
+                <form method="GET" action="" class="d-flex align-items-center bg-white p-2 rounded shadow-sm">
+                    <label for="monthFilter" class="me-2 fw-bold text-primary mb-0"><i class="fas fa-calendar-alt me-1"></i> Month:</label>
+                    <input type="month" name="month" id="monthFilter" class="form-control form-control-sm border-0" style="background-color: #f8f9fa;" value="<?php echo isset($data['month']) ? $data['month'] : date('Y-m'); ?>" onchange="this.form.submit()">
+                </form>
+            </div>
+            
             <div class="row mb-4">
                 <div class="col">
                     <div class="card bg-primary text-white h-100">

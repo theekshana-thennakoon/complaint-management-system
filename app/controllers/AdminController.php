@@ -181,6 +181,80 @@ class AdminController extends Controller {
         }
     }
 
+    public function createDepartment(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            $data = [
+                'name' => trim($_POST['name']),
+                'name_err' => ''
+            ];
+
+            if(empty($data['name'])){
+                $data['name_err'] = 'Please enter department name';
+            }
+
+            if(empty($data['name_err'])){
+                if($this->complaintModel->addDepartment($data['name'])){
+                    flash('admin_message', 'Department added successfully');
+                    redirect('admin');
+                } else {
+                    die('Something went wrong');
+                }
+            } else {
+                $dashboardData = $this->_getDashboardData();
+                $data['users'] = $dashboardData['users'];
+                $data['stats'] = $dashboardData['stats'];
+                $data['roles'] = $this->userModel->getManagedRoles();
+                $data['departments'] = $this->complaintModel->getDepartments();
+                $data['all_complaints'] = $this->complaintModel->getComplaints();
+                $data['show_dept_modal'] = true;
+                $this->view('admin/index', $data);
+            }
+        } else {
+            redirect('admin');
+        }
+    }
+
+    public function editDepartment($id){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            $data = [
+                'id' => $id,
+                'name' => trim($_POST['name']),
+                'name_err' => ''
+            ];
+
+            if(empty($data['name'])){
+                $data['name_err'] = 'Please enter department name';
+            }
+
+            if(empty($data['name_err'])){
+                if($this->complaintModel->updateDepartment($id, $data['name'])){
+                    flash('admin_message', 'Department updated successfully');
+                    redirect('admin');
+                } else {
+                    die('Something went wrong');
+                }
+            } else {
+                $this->view('admin/edit_department', $data);
+            }
+        } else {
+            $department = $this->complaintModel->getDepartmentById($id);
+            if(!$department){
+                redirect('admin');
+            }
+
+            $data = [
+                'id' => $id,
+                'name' => $department->name,
+                'name_err' => ''
+            ];
+            $this->view('admin/edit_department', $data);
+        }
+    }
+
     public function delete($id){
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             if($this->userModel->deleteUser($id)){

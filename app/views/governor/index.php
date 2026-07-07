@@ -8,38 +8,44 @@
             <?php flash('auth_error'); ?>
 
             <!-- Page Title -->
-            <div class="d-flex align-items-center mb-4">
-                <i class="fas fa-crown fa-2x me-3" style="color: #6f42c1;"></i>
-                <div>
-                    <h4 class="mb-0 fw-bold" style="color: #6f42c1;">Governor's Reports</h4>
-                    <small class="text-muted">Complaints approved by Government Secretary</small>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-crown fa-2x me-3" style="color: #6f42c1;"></i>
+                    <div>
+                        <h4 class="mb-0 fw-bold" style="color: #6f42c1;">Governor's Reports</h4>
+                        <small class="text-muted">Complaints approved by Government Secretary</small>
+                    </div>
                 </div>
+                <form method="GET" action="" class="d-flex align-items-center bg-white p-2 rounded shadow-sm">
+                    <label for="monthFilter" class="me-2 fw-bold text-primary mb-0"><i class="fas fa-calendar-alt me-1"></i> Month:</label>
+                    <input type="month" name="month" id="monthFilter" class="form-control form-control-sm border-0" style="background-color: #f8f9fa;" value="<?php echo isset($data['month']) ? $data['month'] : date('Y-m'); ?>" onchange="this.form.submit()">
+                </form>
             </div>
 
             <!-- Stats Cards -->
             <div class="row mb-4">
-                <div class="col-md-3 mb-3">
+                <div class="col-md-6 mb-3">
                     <div class="card text-white h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #6f42c1, #8e5fe8);">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="small opacity-75">Total GS-Approved</div>
-                                    <div class="fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['total']; ?></div>
+                                    <div class="small opacity-75">Total GS-Approved (Selected Month)</div>
+                                    <div class="fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['approved']; ?></div>
                                 </div>
                                 <i class="fas fa-file-alt fa-2x opacity-50"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-success text-white h-100 border-0 shadow-sm">
+                <div class="col-md-6 mb-3">
+                    <div class="card bg-info text-white h-100 border-0 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="small opacity-75">This Month</div>
-                                    <div class="fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['this_month']; ?></div>
+                                    <div class="small opacity-75">All System Complaints (Selected Month)</div>
+                                    <div class="fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['total']; ?></div>
                                 </div>
-                                <i class="fas fa-calendar-check fa-2x opacity-50"></i>
+                                <i class="fas fa-layer-group fa-2x opacity-50"></i>
                             </div>
                         </div>
                     </div>

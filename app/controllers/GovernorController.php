@@ -13,19 +13,22 @@ class GovernorController extends Controller {
     }
 
     public function index() {
-        $all_complaints = $this->complaintModel->getComplaints();
+        $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+        $all_complaints = $this->complaintModel->getComplaints($month);
 
+        $pending = 0;
+        $approved = 0;
+        $rejected = 0;
         $approved_reports = [];
-        $total = 0;
-        $this_month = 0;
 
         foreach($all_complaints as $c) {
-            if(strpos($c->status, 'Approved by GS') !== false) {
+            if(strpos($c->status, 'Pending') !== false) {
+                $pending++;
+            } elseif(strpos($c->status, 'Approved by GS') !== false) {
                 $approved_reports[] = $c;
-                $total++;
-                if(date('Y-m') === date('Y-m', strtotime($c->created_at))) {
-                    $this_month++;
-                }
+                $approved++;
+            } elseif(strpos($c->status, 'Rejected') !== false) {
+                $rejected++;
             }
         }
 
@@ -33,10 +36,12 @@ class GovernorController extends Controller {
             'title' => 'Governor Dashboard',
             'reports' => $approved_reports,
             'stats' => [
-                'total' => $total,
-                'this_month' => $this_month,
+                'total' => count($all_complaints),
+                'pending' => $pending,
+                'approved' => $approved,
+                'rejected' => $rejected
             ],
-            'all_complaints' => $all_complaints
+            'month' => $month
         ];
 
         $this->view('governor/index', $data);

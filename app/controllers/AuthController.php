@@ -38,11 +38,13 @@ class AuthController extends Controller {
                 'name' => trim($_POST['name']),
                 'username' => trim($_POST['username']),
                 'nic' => trim($_POST['nic']),
+                'province' => isset($_POST['province']) ? trim($_POST['province']) : '',
                 'password' => trim($_POST['password']),
                 'confirm_password' => trim($_POST['confirm_password']),
                 'name_err' => '',
                 'username_err' => '',
                 'nic_err' => '',
+                'province_err' => '',
                 'password_err' => '',
                 'confirm_password_err' => ''
             ];
@@ -83,8 +85,13 @@ class AuthController extends Controller {
                 }
             }
 
+            // Validate Province
+            if(empty($data['province'])){
+                $data['province_err'] = 'Please select a province';
+            }
+
             // Make sure errors are empty
-            if(empty($data['name_err']) && empty($data['username_err']) && empty($data['nic_err']) && empty($data['password_err']) && empty($data['confirm_password_err'])){
+            if(empty($data['name_err']) && empty($data['username_err']) && empty($data['nic_err']) && empty($data['province_err']) && empty($data['password_err']) && empty($data['confirm_password_err'])){
                 // Validated
                 
                 // Hash Password
@@ -109,11 +116,13 @@ class AuthController extends Controller {
                 'name' => '',
                 'username' => '',
                 'nic' => '',
+                'province' => '',
                 'password' => '',
                 'confirm_password' => '',
                 'name_err' => '',
                 'username_err' => '',
                 'nic_err' => '',
+                'province_err' => '',
                 'password_err' => '',
                 'confirm_password_err' => ''
             ];
@@ -193,6 +202,7 @@ class AuthController extends Controller {
         $_SESSION['user_username'] = $user->username;
         $_SESSION['user_role_id'] = $user->role_id;
         $_SESSION['user_department_id'] = $user->department_id;
+        $_SESSION['user_province'] = $user->province;
         $_SESSION['user_level'] = $this->userModel->getRoleLevel($user->role_id);
         
         if ($_SESSION['user_role_id'] == 1) {
@@ -307,6 +317,7 @@ class AuthController extends Controller {
         unset($_SESSION['user_username']);
         unset($_SESSION['user_role_id']);
         unset($_SESSION['user_department_id']);
+        unset($_SESSION['user_province']);
         unset($_SESSION['user_level']);
         session_destroy();
         redirect('auth');

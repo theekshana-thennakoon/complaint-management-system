@@ -13,9 +13,10 @@ class AoController extends Controller {
     }
 
     public function index() {
+        $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
         // Fetch complaints currently pending AO approval (current_role_id = 4)
-        $complaints = $this->complaintModel->getComplaintsByRoleId(4);
-        $all_complaints = $this->complaintModel->getComplaints();
+        $complaints = $this->complaintModel->getComplaintsByRoleId(4, $month);
+        $all_complaints = $this->complaintModel->getComplaints($month);
 
         $approved = 0;
         $rejected = 0;
@@ -23,11 +24,11 @@ class AoController extends Controller {
         $rejected_reports = [];
 
         foreach($all_complaints as $c) {
-            if(strpos($c->status, 'Approved by AO') !== false) {
+            if($this->complaintModel->hasRoleLoggedAction($c->id, 4, 'Approve')) {
                 $approved++;
                 $submitted_to_gs[] = $c;
             }
-            if(strpos($c->status, 'Rejected by AO') !== false) {
+            if($this->complaintModel->hasRoleLoggedAction($c->id, 4, 'Reject')) {
                 $rejected++;
                 $rejected_reports[] = $c;
             }
@@ -43,7 +44,8 @@ class AoController extends Controller {
                 'approved' => $approved,
                 'rejected' => $rejected
             ],
-            'all_complaints' => $all_complaints
+            'all_complaints' => $all_complaints,
+            'month' => $month
         ];
 
         $this->view('ao/index', $data);
@@ -56,7 +58,7 @@ class AoController extends Controller {
         if ($complaint) {
             if ($complaint->current_role_id == 4) {
                 $can_view = true;
-            } elseif (strpos($complaint->status, 'Approved by AO') !== false || strpos($complaint->status, 'Rejected by AO') !== false) {
+            } elseif ($this->complaintModel->hasRoleActedOnComplaint($id, 4)) {
                 $can_view = true;
             }
         }

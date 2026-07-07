@@ -81,6 +81,7 @@ class ComplaintsController extends Controller {
                 'status'               => $status,
                 'current_role_id'      => $current_role,
                 'created_by'           => $_SESSION['user_id'],
+                'province'             => $_SESSION['user_province'] ?? NULL,
                 'categories'           => $this->complaintModel->getCategories(),
                 'departments'          => $this->complaintModel->getDepartments(),
                 'err'                  => ''

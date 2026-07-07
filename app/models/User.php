@@ -29,13 +29,14 @@ class User {
 
     // Register user
     public function register($data){
-        $this->db->query('INSERT INTO users (name, username, password, nic, role_id) VALUES(:name, :username, :password, :nic, :role_id)');
+        $this->db->query('INSERT INTO users (name, username, password, nic, province, role_id) VALUES(:name, :username, :password, :nic, :province, :role_id)');
         
         // Bind values
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':username', $data['username']);
         $this->db->bind(':password', $data['password']);
         $this->db->bind(':nic', $data['nic']);
+        $this->db->bind(':province', $data['province']);
         // Default role for self-registration might be 'Subject Officer' (ID 6 in the SQL schema)
         // Let's make it 6 (Subject Officer) for now
         $this->db->bind(':role_id', 6); 

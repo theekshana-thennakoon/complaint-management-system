@@ -3,7 +3,13 @@
 <div class="container-fluid mt-4 px-4">
 <div class="row">
     <div class="col-md-12">
-        <h2 class="mb-4">Welcome, <?php echo $_SESSION['user_name']; ?></h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Welcome, <?php echo $_SESSION['user_name']; ?></h2>
+            <form method="GET" action="" class="d-flex align-items-center bg-white p-2 rounded shadow-sm">
+                <label for="monthFilter" class="me-2 fw-bold text-primary mb-0"><i class="fas fa-calendar-alt me-1"></i> Month:</label>
+                <input type="month" name="month" id="monthFilter" class="form-control form-control-sm border-0" style="background-color: #f8f9fa;" value="<?php echo isset($data['month']) ? $data['month'] : date('Y-m'); ?>" onchange="this.form.submit()">
+            </form>
+        </div>
     </div>
 </div>
 

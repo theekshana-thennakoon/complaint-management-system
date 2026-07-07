@@ -13,9 +13,16 @@ class CcController extends Controller {
     }
 
     public function index() {
-        // Fetch complaints currently pending CC approval (current_role_id = 5)
-        $complaints = $this->complaintModel->getComplaintsByRoleId(5);
-        $all_complaints = $this->complaintModel->getComplaints();
+        $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+        $raw_complaints = $this->complaintModel->getComplaintsByRoleId(5, $month);
+        $all_complaints = $this->complaintModel->getComplaints($month);
+
+        $complaints = [];
+        foreach($raw_complaints as $c) {
+            if (strpos($c->status, 'Approved by GS') === false) {
+                $complaints[] = $c;
+            }
+        }
 
         $approved = 0;
         $rejected = 0;
@@ -23,11 +30,11 @@ class CcController extends Controller {
         $rejected_reports = [];
 
         foreach($all_complaints as $c) {
-            if(strpos($c->status, 'Approved by CC') !== false) {
+            if($this->complaintModel->hasRoleLoggedAction($c->id, 5, 'Approve')) {
                 $approved++;
                 $submitted_to_ao[] = $c;
             }
-            if(strpos($c->status, 'Rejected by CC') !== false) {
+            if($this->complaintModel->hasRoleLoggedAction($c->id, 5, 'Reject')) {
                 $rejected++;
                 $rejected_reports[] = $c;
             }
@@ -43,7 +50,8 @@ class CcController extends Controller {
                 'approved' => $approved,
                 'rejected' => $rejected
             ],
-            'all_complaints' => $all_complaints
+            'all_complaints' => $all_complaints,
+            'month' => $month
         ];
 
         $this->view('cc/index', $data);
@@ -56,7 +64,7 @@ class CcController extends Controller {
         if ($complaint) {
             if ($complaint->current_role_id == 5) {
                 $can_view = true;
-            } elseif (strpos($complaint->status, 'Approved by CC') !== false || strpos($complaint->status, 'Rejected by CC') !== false) {
+            } elseif ($this->complaintModel->hasRoleActedOnComplaint($id, 5)) {
                 $can_view = true;
             }
         }
