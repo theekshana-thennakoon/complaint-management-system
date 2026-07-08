@@ -12,7 +12,7 @@ define('APPROOT', dirname(dirname(__FILE__)));
 define('URLROOT', 'http://localhost/mahajanadinaya');
 
 // Site Name
-define('SITENAME', 'NCP Complaint Management System');
+define('SITENAME', 'Complaint Management System');
 
 // App Version
 define('APPVERSION', '1.0.0');

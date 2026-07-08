@@ -5,7 +5,7 @@
  * URL FORMAT - /controller/method/params
  */
 class App {
-    protected $currentController = 'Pages';
+    protected $currentController = 'Auth';
     protected $currentMethod = 'index';
     protected $params = [];
 

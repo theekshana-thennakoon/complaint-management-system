@@ -134,7 +134,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <table style="width: 100%; border: none; border-collapse: collapse;">
         <thead>

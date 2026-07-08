@@ -5,11 +5,6 @@ class PagesController extends Controller {
     }
 
     public function index(){
-        $data = [
-            'title' => 'Welcome to Mahajana Dinaya',
-            'description' => 'Government Complaint/Letter Management System'
-        ];
-
-        $this->view('pages/index', $data);
+        redirect('auth/login');
     }
 }

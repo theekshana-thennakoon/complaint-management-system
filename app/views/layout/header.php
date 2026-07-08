@@ -31,14 +31,38 @@ $route_param = $_GET['url'] ?? '';
         const BASE_URL = '<?php echo URLROOT; ?>';
     </script>
 </head>
-<body>
+<body oncontextmenu="return false;">
+<?php
+$displayTitle = SITENAME;
+$displaySubtitle = 'Complaint Management';
+
+if (isset($_SESSION['user_id']) && isset($_SESSION['user_province'])) {
+    $provinceMap = [
+        'බස්නාහිර පළාත' => ['short' => 'WP', 'full' => 'Western Province'],
+        'මධ්‍යම පළාත' => ['short' => 'CP', 'full' => 'Central Province'],
+        'දකුණු පළාත' => ['short' => 'SP', 'full' => 'Southern Province'],
+        'උතුරු පළාත' => ['short' => 'NP', 'full' => 'Northern Province'],
+        'නැගෙනහිර පළාත' => ['short' => 'EP', 'full' => 'Eastern Province'],
+        'වයඹ පළාත' => ['short' => 'NWP', 'full' => 'North Western Province'],
+        'උතුරු මැද පළාත' => ['short' => 'NCP', 'full' => 'North Central Province'],
+        'ඌව පළාත' => ['short' => 'UP', 'full' => 'Uva Province'],
+        'සබරගමුව පළාත' => ['short' => 'SGP', 'full' => 'Sabaragamuwa Province']
+    ];
+
+    $pName = $_SESSION['user_province'];
+    if (isset($provinceMap[$pName])) {
+        $displayTitle = $provinceMap[$pName]['short'] . ' ' . SITENAME;
+        $displaySubtitle = 'Complain management system of ' . $provinceMap[$pName]['full'] . ' Governor office';
+    }
+}
+?>
     <header class="main-header">
         <div class="header-container">
             <a href="<?php echo URLROOT; ?>" class="logo-section">
                 <i class="fas fa-shield-alt"></i>
                 <div>
-                    <h1><?php echo SITENAME; ?></h1>
-                    <span>Complaint Management</span>
+                    <h1><?php echo $displayTitle; ?></h1>
+                    <span><?php echo $displaySubtitle; ?></span>
                 </div>
             </a>
             
@@ -49,22 +73,22 @@ $route_param = $_GET['url'] ?? '';
             <div class="nav-wrapper" id="nav-wrapper" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <nav class="main-nav">
                     <ul>
-                        <li><a href="<?php echo URLROOT; ?>" class="nav-link <?php echo empty($route_param) ? 'active' : ''; ?>">Home</a></li>
+                        <!-- <li><a href="<?php echo URLROOT; ?>" class="nav-link <?php echo empty($route_param) ? 'active' : ''; ?>">Home</a></li> -->
                         <li><a href="<?php echo URLROOT; ?>/publiccomplaint/status" class="nav-link <?php echo strpos($route_param, 'publiccomplaint/status') !== false ? 'active' : ''; ?>">Check Status</a></li>
                         
                         <?php if (isset($_SESSION['user_id'])): ?>
-                            <?php if ($_SESSION['user_role_id'] != 5 && $_SESSION['user_role_id'] != 4 && $_SESSION['user_role_id'] != 3 && $_SESSION['user_role_id'] != 2 && $_SESSION['user_role_id'] != 1): ?>
+                            <?php if (isset($_SESSION['user_role_id']) && $_SESSION['user_role_id'] != 5 && $_SESSION['user_role_id'] != 4 && $_SESSION['user_role_id'] != 3 && $_SESSION['user_role_id'] != 2 && $_SESSION['user_role_id'] != 1): ?>
                                 <li><a href="<?php echo URLROOT; ?>/dashboard" class="nav-link <?php echo strpos($route_param, 'dashboard') !== false ? 'active' : ''; ?>"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
                             <?php endif; ?>
-                            <?php if ($_SESSION['user_role_id'] == 1): ?>
+                            <?php if (isset($_SESSION['user_role_id']) && $_SESSION['user_role_id'] == 1): ?>
                                 <li><a href="<?php echo URLROOT; ?>/admin" class="nav-link <?php echo strpos($route_param, 'admin') !== false ? 'active' : ''; ?>"><i class="fas fa-users-cog"></i> Admin</a></li>
-                            <?php elseif ($_SESSION['user_role_id'] == 5): ?>
+                            <?php elseif (isset($_SESSION['user_role_id']) && $_SESSION['user_role_id'] == 5): ?>
                                 <li><a href="<?php echo URLROOT; ?>/cc" class="nav-link <?php echo strpos($route_param, 'cc') !== false ? 'active' : ''; ?>"><i class="fas fa-inbox"></i> CC Dashboard</a></li>
-                            <?php elseif ($_SESSION['user_role_id'] == 4): ?>
+                            <?php elseif (isset($_SESSION['user_role_id']) && $_SESSION['user_role_id'] == 4): ?>
                                 <li><a href="<?php echo URLROOT; ?>/ao" class="nav-link <?php echo strpos($route_param, 'ao') !== false ? 'active' : ''; ?>"><i class="fas fa-user-tie"></i> AO Dashboard</a></li>
-                            <?php elseif ($_SESSION['user_role_id'] == 3): ?>
+                            <?php elseif (isset($_SESSION['user_role_id']) && $_SESSION['user_role_id'] == 3): ?>
                                 <li><a href="<?php echo URLROOT; ?>/gs" class="nav-link <?php echo strpos($route_param, 'gs') !== false ? 'active' : ''; ?>"><i class="fas fa-landmark"></i> GS Dashboard</a></li>
-                            <?php elseif ($_SESSION['user_role_id'] == 2): ?>
+                            <?php elseif (isset($_SESSION['user_role_id']) && $_SESSION['user_role_id'] == 2): ?>
                                 <li><a href="<?php echo URLROOT; ?>/governor" class="nav-link <?php echo strpos($route_param, 'governor') !== false ? 'active' : ''; ?>"><i class="fas fa-crown"></i> Governor</a></li>
                             <?php endif; ?>
 
