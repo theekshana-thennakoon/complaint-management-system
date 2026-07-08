@@ -35,6 +35,20 @@
                             <p><strong>Subject:</strong> <?php echo htmlspecialchars($data['complaint']->subject); ?></p>
                             <p><strong>Status:</strong> <span class="badge status-<?php echo strtolower($data['complaint']->status); ?>"><?php echo htmlspecialchars($data['complaint']->status); ?></span></p>
                             <p><strong>Date Filed:</strong> <?php echo htmlspecialchars($data['complaint']->date); ?></p>
+                            
+                            <?php if(!empty($data['attachments'])): ?>
+                            <hr style="border: 0; border-top: 1px solid rgba(0,0,0,0.1); margin: 15px 0;">
+                            <h5>Attachments</h5>
+                            <ul style="list-style-type: none; padding-left: 0;">
+                                <?php foreach($data['attachments'] as $attachment): ?>
+                                <li style="margin-bottom: 5px;">
+                                    <a href="<?php echo URLROOT; ?>/<?php echo $attachment->file_path; ?>" target="_blank" style="text-decoration: none;">
+                                        <i class="fas fa-paperclip"></i> <?php echo htmlspecialchars($attachment->file_name); ?>
+                                    </a>
+                                </li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <?php endif; ?>
                         </div>
                         
                         <div class="timeline">

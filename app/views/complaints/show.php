@@ -3,9 +3,7 @@
 <div class="dashboard-layout">
     <aside class="sidebar">
         <div class="sidebar-heading">Management</div>
-        <a href="<?php echo URLROOT; ?>/complaints" class="sidebar-menu-item active">
-            <i class="fas fa-list"></i> All Complaints
-        </a>
+        
         <a href="<?php echo URLROOT; ?>/complaints/create" class="sidebar-menu-item">
             <i class="fas fa-plus"></i> New Complaint
         </a>
@@ -140,6 +138,21 @@
                             <td><?php echo $data['complaint']->date; ?></td>
                         </tr>
                     </table>
+
+                    <?php if(!empty($data['attachments'])): ?>
+                    <h4 style="color: var(--primary-color); margin-top: 20px; margin-bottom: 10px;">Attachments</h4>
+                    <table class="data-table">
+                        <?php foreach($data['attachments'] as $attachment): ?>
+                        <tr>
+                            <td>
+                                <a href="<?php echo URLROOT; ?>/<?php echo $attachment->file_path; ?>" target="_blank">
+                                    <i class="fas fa-paperclip"></i> <?php echo htmlspecialchars($attachment->file_name); ?>
+                                </a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </table>
+                    <?php endif; ?>
                 </div>
             </div>
 

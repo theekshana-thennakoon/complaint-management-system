@@ -22,7 +22,7 @@
                 </div>
                 
                 <div class="card-body p-4">
-                    <form action="<?php echo URLROOT; ?>/complaints/edit/<?php echo $data['id']; ?>" method="POST">
+                    <form action="<?php echo URLROOT; ?>/complaints/edit/<?php echo $data['id']; ?>" method="POST" enctype="multipart/form-data">
                         
                         <?php if(!empty($data['err'])) : ?>
                             <div class="alert alert-danger"><?php echo $data['err']; ?></div>
@@ -182,6 +182,36 @@
                             </button>
                         </div>
                         
+                        <?php if(!empty($data['attachments'])): ?>
+                        <div class="mb-4">
+                            <h5 class="text-primary border-bottom pb-2">Existing Attachments</h5>
+                            <div class="row g-2 mt-2">
+                                <?php foreach($data['attachments'] as $attachment): ?>
+                                <div class="col-md-6">
+                                    <div class="border rounded p-2 d-flex align-items-center">
+                                        <i class="fas fa-paperclip text-muted me-2"></i>
+                                        <a href="<?php echo URLROOT; ?>/<?php echo $attachment->file_path; ?>" target="_blank" class="text-decoration-none text-truncate" style="max-width: 90%;">
+                                            <?php echo htmlspecialchars($attachment->file_name); ?>
+                                        </a>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-bold">Add New Attachments (Optional, multiple files allowed)</label>
+                            <div class="advanced-dropzone" id="advancedDropzone">
+                                <input type="file" name="attachments[]" id="attachments" class="d-none" style="display:none;" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
+                                <div class="dropzone-content">
+                                    <i class="fas fa-cloud-upload-alt dropzone-icon"></i>
+                                    <p style="margin-bottom: 10px; color: var(--text-secondary);">Drag & Drop files here or</p>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('attachments').click()">Browse Files</button>
+                                </div>
+                            </div>
+                            <div id="filePreviewContainer" class="file-preview-container mt-3"></div>
+                        </div>
                         <input type="hidden" name="direct_forward" id="direct_forward" value="">
 
                         <div class="mt-4" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
@@ -224,6 +254,65 @@
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3.5px rgba(45,145,80,0.14);
     outline: none;
+}
+.advanced-dropzone {
+    border: 2px dashed var(--primary-color);
+    border-radius: var(--radius-md);
+    padding: 30px;
+    text-align: center;
+    background-color: var(--primary-50);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+.advanced-dropzone.dragover {
+    background-color: var(--primary-color);
+    color: white;
+}
+.advanced-dropzone.dragover .dropzone-icon,
+.advanced-dropzone.dragover p {
+    color: white !important;
+}
+.dropzone-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+.file-preview-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background: #fff;
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+}
+.file-preview-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.file-icon {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+}
+.file-details h6 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+.file-details small {
+    color: var(--text-muted);
+}
+.btn-remove-file {
+    color: #dc3545;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+.btn-remove-file:hover {
+    color: #a71d2a;
 }
 </style>
 
@@ -434,6 +523,121 @@
                     }
                 });
             });
+        }
+
+        // Advanced File Upload JS
+        const dropzone = document.getElementById('advancedDropzone');
+        const fileInput = document.getElementById('attachments');
+        const previewContainer = document.getElementById('filePreviewContainer');
+        let selectedFiles = [];
+
+        if (dropzone && fileInput) {
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // Highlight dropzone when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                dropzone.classList.add('dragover');
+            }
+
+            function unhighlight(e) {
+                dropzone.classList.remove('dragover');
+            }
+
+            // Handle dropped files
+            dropzone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            // Handle selected files
+            fileInput.addEventListener('change', function(e) {
+                handleFiles(this.files);
+            });
+
+            // Click on dropzone triggers file input (if not clicking the browse button)
+            dropzone.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'BUTTON') {
+                    fileInput.click();
+                }
+            });
+
+            function handleFiles(files) {
+                const newFiles = Array.from(files);
+                selectedFiles = [...selectedFiles, ...newFiles];
+                updateFileInput();
+                renderPreviews();
+            }
+
+            function updateFileInput() {
+                const dataTransfer = new DataTransfer();
+                selectedFiles.forEach(file => dataTransfer.items.add(file));
+                fileInput.files = dataTransfer.files;
+            }
+
+            function renderPreviews() {
+                previewContainer.innerHTML = '';
+                selectedFiles.forEach((file, index) => {
+                    const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+                    
+                    // Determine icon based on file type
+                    let iconClass = 'fas fa-file';
+                    if (file.type.startsWith('image/')) iconClass = 'fas fa-file-image text-primary';
+                    else if (file.type === 'application/pdf') iconClass = 'fas fa-file-pdf text-danger';
+                    else if (file.type.includes('word')) iconClass = 'fas fa-file-word text-info';
+                    
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'file-preview-item';
+                    previewItem.innerHTML = `
+                        <div class="file-preview-info">
+                            <i class="${iconClass} file-icon"></i>
+                            <div class="file-details">
+                                <h6>${file.name}</h6>
+                                <small>${sizeInMB} MB</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-remove-file" data-index="${index}" title="Remove file">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                    `;
+                    previewContainer.appendChild(previewItem);
+                });
+
+                // Add event listeners to remove buttons
+                const removeButtons = previewContainer.querySelectorAll('.btn-remove-file');
+                removeButtons.forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const index = parseInt(this.getAttribute('data-index'));
+                        removeFile(index);
+                    });
+                });
+            }
+
+            function removeFile(index) {
+                selectedFiles.splice(index, 1);
+                updateFileInput();
+                renderPreviews();
+            }
         }
     });
 </script>

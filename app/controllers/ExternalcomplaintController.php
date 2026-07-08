@@ -49,7 +49,27 @@ class ExternalcomplaintController extends Controller {
                     ];
                 }
                 
-                if($this->complaintModel->addComplaint($data, $details)){
+                if($complaint_id = $this->complaintModel->addComplaint($data, $details)){
+                    // Handle file uploads
+                    $uploaded_files = [];
+                    if (!empty($_FILES['attachments']['name'][0])) {
+                        $upload_dir = APPROOT . '/../public/uploads/complaints/';
+                        foreach ($_FILES['attachments']['name'] as $key => $name) {
+                            if ($_FILES['attachments']['error'][$key] == UPLOAD_ERR_OK) {
+                                $tmp_name = $_FILES['attachments']['tmp_name'][$key];
+                                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                                $new_name = uniqid() . '_' . time() . '.' . $ext;
+                                if (move_uploaded_file($tmp_name, $upload_dir . $new_name)) {
+                                    $uploaded_files[] = [
+                                        'file_name' => $name,
+                                        'file_path' => 'uploads/complaints/' . $new_name
+                                    ];
+                                }
+                            }
+                        }
+                        $this->complaintModel->addAttachments($complaint_id, $uploaded_files);
+                    }
+
                     $_SESSION['sweet_success'] = 'Complaint submitted successfully! Reference No: ' . $data['complaint_no'];
                     redirect('externalcomplaint/create');
                 } else {

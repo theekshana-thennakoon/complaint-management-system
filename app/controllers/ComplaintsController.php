@@ -94,6 +94,26 @@ class ComplaintsController extends Controller {
             } else {
                 $complaint_id = $this->complaintModel->addComplaint($data, $details);
                 if($complaint_id){
+                    // Handle file uploads
+                    $uploaded_files = [];
+                    if (!empty($_FILES['attachments']['name'][0])) {
+                        $upload_dir = APPROOT . '/../public/uploads/complaints/';
+                        foreach ($_FILES['attachments']['name'] as $key => $name) {
+                            if ($_FILES['attachments']['error'][$key] == UPLOAD_ERR_OK) {
+                                $tmp_name = $_FILES['attachments']['tmp_name'][$key];
+                                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                                $new_name = uniqid() . '_' . time() . '.' . $ext;
+                                if (move_uploaded_file($tmp_name, $upload_dir . $new_name)) {
+                                    $uploaded_files[] = [
+                                        'file_name' => $name,
+                                        'file_path' => 'uploads/complaints/' . $new_name
+                                    ];
+                                }
+                            }
+                        }
+                        $this->complaintModel->addAttachments($complaint_id, $uploaded_files);
+                    }
+
                     $_SESSION['sweet_success'] = 'Complaint created successfully!';
                     $_SESSION['sweet_ref'] = $data['complaint_no'];
                     redirect('complaints/show/' . $complaint_id);
@@ -143,7 +163,8 @@ class ComplaintsController extends Controller {
             'reject_log' => $reject_log,
             'rejections' => $rejections,
             'departments' => $this->complaintModel->getDepartments(),
-            'dispatched_departments' => $this->complaintModel->getDispatchedDepartments($id)
+            'dispatched_departments' => $this->complaintModel->getDispatchedDepartments($id),
+            'attachments' => $this->complaintModel->getAttachments($id)
         ];
 
         $this->view('complaints/show', $data);
@@ -302,6 +323,26 @@ class ComplaintsController extends Controller {
                 $this->view('complaints/edit', $data);
             } else {
                 if($this->complaintModel->updateComplaint($id, $data, $details)){
+                    // Handle file uploads (append new attachments)
+                    $uploaded_files = [];
+                    if (!empty($_FILES['attachments']['name'][0])) {
+                        $upload_dir = APPROOT . '/../public/uploads/complaints/';
+                        foreach ($_FILES['attachments']['name'] as $key => $name) {
+                            if ($_FILES['attachments']['error'][$key] == UPLOAD_ERR_OK) {
+                                $tmp_name = $_FILES['attachments']['tmp_name'][$key];
+                                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                                $new_name = uniqid() . '_' . time() . '.' . $ext;
+                                if (move_uploaded_file($tmp_name, $upload_dir . $new_name)) {
+                                    $uploaded_files[] = [
+                                        'file_name' => $name,
+                                        'file_path' => 'uploads/complaints/' . $new_name
+                                    ];
+                                }
+                            }
+                        }
+                        $this->complaintModel->addAttachments($id, $uploaded_files);
+                    }
+
                     $direct_forward = isset($_POST['direct_forward']) ? trim($_POST['direct_forward']) : '';
                     if ($direct_forward === 'ao') {
                         $status        = 'Forwarded to AO';
@@ -349,6 +390,7 @@ class ComplaintsController extends Controller {
                 'description' => $complaint->description,
                 'categories' => $this->complaintModel->getCategories(),
                 'departments' => $this->complaintModel->getDepartments(),
+                'attachments' => $this->complaintModel->getAttachments($id),
                 'err' => ''
             ];
 

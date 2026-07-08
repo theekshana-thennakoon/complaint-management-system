@@ -13,9 +13,6 @@
             </a>
         <?php endif; ?>
 
-        <a class="list-group-item list-group-item-action bg-dark text-white p-3" href="<?php echo URLROOT; ?>/complaints">
-            <i class="ri-file-list-line"></i> All Complaints
-        </a>
 
         <?php if($_SESSION['user_level'] >= 100) : // Admin ?>
             <a class="list-group-item list-group-item-action bg-dark text-white p-3" href="<?php echo URLROOT; ?>/departments">

@@ -32,7 +32,27 @@ class PubliccomplaintController extends Controller {
                 $data['err'] = 'Please fill all required fields';
                 $this->view('public/create', $data);
             } else {
-                if($this->complaintModel->addComplaint($data)){
+                if($complaint_id = $this->complaintModel->addComplaint($data)){
+                    // Handle file uploads
+                    $uploaded_files = [];
+                    if (!empty($_FILES['attachments']['name'][0])) {
+                        $upload_dir = APPROOT . '/../public/uploads/complaints/';
+                        foreach ($_FILES['attachments']['name'] as $key => $name) {
+                            if ($_FILES['attachments']['error'][$key] == UPLOAD_ERR_OK) {
+                                $tmp_name = $_FILES['attachments']['tmp_name'][$key];
+                                $ext = pathinfo($name, PATHINFO_EXTENSION);
+                                $new_name = uniqid() . '_' . time() . '.' . $ext;
+                                if (move_uploaded_file($tmp_name, $upload_dir . $new_name)) {
+                                    $uploaded_files[] = [
+                                        'file_name' => $name,
+                                        'file_path' => 'uploads/complaints/' . $new_name
+                                    ];
+                                }
+                            }
+                        }
+                        $this->complaintModel->addAttachments($complaint_id, $uploaded_files);
+                    }
+
                     $_SESSION['sweet_success'] = 'Complaint submitted successfully!';
                     $_SESSION['sweet_ref'] = $data['complaint_no'];
                     redirect('publiccomplaint/status?ref=' . $data['complaint_no']);
@@ -73,6 +93,7 @@ class PubliccomplaintController extends Controller {
             'ref' => $ref,
             'nic_or_mobile' => $nic_or_mobile,
             'complaint' => null,
+            'attachments' => [],
             'err' => ''
         ];
 
@@ -86,9 +107,11 @@ class PubliccomplaintController extends Controller {
                         $data['err'] = 'Verification failed. Incorrect NIC or Mobile number.';
                     } else if (!empty($data['nic_or_mobile'])) {
                         $data['complaint'] = $complaint;
+                        $data['attachments'] = $this->complaintModel->getAttachments($complaint->id);
                     }
                 } else {
                     $data['complaint'] = $complaint;
+                    $data['attachments'] = $this->complaintModel->getAttachments($complaint->id);
                 }
             } else {
                 $data['err'] = 'No complaint found with this reference number.';

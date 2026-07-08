@@ -406,6 +406,25 @@ class Complaint {
         return $this->db->rowCount() > 0;
     }
 
+    public function addAttachments($complaint_id, $attachments) {
+        if (empty($attachments)) return true;
+
+        foreach ($attachments as $attachment) {
+            $this->db->query('INSERT INTO complaint_attachments (complaint_id, file_name, file_path) VALUES (:complaint_id, :file_name, :file_path)');
+            $this->db->bind(':complaint_id', $complaint_id);
+            $this->db->bind(':file_name', $attachment['file_name']);
+            $this->db->bind(':file_path', $attachment['file_path']);
+            $this->db->execute();
+        }
+        return true;
+    }
+
+    public function getAttachments($complaint_id) {
+        $this->db->query('SELECT * FROM complaint_attachments WHERE complaint_id = :complaint_id');
+        $this->db->bind(':complaint_id', $complaint_id);
+        return $this->db->resultSet();
+    }
+
     public function generateComplaintNo($type, $province) {
         $prefix = ($type === 'external') ? 'E' : 'G';
         
