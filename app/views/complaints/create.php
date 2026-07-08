@@ -107,6 +107,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label for="district" class="form-label">District *</label>
+                        <select name="district" id="districtSelect" class="form-control" required>
+                            <option value="">Select District</option>
+                        </select>
+                        <input type="hidden" id="userProvince" value="<?php echo htmlspecialchars($_SESSION['user_province'] ?? ''); ?>">
+                        <input type="hidden" id="selectedDistrict" value="<?php echo htmlspecialchars($data['district'] ?? ''); ?>">
+                    </div>
                 </div>
 
                 <div class="form-row">
@@ -416,6 +424,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+    }
+
+    // Populate District based on Province
+    const districts = {
+        'බස්නාහිර පළාත': ['කොළඹ', 'ගම්පහ', 'කළුතර'],
+        'මධ්‍යම පළාත': ['මහනුවර', 'මාතලේ', 'නුවරඑළිය'],
+        'දකුණු පළාත': ['ගාල්ල', 'මාතර', 'හම්බන්තොට'],
+        'උතුරු පළාත': ['යාපනය', 'කිලිනොච්චි', 'මන්නාරම', 'වවුනියාව', 'මුලතිව්'],
+        'නැගෙනහිර පළාත': ['මඩකලපුව', 'අම්පාර', 'ත්‍රිකුණාමලය'],
+        'වයඹ පළාත': ['කුරුණෑගල', 'පුත්තලම'],
+        'උතුරු මැද පළාත': ['අනුරාධපුරය', 'පොළොන්නරුව'],
+        'ඌව පළාත': ['බදුල්ල', 'මොණරාගල'],
+        'සබරගමුව පළාත': ['රත්නපුර', 'කෑගල්ල']
+    };
+
+    const userProvince = document.getElementById('userProvince').value;
+    const selectedDistrict = document.getElementById('selectedDistrict').value;
+    const districtSelect = document.getElementById('districtSelect');
+    
+    if (userProvince && districts[userProvince]) {
+        districts[userProvince].forEach(function(district) {
+            const option = document.createElement('option');
+            option.value = district;
+            option.textContent = district;
+            if (district === selectedDistrict) {
+                option.selected = true;
+            }
+            districtSelect.appendChild(option);
+        });
+    } else if (!userProvince) {
+        // If province is not found, we can leave it empty or show a message
+        const option = document.createElement('option');
+        option.value = "";
+        option.textContent = "Province not configured";
+        districtSelect.appendChild(option);
     }
 });
 </script>

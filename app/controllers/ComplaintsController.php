@@ -82,12 +82,13 @@ class ComplaintsController extends Controller {
                 'current_role_id'      => $current_role,
                 'created_by'           => $_SESSION['user_id'],
                 'province'             => $_SESSION['user_province'] ?? NULL,
+                'district'             => isset($_POST['district']) ? trim($_POST['district']) : '',
                 'categories'           => $this->complaintModel->getCategories(),
                 'departments'          => $this->complaintModel->getDepartments(),
                 'err'                  => ''
             ];
 
-            if(empty($data['applicant_name']) || empty($data['subject']) || empty($data['category_id']) || empty($data['forward_department_id']) || empty($data['person'])){
+            if(empty($data['applicant_name']) || empty($data['subject']) || empty($data['category_id']) || empty($data['forward_department_id']) || empty($data['person']) || empty($data['district'])){
                 $data['err'] = 'Please fill all required fields';
                 $this->view('complaints/create', $data);
             } else {
@@ -246,9 +247,15 @@ class ComplaintsController extends Controller {
     public function edit($id){
         $complaint = $this->complaintModel->getComplaintById($id);
         
-        // Ensure complaint exists and belongs to the user
-        if(!$complaint || $complaint->created_by != $_SESSION['user_id'] || $complaint->status != 'Rejected by CC'){
-            flash('complaint_error', 'You cannot edit this complaint.', 'alert alert-danger');
+        // Ensure complaint exists and is editable
+        $can_edit = false;
+        if ($complaint && $complaint->created_by == $_SESSION['user_id'] && $complaint->status == 'Rejected by CC') {
+            $can_edit = true;
+        } elseif ($complaint && $complaint->status == 'Draft') {
+            $can_edit = true;
+        }
+
+        if(!$can_edit){
             redirect('dashboard');
         }
 
@@ -299,23 +306,23 @@ class ComplaintsController extends Controller {
                     if ($direct_forward === 'ao') {
                         $status        = 'Forwarded to AO';
                         $current_role  = 4; // AO role ID
-                        $log_msg       = 'Complaint forwarded directly to AO after correction.';
+                        $log_msg       = ($complaint->status == 'Draft') ? 'Complaint forwarded directly to AO.' : 'Complaint forwarded directly to AO after correction.';
                         $flash_msg     = 'Complaint successfully forwarded to AO.';
                     } elseif ($direct_forward === 'gs') {
                         $status        = 'Forwarded to GS';
                         $current_role  = 3; // GS role ID
-                        $log_msg       = 'Complaint forwarded directly to GS after correction.';
+                        $log_msg       = ($complaint->status == 'Draft') ? 'Complaint forwarded directly to GS.' : 'Complaint forwarded directly to GS after correction.';
                         $flash_msg     = 'Complaint successfully forwarded to GS.';
                     } else {
-                        $status        = 'Resubmitted (Pending CC)';
+                        $status        = ($complaint->status == 'Draft') ? 'Pending CC' : 'Resubmitted (Pending CC)';
                         $current_role  = 5; // CC role ID
-                        $log_msg       = 'User corrected and resubmitted.';
-                        $flash_msg     = 'Complaint successfully resubmitted to Chief Clerk.';
+                        $log_msg       = ($complaint->status == 'Draft') ? 'Complaint submitted to Chief Clerk.' : 'User corrected and resubmitted.';
+                        $flash_msg     = 'Complaint successfully submitted to Chief Clerk.';
                     }
 
                     // Update status and log workflow
                     $this->complaintModel->updateComplaintStatus($id, $status, $current_role);
-                    $this->complaintModel->logWorkflow($id, $complaint->current_role_id, $current_role, 'Resubmit', $log_msg, $_SESSION['user_id']);
+                    $this->complaintModel->logWorkflow($id, $complaint->current_role_id, $current_role, ($complaint->status == 'Draft') ? 'Submit' : 'Resubmit', $log_msg, $_SESSION['user_id']);
                     
                     flash('complaint_success', $flash_msg);
                     redirect('dashboard');

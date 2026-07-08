@@ -56,7 +56,7 @@
                         <?php else: ?>
                             <?php foreach($data['complaints'] as $complaint) : ?>
                                 <tr>
-                                    <td class="py-3"><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                    <td class="py-3"><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                     <td class="py-3"><?php echo htmlspecialchars($complaint->date); ?></td>
                                     <td class="py-3 fw-semibold"><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                     <td class="py-3 text-muted"><?php echo htmlspecialchars($complaint->subject); ?></td>

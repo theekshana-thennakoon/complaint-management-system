@@ -75,7 +75,7 @@
                                     <?php $i = 1; foreach($data['dispatched'] as $complaint): ?>
                                         <tr style="transition: all 0.2s ease;">
                                             <td class="ps-3 text-muted small"><?php echo $i++; ?></td>
-                                            <td><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                            <td><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                             <td><?php echo date('Y-m-d', strtotime($complaint->dispatched_at)); ?></td>
                                             <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                             <td><?php echo htmlspecialchars($complaint->subject); ?></td>

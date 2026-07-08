@@ -102,7 +102,7 @@
                                         <tbody>
                                             <?php foreach($data['complaints'] as $complaint): ?>
                                                 <tr style="transition: all 0.2s ease;">
-                                                    <td class="ps-3"><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                                    <td class="ps-3"><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                                     <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                                     <td><?php echo htmlspecialchars($complaint->subject); ?></td>
                                                     <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2"><i class="fas fa-tag me-1"></i> <?php echo htmlspecialchars($complaint->category_name); ?></span></td>
@@ -153,7 +153,7 @@
                                         <tbody>
                                             <?php foreach($data['submitted_to_gs'] as $complaint): ?>
                                                 <tr style="transition: all 0.2s ease;">
-                                                    <td class="ps-3"><span class="text-success fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                                    <td class="ps-3"><span class="text-success fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                                     <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                                     <td><?php echo htmlspecialchars($complaint->subject); ?></td>
                                                     <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2"><i class="fas fa-tag me-1"></i> <?php echo htmlspecialchars($complaint->category_name); ?></span></td>
@@ -202,7 +202,7 @@
                                         <tbody>
                                             <?php foreach($data['rejected_reports'] as $complaint): ?>
                                                 <tr style="transition: all 0.2s ease;">
-                                                    <td class="ps-3"><span class="text-danger fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                                    <td class="ps-3"><span class="text-danger fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                                     <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                                     <td><?php echo htmlspecialchars($complaint->subject); ?></td>
                                                     <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2"><i class="fas fa-tag me-1"></i> <?php echo htmlspecialchars($complaint->category_name); ?></span></td>
@@ -251,7 +251,7 @@
                                         <tbody>
                                             <?php foreach($data['all_complaints'] as $complaint): ?>
                                                 <tr style="transition: all 0.2s ease;">
-                                                    <td class="ps-3"><span class="text-info fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                                    <td class="ps-3"><span class="text-info fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                                     <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                                     <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                                     <td><?php echo htmlspecialchars($complaint->subject); ?></td>

@@ -222,7 +222,7 @@
                             <tbody>
                                 <?php foreach($data['all_complaints'] as $complaint): ?>
                                     <tr style="transition: all 0.2s ease;">
-                                        <td class="ps-3"><span class="fw-bold text-primary"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                        <td class="ps-3"><span class="fw-bold text-primary"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>

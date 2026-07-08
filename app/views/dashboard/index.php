@@ -94,6 +94,9 @@
                 <button class="nav-link active fw-bold text-primary" id="my-tab" data-bs-toggle="tab" data-bs-target="#my-complaints" type="button" role="tab"><i class="fas fa-file-alt me-1"></i> My Submitted Complaints</button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-success" id="external-tab" data-bs-toggle="tab" data-bs-target="#external-complaints" type="button" role="tab"><i class="fas fa-external-link-alt me-1"></i> External Complaints</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link fw-bold text-info" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-complaints" type="button" role="tab"><i class="fas fa-list me-1"></i> All System Complaints</button>
             </li>
         </ul>
@@ -131,7 +134,7 @@
                             <tbody>
                                 <?php foreach($data['user_complaints'] as $complaint): ?>
                                     <tr style="transition: all 0.2s ease;">
-                                        <td class="ps-3"><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                        <td class="ps-3"><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
                                         <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2"><i class="fas fa-tag me-1"></i> <?php echo htmlspecialchars($complaint->category_name); ?></span></td>
@@ -169,7 +172,56 @@
                     </div>
                 <?php endif; ?>
             </div>
+                </div>
+            </div>
+
+            <!-- External Complaints Tab -->
+            <div class="tab-pane fade" id="external-complaints" role="tabpanel" aria-labelledby="external-tab">
+                <div class="card shadow border-0 rounded-4 mb-4">
+                    <div class="card-header bg-gradient bg-success text-white py-3 rounded-top-4">
+                        <h5 class="mb-0 fw-bold">External Complaints</h5>
                     </div>
+            <div class="card-body">
+                <?php if (empty($data['external_complaints'])): ?>
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-folder-open fa-4x mb-3 opacity-50"></i>
+                        <h4>No External Complaints Found</h4>
+                    </div>
+                <?php else: ?>
+                    <div class="table-responsive p-2">
+                        <table class="table table-hover align-middle border-bottom">
+                            <thead class="table-light text-uppercase text-secondary" style="font-size: 0.85rem;">
+                                <tr>
+                                    <th class="ps-3">Complaint No</th>
+                                    <th>Date</th>
+                                    <th>Applicant</th>
+                                    <th>Subject</th>
+                                    <th>Category</th>
+                                    <th>Current Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($data['external_complaints'] as $complaint): ?>
+                                    <tr style="transition: all 0.2s ease;">
+                                        <td class="ps-3"><span class="fw-bold text-success"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
+                                        <td><?php echo htmlspecialchars($complaint->date); ?></td>
+                                        <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
+                                        <td><?php echo htmlspecialchars($complaint->subject); ?></td>
+                                        <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span></td>
+                                        <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
+                                        <td>
+                                            <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm">
+                                                <i class="fas fa-eye me-1"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
                 </div>
             </div>
 
@@ -202,7 +254,7 @@
                             <tbody>
                                 <?php foreach($data['all_complaints'] as $complaint): ?>
                                     <tr style="transition: all 0.2s ease;">
-                                        <td class="ps-3"><span class="fw-bold text-primary"><?php echo htmlspecialchars($complaint->complaint_no); ?></span></td>
+                                        <td class="ps-3"><span class="fw-bold text-primary"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>

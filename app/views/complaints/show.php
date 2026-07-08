@@ -50,6 +50,20 @@
             </div>
         <?php endif; ?>
 
+        <?php if($data['complaint']->status == 'Draft'): ?>
+            <div class="alert alert-info shadow-sm border-info border-start border-5 mb-4 rounded d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="alert-heading text-info fw-bold mb-1"><i class="fas fa-file-signature"></i> Draft Complaint</h5>
+                    <p class="mb-0">This complaint is in draft status. You can edit and submit it to the Chief Clerk.</p>
+                </div>
+                <div>
+                    <a href="<?php echo URLROOT; ?>/complaints/edit/<?php echo $data['complaint']->id; ?>" class="btn btn-info text-white fw-bold">
+                        <i class="fas fa-edit"></i> Edit & Submit to CC
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <?php if (!empty($data['rejections'])): ?>
             <div class="alert alert-warning mb-4 shadow-sm border-warning border-start border-5 rounded">
                 <h6 class="alert-heading text-warning-emphasis fw-bold mb-2"><i class="fas fa-history"></i> Previous Rejection History</h6>

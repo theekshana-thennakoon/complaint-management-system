@@ -1,5 +1,34 @@
 <?php require APPROOT . '/views/layout/header.php'; ?>
 
+<!-- Page Loading Animation Overlay -->
+<div id="page-loader" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color, #f8fafc); z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
+    <div style="width: 60px; height: 60px; border: 4px solid var(--primary-100, #d1f0dd); border-top-color: var(--primary-color, #2d9150); border-radius: 50%; animation: spin 1s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;"></div>
+    <h3 style="margin-top: 25px; color: var(--primary-color, #2d9150); font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing: 1px; animation: pulse 1.5s ease-in-out infinite;">Loading...</h3>
+</div>
+<style>
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+</style>
+<script>
+    // Immediately hide the loader if already loaded in this session to prevent flashing
+    if (sessionStorage.getItem('homeLoaded') === 'true') {
+        document.getElementById('page-loader').style.display = 'none';
+    } else {
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                var loader = document.getElementById('page-loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(function() {
+                        loader.style.display = 'none';
+                        sessionStorage.setItem('homeLoaded', 'true');
+                    }, 500); // wait for opacity transition
+                }
+            }, 1200); // artificial delay for premium feel
+        });
+    }
+</script>
+
 <main class="container">
     <section class="hero-section">
         <h2>Welcome to <?php echo SITENAME; ?></h2>

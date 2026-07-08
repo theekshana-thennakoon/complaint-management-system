@@ -18,7 +18,7 @@
 
             <div class="card shadow border-0 rounded-4">
                 <div class="card-header bg-gradient bg-primary text-white py-3 rounded-top-4">
-                    <h4 class="mb-0"><i class="fas fa-edit"></i> Edit & Resubmit Complaint</h4>
+                    <h4 class="mb-0"><i class="fas fa-edit"></i> <?php echo ($data['complaint']->status == 'Draft') ? 'Edit & Submit Complaint' : 'Edit & Resubmit Complaint'; ?></h4>
                 </div>
                 
                 <div class="card-body p-4">
@@ -186,7 +186,7 @@
 
                         <div class="mt-4" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
                             <button type="submit" class="btn btn-primary" onclick="document.getElementById('direct_forward').value=''">
-                                <i class="fas fa-paper-plane me-1"></i> Resubmit to CC
+                                <i class="fas fa-paper-plane me-1"></i> <?php echo ($data['complaint']->status == 'Draft') ? 'Submit to CC' : 'Resubmit to CC'; ?>
                             </button>
                             <div style="width: 1px; height: 36px; background: var(--gray-200);"></div>
                             <button type="submit" class="btn btn-warning" onclick="document.getElementById('direct_forward').value='ao'">

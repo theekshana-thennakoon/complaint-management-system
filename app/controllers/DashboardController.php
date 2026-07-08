@@ -43,7 +43,8 @@ class DashboardController extends Controller {
             'user_complaints' => $user_complaints,
             'departments' => $this->complaintModel->getDepartments(),
             'month' => $month,
-            'all_complaints' => $this->complaintModel->getComplaints($month)
+            'all_complaints' => $this->complaintModel->getComplaints($month),
+            'external_complaints' => $this->complaintModel->getExternalComplaints($month)
         ];
         $this->view('dashboard/index', $data);
     }

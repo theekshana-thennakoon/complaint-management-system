@@ -64,7 +64,6 @@ class AoController extends Controller {
         }
 
         if (!$can_view) {
-            flash('complaint_error', 'Complaint not found or not assigned to you', 'alert alert-danger');
             redirect('ao/index');
         }
 
