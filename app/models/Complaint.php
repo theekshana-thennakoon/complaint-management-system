@@ -405,4 +405,32 @@ class Complaint {
         $this->db->single();
         return $this->db->rowCount() > 0;
     }
+
+    public function generateComplaintNo($type, $province) {
+        $prefix = ($type === 'external') ? 'E' : 'G';
+        
+        $provinceMap = [
+            'බස්නාහිර පළාත' => 'WP',
+            'මධ්‍යම පළාත' => 'CP',
+            'දකුණු පළාත' => 'SP',
+            'උතුරු පළාත' => 'NP',
+            'නැගෙනහිර පළාත' => 'EP',
+            'වයඹ පළාත' => 'NWP',
+            'උතුරු මැද පළාත' => 'NCP',
+            'ඌව පළාත' => 'UP',
+            'සබරගමුව පළාත' => 'SGP'
+        ];
+        
+        $shortProvince = isset($provinceMap[$province]) ? $provinceMap[$province] : 'XX';
+        $dateStr = date('Ymd');
+        $today = date('Y-m-d');
+        
+        $this->db->query("SELECT COUNT(*) as count FROM complaints WHERE date = :today");
+        $this->db->bind(':today', $today);
+        $row = $this->db->single();
+        
+        $count = (isset($row->count) ? $row->count : 0) + 1;
+        
+        return sprintf("%s-%s-%s-%03d", $prefix, $shortProvince, $dateStr, $count);
+    }
 }

@@ -24,7 +24,7 @@ class ExternalcomplaintController extends Controller {
                 'category_id' => trim($_POST['category_id'] ?? 1), 
                 'description' => trim($_POST['reason']),
                 'forward_department_id' => trim($_POST['forward_department_id']),
-                'complaint_no' => 'EXT-'.time().'-'.rand(10,99),
+                'complaint_no' => $this->complaintModel->generateComplaintNo('external', trim($_POST['province'])),
                 'date' => date('Y-m-d'),
                 'departments' => $this->complaintModel->getDepartments(),
                 'categories' => $this->complaintModel->getCategories(),

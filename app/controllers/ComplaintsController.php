@@ -76,7 +76,7 @@ class ComplaintsController extends Controller {
                 'forward_department_id'=> trim($_POST['forward_department_id']),
                 'person'               => isset($_POST['person']) ? trim($_POST['person']) : '',
                 'description'          => isset($_POST['description']) ? trim($_POST['description']) : '',
-                'complaint_no'         => 'GOV-C-'.date('YmdHis'),
+                'complaint_no'         => $this->complaintModel->generateComplaintNo('internal', $_SESSION['user_province'] ?? ''),
                 'date'                 => date('Y-m-d'),
                 'status'               => $status,
                 'current_role_id'      => $current_role,

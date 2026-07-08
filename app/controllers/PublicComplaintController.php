@@ -22,7 +22,7 @@ class PubliccomplaintController extends Controller {
                 'subject' => trim($_POST['subject']),
                 'category_id' => trim($_POST['category_id']),
                 'description' => isset($_POST['description']) ? trim($_POST['description']) : '',
-                'complaint_no' => 'C-'.time().'-'.rand(10,99),
+                'complaint_no' => $this->complaintModel->generateComplaintNo('external', $_SESSION['user_province'] ?? ''),
                 'date' => date('Y-m-d'),
                 'categories' => $this->complaintModel->getCategories(),
                 'err' => ''
