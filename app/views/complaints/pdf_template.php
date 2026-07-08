@@ -213,7 +213,11 @@
                     echo '[Department]';
                 }
             ?>,<br>
-            උතුරු මැද පළාත.
+            <?php
+                if (!empty($data['complaint']->province)) {
+                    echo htmlspecialchars($data['complaint']->province);
+                }
+            ?>
         </div>
 
         <div class="letter-intro">

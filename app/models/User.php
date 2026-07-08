@@ -90,15 +90,27 @@ class User {
     }
     // Admin: Get Users (GS, AO, CC)
     // Admin: Get Users (GS, AO, CC, Subject Officer/Dept)
-    public function getAdminManagedUsers(){
-        $this->db->query('
+    public function getAdminManagedUsers($province = null){
+        $sql = '
             SELECT u.*, r.name as role_name, d.name as department_name 
             FROM users u 
             JOIN roles r ON u.role_id = r.id 
             LEFT JOIN departments d ON u.department_id = d.id
             WHERE u.role_id IN (2, 3, 4, 5, 6, 7) 
-            ORDER BY u.created_at DESC
-        ');
+        ';
+        
+        if ($province) {
+            $sql .= ' AND u.province = :province ';
+        }
+        
+        $sql .= ' ORDER BY u.created_at DESC';
+        
+        $this->db->query($sql);
+        
+        if ($province) {
+            $this->db->bind(':province', $province);
+        }
+        
         return $this->db->resultSet();
     }
 

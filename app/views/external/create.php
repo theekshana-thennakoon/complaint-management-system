@@ -181,6 +181,10 @@ header.main-header { display: none !important; }
 }
 </style>
 
+<!-- Include Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<!-- Include Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
     $('select[name="province"]').select2({
@@ -201,17 +205,20 @@ $(document).ready(function() {
         width: '100%'
     });
 
-    const districts = {
-        'බස්නාහිර පළාත': ['කොළඹ', 'ගම්පහ', 'කළුතර'],
-        'මධ්‍යම පළාත': ['මහනුවර', 'මාතලේ', 'නුවරඑළිය'],
-        'දකුණු පළාත': ['ගාල්ල', 'මාතර', 'හම්බන්තොට'],
-        'උතුරු පළාත': ['යාපනය', 'කිලිනොච්චි', 'මන්නාරම', 'වවුනියාව', 'මුලතිව්'],
-        'නැගෙනහිර පළාත': ['මඩකලපුව', 'අම්පාර', 'ත්‍රිකුණාමලය'],
-        'වයඹ පළාත': ['කුරුණෑගල', 'පුත්තලම'],
-        'උතුරු මැද පළාත': ['අනුරාධපුරය', 'පොළොන්නරුව'],
-        'ඌව පළාත': ['බදුල්ල', 'මොණරාගල'],
-        'සබරගමුව පළාත': ['රත්නපුර', 'කෑගල්ල']
-    };
+    const districts = <?php 
+        $districts_map = [
+            'බස්නාහිර පළාත' => ['කොළඹ', 'ගම්පහ', 'කළුතර'],
+            'මධ්‍යම පළාත' => ['මහනුවර', 'මාතලේ', 'නුවරඑළිය'],
+            'දකුණු පළාත' => ['ගාල්ල', 'මාතර', 'හම්බන්තොට'],
+            'උතුරු පළාත' => ['යාපනය', 'කිලිනොච්චි', 'මන්නාරම', 'වවුනියාව', 'මුලතිව්'],
+            'නැගෙනහිර පළාත' => ['මඩකලපුව', 'අම්පාර', 'ත්‍රිකුණාමලය'],
+            'වයඹ පළාත' => ['කුරුණෑගල', 'පුත්තලම'],
+            'උතුරු මැද පළාත' => ['අනුරාධපුරය', 'පොළොන්නරුව'],
+            'ඌව පළාත' => ['බදුල්ල', 'මොණරාගල'],
+            'සබරගමුව පළාත' => ['රත්නපුර', 'කෑගල්ල']
+        ];
+        echo json_encode($districts_map, JSON_UNESCAPED_UNICODE); 
+    ?>;
 
     function populateDistricts(province, selectedDistrict = '') {
         const districtSelect = $('select[name="district"]');

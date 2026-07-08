@@ -3,10 +3,15 @@
 <div class="container mt-5">
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-            <h2 class="fw-bold" style="color: var(--primary-color);"><i class="fas fa-users-cog me-2"></i> Admin Dashboard</h2>
+            <h2 class="fw-bold" style="color: var(--primary-color);">
+                <i class="fas fa-users-cog me-2"></i> Admin Dashboard<br>
+                <?php if(!empty($_SESSION['user_province'])): ?>
+                    <span class="fs-4 text-mute fw-bold ms-2"><?php echo htmlspecialchars($_SESSION['user_province']); ?></span>
+                <?php endif; ?>
+            </h2>
             <div>
                 <button type="button" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4 me-2" data-bs-toggle="modal" data-bs-target="#addUserModal"><i class="fas fa-plus me-2"></i> Add New User</button>
-                <button type="button" class="btn btn-outline-primary btn-lg rounded-pill shadow-sm px-4" data-bs-toggle="modal" data-bs-target="#addDepartmentModal"><i class="fas fa-plus me-2"></i> Add Department</button>
+                
             </div>
         </div>
         
@@ -83,7 +88,7 @@
                         <button class="nav-link active rounded-pill fw-bold" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab" aria-controls="users" aria-selected="true"><i class="fas fa-users me-2"></i> Managed Users List</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link rounded-pill fw-bold" id="departments-tab" data-bs-toggle="tab" data-bs-target="#departments" type="button" role="tab" aria-controls="departments" aria-selected="false"><i class="fas fa-building me-2"></i> Managed Departments List</button>
+                        <button class="nav-link rounded-pill fw-bold" id="departments-tab" data-bs-toggle="tab" data-bs-target="#departments" type="button" role="tab" aria-controls="departments" aria-selected="false"><i class="fas fa-building me-2"></i> Managed Department Officers List</button>
                     </li>
                 </ul>
             </div>
@@ -111,6 +116,7 @@
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach($data['users'] as $user): ?>
+                                        <?php if($user->role_id == 7) continue; ?>
                                             <tr>
                                                 <td class="py-3">
                                                     <div class="d-flex align-items-center">
@@ -161,29 +167,59 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light text-muted small text-uppercase">
                                     <tr>
-                                        <th class="py-3 rounded-start">Department Name</th>
+                                        <th class="py-3 rounded-start">User Details</th>
+                                        <th class="py-3">Role</th>
+                                        <th class="py-3">Status</th>
                                         <th class="py-3 text-end rounded-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="border-top-0">
-                                    <?php if(empty($data['departments'])): ?>
+                                    <?php if(empty($data['users'])): ?>
                                         <tr>
-                                            <td colspan="2" class="text-center py-5 text-muted">
-                                                <i class="fas fa-building fa-3x mb-3 text-light"></i>
-                                                <h5>No departments found</h5>
+                                            <td colspan="4" class="text-center py-5 text-muted">
+                                                <i class="fas fa-users-slash fa-3x mb-3 text-light"></i>
+                                                <h5>No Department Officers found</h5>
                                             </td>
                                         </tr>
                                     <?php else: ?>
-                                        <?php foreach($data['departments'] as $dept): ?>
+                                        <?php foreach($data['users'] as $user): ?>
+                                            <?php if($user->role_id != 7) continue; ?>
                                             <tr>
-                                                <td class="py-3 fw-semibold">
-                                                    <i class="fas fa-building text-primary me-2"></i>
-                                                    <?php echo htmlspecialchars($dept->name); ?>
+                                                <td class="py-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 45px; height: 45px; font-size: 1.2rem;">
+                                                            <?php echo strtoupper(substr($user->name, 0, 1)); ?>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-bold"><?php echo htmlspecialchars($user->name); ?></h6>
+                                                            <span class="text-muted small">@<?php echo htmlspecialchars($user->username); ?></span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="py-3">
+                                                    <span class="badge bg-primary rounded-pill px-3 py-2 fw-semibold shadow-sm">
+                                                        <i class="fas fa-user-shield me-1"></i> <?php echo htmlspecialchars($user->role_name); ?>
+                                                        <?php if(!empty($user->department_name)): ?>
+                                                            - <small><?php echo htmlspecialchars($user->department_name); ?></small>
+                                                        <?php endif; ?>
+                                                    </span>
+                                                </td>
+                                                <td class="py-3">
+                                                    <?php if($user->status == 'active'): ?>
+                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">Active</span>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill">Inactive</span>
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td class="py-3 text-end">
-                                                    <a href="<?php echo URLROOT; ?>/admin/editDepartment/<?php echo $dept->id; ?>" class="btn btn-sm btn-light text-primary rounded-circle p-2 mx-1 shadow-sm" title="Edit Department">
+                                                    <a href="<?php echo URLROOT; ?>/admin/edit/<?php echo $user->id; ?>" class="btn btn-sm btn-light text-primary rounded-circle p-2 mx-1 shadow-sm" title="Edit User">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    <form action="<?php echo URLROOT; ?>/admin/delete/<?php echo $user->id; ?>" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                                        <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle p-2 mx-1 shadow-sm" title="Delete User">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </form>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -193,52 +229,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="card shadow border-0 rounded-4 mb-5">
-            <div class="card-header text-white py-3 rounded-top-4" style="background: linear-gradient(135deg, #1e3c72, #2a5298);">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-list me-2"></i> All System Complaints</h5>
-            </div>
-            <div class="card-body px-4 pb-4">
-                <?php if (empty($data['all_complaints'])): ?>
-                    <div class="text-center py-5 text-muted">
-                        <i class="fas fa-folder-open fa-4x mb-3 opacity-50"></i>
-                        <h4>No Complaints Found</h4>
-                    </div>
-                <?php else: ?>
-                    <div class="table-responsive p-2">
-                        <table class="table table-hover align-middle mb-0 border-bottom">
-                            <thead class="table-light text-uppercase text-secondary" style="font-size: 0.85rem;">
-                                <tr>
-                                    <th class="ps-3">Complaint No</th>
-                                    <th>Date</th>
-                                    <th>Applicant</th>
-                                    <th>Subject</th>
-                                    <th>Category</th>
-                                    <th>Current Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($data['all_complaints'] as $complaint): ?>
-                                    <tr style="transition: all 0.2s ease;">
-                                        <td class="ps-3"><span class="fw-bold text-primary"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
-                                        <td><?php echo htmlspecialchars($complaint->date); ?></td>
-                                        <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
-                                        <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span></td>
-                                        <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
-                                        <td>
-                                            <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
-                                                <i class="fas fa-eye me-1"></i> View
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -325,30 +315,6 @@
     </div>
 </div>
 
-<!-- Add Department Modal -->
-<div class="modal fade" id="addDepartmentModal" tabindex="-1" aria-labelledby="addDepartmentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header border-bottom-0 py-3">
-                <h5 class="modal-title fw-bold text-primary" id="addDepartmentModalLabel"><i class="fas fa-building me-2"></i> Add New Department</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body px-4">
-                <form action="<?php echo URLROOT; ?>/admin/createDepartment" method="post" id="addDepartmentForm">
-                    <div class="mb-3">
-                        <label for="dept_name" class="form-label fw-semibold">Department Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" id="dept_name" class="form-control rounded-3 <?php echo (!empty($data['name_err']) && isset($data['show_dept_modal'])) ? 'is-invalid' : ''; ?>" value="<?php echo (isset($data['name']) && isset($data['show_dept_modal'])) ? $data['name'] : ''; ?>">
-                        <span class="invalid-feedback"><?php echo (isset($data['name_err']) && isset($data['show_dept_modal'])) ? $data['name_err'] : ''; ?></span>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-top-0 pt-0 pb-3 px-4">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="addDepartmentForm" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="fas fa-save me-2"></i> Save Department</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

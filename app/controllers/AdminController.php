@@ -9,7 +9,8 @@ class AdminController extends Controller {
     }
 
     private function _getDashboardData(){
-        $users = $this->userModel->getAdminManagedUsers();
+        $province = $_SESSION['user_province'] ?? null;
+        $users = $this->userModel->getAdminManagedUsers($province);
         
         $stats = [
             'total' => count($users),
