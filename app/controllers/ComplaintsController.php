@@ -98,6 +98,9 @@ class ComplaintsController extends Controller {
                     $uploaded_files = [];
                     if (!empty($_FILES['attachments']['name'][0])) {
                         $upload_dir = APPROOT . '/../public/uploads/complaints/';
+                        if (!is_dir($upload_dir)) {
+                            @mkdir($upload_dir, 0755, true);
+                        }
                         foreach ($_FILES['attachments']['name'] as $key => $name) {
                             if ($_FILES['attachments']['error'][$key] == UPLOAD_ERR_OK) {
                                 $tmp_name = $_FILES['attachments']['tmp_name'][$key];
@@ -327,6 +330,9 @@ class ComplaintsController extends Controller {
                     $uploaded_files = [];
                     if (!empty($_FILES['attachments']['name'][0])) {
                         $upload_dir = APPROOT . '/../public/uploads/complaints/';
+                        if (!is_dir($upload_dir)) {
+                            @mkdir($upload_dir, 0755, true);
+                        }
                         foreach ($_FILES['attachments']['name'] as $key => $name) {
                             if ($_FILES['attachments']['error'][$key] == UPLOAD_ERR_OK) {
                                 $tmp_name = $_FILES['attachments']['tmp_name'][$key];

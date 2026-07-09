@@ -172,6 +172,13 @@
     } else {
         $footer_img_src = ''; 
     }
+    
+    $my_number = '';
+    if ($data['complaint']->district == 'අනුරාධපුරය') {
+        $my_number = 'NCP/GOV/2/7';
+    } elseif ($data['complaint']->district == 'පොළොන්නරුව') {
+        $my_number = 'NCP/GOV/01/PNPD';
+    }
     ?>
     <table style="width: 100%; font-size: 11px; margin-bottom: 30px; border-collapse: collapse; border: none; line-height: 1.2;">
         <tr>
@@ -181,7 +188,7 @@
             
             <td style="text-align: left; padding-right: 2px;">මගේ අංකය</td>
             <td rowspan="3" style="font-size: 28px; font-weight: 300; vertical-align: middle;">}</td>
-            <td rowspan="3" style="width: 25%; font-weight: bold; font-size: 13px; vertical-align: middle; padding-left: 5px;">NCP/GOV/2/7</td>
+            <td rowspan="3" style="width: 25%; font-weight: bold; font-size: 13px; vertical-align: middle; padding-left: 5px;"><?php echo htmlspecialchars($my_number); ?></td>
             
             <td style="text-align: left; padding-right: 2px;">දිනය</td>
             <td rowspan="3" style="font-size: 28px; font-weight: 300; vertical-align: middle;">}</td>
