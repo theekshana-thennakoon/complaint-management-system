@@ -38,7 +38,7 @@ class ExternalcomplaintController extends Controller {
                 $data['created_by'] = NULL;
                 $data['status'] = 'Draft';
                 $data['current_role_id'] = 6;
-                $data['person'] = NULL;
+                $data['person'] = isset($_POST['person']) ? trim($_POST['person']) : NULL;
 
                 $details = [];
                 if (!empty($data['description'])) {
@@ -99,5 +99,26 @@ class ExternalcomplaintController extends Controller {
 
             $this->view('external/create', $data);
         }
+    }
+
+    // AJAX: insert a new department and return its id+name as JSON (public, no login required)
+    public function addDepartmentAjax() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid request']);
+            exit;
+        }
+        $name = isset($_POST['name']) ? trim($_POST['name']) : '';
+        if (empty($name)) {
+            echo json_encode(['success' => false, 'message' => 'Department name is required']);
+            exit;
+        }
+        $id = $this->complaintModel->addDepartment($name);
+        if ($id) {
+            echo json_encode(['success' => true, 'id' => (int)$id, 'name' => $name]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to add department']);
+        }
+        exit;
     }
 }

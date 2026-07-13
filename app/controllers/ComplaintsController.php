@@ -403,4 +403,25 @@ class ComplaintsController extends Controller {
             $this->view('complaints/edit', $data);
         }
     }
+
+    // AJAX: insert a new department and return its id+name as JSON
+    public function addDepartmentAjax() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid request']);
+            exit;
+        }
+        $name = isset($_POST['name']) ? trim($_POST['name']) : '';
+        if (empty($name)) {
+            echo json_encode(['success' => false, 'message' => 'Department name is required']);
+            exit;
+        }
+        $id = $this->complaintModel->addDepartment($name);
+        if ($id) {
+            echo json_encode(['success' => true, 'id' => (int)$id, 'name' => $name]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Failed to add department']);
+        }
+        exit;
+    }
 }

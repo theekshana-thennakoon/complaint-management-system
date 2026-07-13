@@ -63,7 +63,10 @@ class Complaint {
     public function addDepartment($name){
         $this->db->query('INSERT INTO departments (name) VALUES (:name)');
         $this->db->bind(':name', $name);
-        return $this->db->execute();
+        if ($this->db->execute()) {
+            return $this->db->lastInsertId();
+        }
+        return false;
     }
 
     public function getDepartmentById($id){

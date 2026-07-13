@@ -34,7 +34,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="applicant_name" class="form-label">Applicant Name *</label>
-                        <input type="text" name="applicant_name" class="form-control" value="<?php echo $data['applicant_name']; ?>">
+                        <input type="text" name="applicant_name" id="applicant_name" class="form-control" value="<?php echo $data['applicant_name']; ?>">
                     </div>
                     <div class="form-group">
                         <label for="nic" class="form-label">NIC *</label>
@@ -61,7 +61,7 @@
                 <h4 style="margin: 20px 0 15px; color: var(--primary-color);">Complaint Details</h4>
                 <div class="form-group">
                     <label for="subject" class="form-label">Subject *</label>
-                    <input type="text" name="subject" class="form-control" value="<?php echo $data['subject']; ?>">
+                    <input type="text" name="subject" id="subject" class="form-control" value="<?php echo $data['subject']; ?>">
                 </div>
                 
                 <div class="form-row">
@@ -92,6 +92,10 @@
                                 <!-- Search Box inside Dropdown -->
                                 <div class="p-1 mb-2">
                                     <input type="text" id="deptSearch" class="form-control form-control-sm" placeholder="🔍 Search department..." style="font-size: 0.85rem; padding: 6px 12px;">
+                                </div>
+                                <!-- Custom (typed) option – shown when no match found -->
+                                <div id="deptCustomOption" class="custom-option d-none" data-custom="true" style="cursor: pointer; font-size: 0.9rem; border: 1px dashed var(--primary-color); background: var(--primary-50); color: var(--primary-color); margin: 0 0 4px;">
+                                    <i class="fas fa-plus-circle" style="margin-right:6px;"></i><span id="deptCustomOptionText"></span>
                                 </div>
                                 <!-- Options List -->
                                 <div id="customSelectOptions" style="overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 2px;">
@@ -134,6 +138,10 @@
                                 <!-- Search Box inside Dropdown -->
                                 <div class="p-1 mb-2">
                                     <input type="text" id="personSearch" class="form-control form-control-sm" placeholder="🔍 Search person..." style="font-size: 0.85rem; padding: 6px 12px;">
+                                </div>
+                                <!-- Custom (typed) option – shown when no match found -->
+                                <div id="personCustomOption" class="custom-person-option d-none" data-custom="true" style="cursor: pointer; font-size: 0.9rem; border: 1px dashed var(--primary-color); background: var(--primary-50); color: var(--primary-color); margin: 0 0 4px;">
+                                    <i class="fas fa-plus-circle" style="margin-right:6px;"></i><span id="personCustomOptionText"></span>
                                 </div>
                                 <!-- Options List -->
                                 <div id="customPersonSelectOptions" style="overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 2px;">
@@ -179,7 +187,7 @@
                             <tr>
                                 <td>1</td>
                                 <td><input type="text" name="detail_letter_no[]" class="form-control"></td>
-                                <td><input type="text" name="detail_name[]" class="form-control"></td>
+                                <td><input type="text" name="detail_name[]" id="firstDetailName" class="form-control"></td>
                                 <td>
                                     <button type="button" class="btn btn-danger btn-sm remove-row"><i class="fas fa-trash"></i></button>
                                 </td>
@@ -308,6 +316,41 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+    // ── Auto-fill first row "නම හා කාරණය" from Applicant Name + Subject ──────
+    const applicantNameInput = document.getElementById('applicant_name');
+    const subjectInput       = document.getElementById('subject');
+    const firstDetailName    = document.getElementById('firstDetailName');
+
+    let autoFillActive = true; // becomes false once user manually edits the cell
+
+    function updateFirstDetail() {
+        if (!autoFillActive) return;
+        const name    = applicantNameInput ? applicantNameInput.value.trim() : '';
+        const subject = subjectInput       ? subjectInput.value.trim()       : '';
+        if (name || subject) {
+            firstDetailName.value = name && subject ? name + ' - ' + subject
+                                  : name || subject;
+        }
+    }
+
+    if (applicantNameInput) applicantNameInput.addEventListener('input', updateFirstDetail);
+    if (subjectInput)       subjectInput.addEventListener('input', updateFirstDetail);
+
+    // If the user manually types in the cell, stop auto-syncing
+    if (firstDetailName) {
+        firstDetailName.addEventListener('input', function() {
+            // Only mark as manual if the value no longer matches what auto-fill would produce
+            const name    = applicantNameInput ? applicantNameInput.value.trim() : '';
+            const subject = subjectInput       ? subjectInput.value.trim()       : '';
+            const expected = name && subject ? name + ' - ' + subject : name || subject;
+            if (this.value !== expected) {
+                autoFillActive = false;
+            }
+        });
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     const wrapper = document.querySelector('.custom-select-wrapper');
     if (wrapper) {
         const trigger = document.getElementById('customSelectTrigger');
@@ -387,17 +430,86 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Filter options as you type
-        searchInput.addEventListener('input', function() {
-            const query = searchInput.value.toLowerCase().trim();
-            options.forEach(opt => {
-                const val = opt.getAttribute('data-value');
+        // Filter options as you type + show "add new dept" option
+        const deptCustomOption     = document.getElementById('deptCustomOption');
+        const deptCustomOptionText = document.getElementById('deptCustomOptionText');
+        // live options list (grows when new depts are added)
+        let allDeptOptions = Array.from(optionsContainer.querySelectorAll('.custom-option'));
+
+        function filterDeptOptions() {
+            const query = searchInput.value.trim();
+            const queryLower = query.toLowerCase();
+            let anyVisible = false;
+
+            allDeptOptions = Array.from(optionsContainer.querySelectorAll('.custom-option'));
+            allDeptOptions.forEach(opt => {
+                const val  = opt.getAttribute('data-value');
                 const text = opt.textContent.toLowerCase();
-                if (val === "" || text.includes(query)) {
+                if (val === '' || text.includes(queryLower)) {
                     opt.style.display = 'block';
+                    if (val !== '') anyVisible = true;
                 } else {
                     opt.style.display = 'none';
                 }
+            });
+
+            if (query.length > 0 && !anyVisible) {
+                deptCustomOptionText.textContent = 'Add "' + query + '" as new department';
+                deptCustomOption.classList.remove('d-none');
+            } else {
+                deptCustomOption.classList.add('d-none');
+            }
+        }
+
+        searchInput.addEventListener('input', filterDeptOptions);
+
+        // Click "Add new department" → AJAX insert then auto-select
+        deptCustomOption.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const newName = searchInput.value.trim();
+            if (!newName) return;
+
+            // Disable while saving
+            deptCustomOption.style.opacity = '0.5';
+            deptCustomOption.style.pointerEvents = 'none';
+            deptCustomOptionText.textContent = 'Saving…';
+
+            const formData = new FormData();
+            formData.append('name', newName);
+
+            fetch('<?php echo URLROOT; ?>/complaints/addDepartmentAjax', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    // Build and append a new option element
+                    const newOpt = document.createElement('div');
+                    newOpt.className = 'custom-option';
+                    newOpt.setAttribute('data-value', res.id);
+                    newOpt.style.cssText = 'cursor:pointer;font-size:0.9rem;';
+                    newOpt.textContent = res.name;
+                    optionsContainer.appendChild(newOpt);
+
+                    // Select it
+                    allDeptOptions = Array.from(optionsContainer.querySelectorAll('.custom-option'));
+                    allDeptOptions.forEach(opt => opt.classList.remove('selected'));
+                    newOpt.classList.add('selected');
+                    hiddenInput.value = res.id;
+                    selectText.textContent = res.name;
+                    selectText.classList.remove('text-muted');
+
+                    deptCustomOption.classList.add('d-none');
+                    dropdown.classList.add('d-none');
+                } else {
+                    alert('Error: ' + (res.message || 'Could not add department'));
+                }
+            })
+            .catch(() => alert('Network error. Please try again.'))
+            .finally(() => {
+                deptCustomOption.style.opacity = '';
+                deptCustomOption.style.pointerEvents = '';
             });
         });
     }
@@ -481,18 +593,51 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Filter options as you type
+        // Filter options as you type + show "use typed text" option
+        const customOption = document.getElementById('personCustomOption');
+        const customOptionText = document.getElementById('personCustomOptionText');
+
         searchInput.addEventListener('input', function() {
-            const query = searchInput.value.toLowerCase().trim();
+            const query = searchInput.value.trim();
+            const queryLower = query.toLowerCase();
+            let anyVisible = false;
+
             options.forEach(opt => {
                 const val = opt.getAttribute('data-value');
                 const text = opt.textContent.toLowerCase();
-                if (val === "" || text.includes(query)) {
+                if (val === "" || text.includes(queryLower)) {
                     opt.style.display = 'block';
+                    if (val !== "") anyVisible = true;
                 } else {
                     opt.style.display = 'none';
                 }
             });
+
+            // Show "Use typed text" option only when there is text and no list match
+            if (query.length > 0 && !anyVisible) {
+                customOptionText.textContent = 'Use "' + query + '" as person';
+                customOption.classList.remove('d-none');
+            } else {
+                customOption.classList.add('d-none');
+            }
+        });
+
+        // Click on custom option selects the typed text
+        customOption.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const typedValue = searchInput.value.trim();
+            if (!typedValue) return;
+
+            // Deselect all existing options
+            options.forEach(opt => opt.classList.remove('selected'));
+            customOption.classList.remove('selected'); // reset styling next open
+
+            hiddenInput.value = typedValue;
+            selectText.textContent = typedValue;
+            selectText.classList.remove('text-muted');
+
+            customOption.classList.add('d-none');
+            dropdown.classList.add('d-none');
         });
     }
 
