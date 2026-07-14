@@ -5,10 +5,6 @@
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Welcome, <?php echo $_SESSION['user_name']; ?></h2>
-            <form method="GET" action="" class="d-flex align-items-center bg-white p-2 rounded shadow-sm">
-                <label for="monthFilter" class="me-2 fw-bold text-primary mb-0"><i class="fas fa-calendar-alt me-1"></i> Month:</label>
-                <input type="month" name="month" id="monthFilter" class="form-control form-control-sm border-0" style="background-color: #f8f9fa;" value="<?php echo isset($data['month']) ? $data['month'] : date('Y-m'); ?>" onchange="this.form.submit()">
-            </form>
         </div>
     </div>
 </div>
@@ -84,6 +80,35 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-12 d-flex justify-content-end">
+        <form method="GET" action="" class="d-flex flex-wrap align-items-center bg-white py-2 px-3 rounded-pill shadow-sm border" style="gap: 15px; border-color: rgba(0,0,0,0.05) !important;">
+            <div class="input-group input-group-sm" style="width: auto; flex: 1; min-width: 200px;">
+                <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-2">
+                    <i class="fas fa-filter"></i>
+                </span>
+                <select name="category_id" id="categoryFilter" class="form-select border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);" onchange="this.form.submit()">
+                    <option value="">All Categories</option>
+                    <?php foreach($data['categories'] as $category): ?>
+                        <option value="<?php echo $category->id; ?>" <?php echo (isset($data['category_id']) && $data['category_id'] == $category->id) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($category->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="vr bg-secondary opacity-25 d-none d-md-block" style="width: 2px; border-radius: 2px; margin-top: 4px; margin-bottom: 4px;"></div>
+            
+            <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-2">
+                    <i class="fas fa-calendar-alt"></i>
+                </span>
+                <input type="month" name="month" id="monthFilter" class="form-control border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);" value="<?php echo isset($data['month']) ? $data['month'] : date('Y-m'); ?>" onchange="this.form.submit()">
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="row mt-4">
     <div class="col-md-12">
         <?php flash('complaint_success'); ?>
@@ -137,7 +162,10 @@
                                         <td class="ps-3"><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2"><i class="fas fa-tag me-1"></i> <?php echo htmlspecialchars($complaint->category_name); ?></span></td>
+                                        <td>
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2"><i class="fas fa-tag me-1"></i> <?php echo htmlspecialchars($complaint->category_name); ?></span>
+                                            <?php if(!empty($complaint->letter_type)): ?><br><small class="text-muted text-lowercase"><?php echo htmlspecialchars($complaint->letter_type); ?></small><?php endif; ?>
+                                        </td>
                                         <td>
                                             <?php if ($complaint->status == 'Rejected by CC'): ?>
                                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2"><i class="fas fa-times-circle me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
@@ -208,7 +236,10 @@
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span></td>
+                                        <td>
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span>
+                                            <?php if(!empty($complaint->letter_type)): ?><br><small class="text-muted text-lowercase"><?php echo htmlspecialchars($complaint->letter_type); ?></small><?php endif; ?>
+                                        </td>
                                         <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
                                         <td>
                                             <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm">
@@ -258,7 +289,10 @@
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td><span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span></td>
+                                        <td>
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span>
+                                            <?php if(!empty($complaint->letter_type)): ?><br><small class="text-muted text-lowercase"><?php echo htmlspecialchars($complaint->letter_type); ?></small><?php endif; ?>
+                                        </td>
                                         <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
                                         <td>
                                             <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">

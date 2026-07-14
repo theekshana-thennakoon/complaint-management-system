@@ -14,8 +14,9 @@ class GsController extends Controller {
 
     public function index() {
         $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
-        $complaints = $this->complaintModel->getComplaintsByRoleId(3, $month);
-        $all_complaints = $this->complaintModel->getComplaints($month);
+        $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
+        $complaints = $this->complaintModel->getComplaintsByRoleId(3, $month, $category_id);
+        $all_complaints = $this->complaintModel->getComplaints($month, $category_id);
 
         $approved = 0;
         $rejected = 0;
@@ -43,7 +44,9 @@ class GsController extends Controller {
                 'approved' => $approved,
                 'rejected' => $rejected
             ],
-            'month' => $month
+            'month' => $month,
+            'category_id' => $category_id,
+            'categories' => $this->complaintModel->getCategories()
         ];
 
         $this->view('gs/index', $data);

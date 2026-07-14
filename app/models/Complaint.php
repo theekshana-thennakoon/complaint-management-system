@@ -7,7 +7,7 @@ class Complaint {
     }
 
     public function addComplaint($data, $details = []){
-        $this->db->query('INSERT INTO complaints (complaint_no, date, applicant_name, nic, address, mobile, email, subject, category_id, description, status, current_role_id, created_by, forward_department_id, person, province, district) VALUES (:complaint_no, :date, :applicant_name, :nic, :address, :mobile, :email, :subject, :category_id, :description, :status, :current_role_id, :created_by, :forward_department_id, :person, :province, :district)');
+        $this->db->query('INSERT INTO complaints (complaint_no, date, applicant_name, nic, address, mobile, email, subject, category_id, letter_type, description, letter_intro, letter_body, signatory_name, signatory_title, status, current_role_id, created_by, forward_department_id, person, province, district) VALUES (:complaint_no, :date, :applicant_name, :nic, :address, :mobile, :email, :subject, :category_id, :letter_type, :description, :letter_intro, :letter_body, :signatory_name, :signatory_title, :status, :current_role_id, :created_by, :forward_department_id, :person, :province, :district)');
 
         // Bind values
         $this->db->bind(':complaint_no', $data['complaint_no']);
@@ -19,7 +19,12 @@ class Complaint {
         $this->db->bind(':email', $data['email']);
         $this->db->bind(':subject', $data['subject']);
         $this->db->bind(':category_id', $data['category_id']);
-        $this->db->bind(':description', $data['description']);
+        $this->db->bind(':letter_type', isset($data['letter_type']) ? $data['letter_type'] : null);
+        $this->db->bind(':description', isset($data['description']) ? $data['description'] : null);
+        $this->db->bind(':letter_intro', isset($data['letter_intro']) ? $data['letter_intro'] : null);
+        $this->db->bind(':letter_body', isset($data['letter_body']) ? $data['letter_body'] : null);
+        $this->db->bind(':signatory_name',  $data['signatory_name']  ?? NULL);
+        $this->db->bind(':signatory_title', $data['signatory_title'] ?? NULL);
         $this->db->bind(':status', $data['status'] ?? 'Draft');
         
         $this->db->bind(':current_role_id', $data['current_role_id'] ?? 6);
@@ -88,7 +93,7 @@ class Complaint {
         return $this->db->single();
     }
 
-    public function getComplaints($month = null){
+    public function getComplaints($month = null, $category_id = null){
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -101,6 +106,9 @@ class Complaint {
         if ($month) {
             $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
         }
+        if ($category_id) {
+            $sql .= ' AND c.category_id = :category_id ';
+        }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
@@ -108,10 +116,13 @@ class Complaint {
         if ($month) {
             $this->db->bind(':month', $month);
         }
+        if ($category_id) {
+            $this->db->bind(':category_id', $category_id);
+        }
         return $this->db->resultSet();
     }
 
-    public function getComplaintsByUser($user_id, $month = null){
+    public function getComplaintsByUser($user_id, $month = null, $category_id = null){
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -124,6 +135,9 @@ class Complaint {
         if ($month) {
             $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
         }
+        if ($category_id) {
+            $sql .= ' AND c.category_id = :category_id ';
+        }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
@@ -132,10 +146,13 @@ class Complaint {
         if ($month) {
             $this->db->bind(':month', $month);
         }
+        if ($category_id) {
+            $this->db->bind(':category_id', $category_id);
+        }
         return $this->db->resultSet();
     }
 
-    public function getExternalComplaints($month = null){
+    public function getExternalComplaints($month = null, $category_id = null){
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -148,12 +165,18 @@ class Complaint {
         if ($month) {
             $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
         }
+        if ($category_id) {
+            $sql .= ' AND c.category_id = :category_id ';
+        }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
         $this->db->bind(':province', $province);
         if ($month) {
             $this->db->bind(':month', $month);
+        }
+        if ($category_id) {
+            $this->db->bind(':category_id', $category_id);
         }
         return $this->db->resultSet();
     }
@@ -190,7 +213,7 @@ class Complaint {
         return $this->db->execute();
     }
 
-    public function getComplaintsByRoleId($role_id, $month = null) {
+    public function getComplaintsByRoleId($role_id, $month = null, $category_id = null) {
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -203,6 +226,9 @@ class Complaint {
         if ($month) {
             $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
         }
+        if ($category_id) {
+            $sql .= ' AND c.category_id = :category_id ';
+        }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
@@ -211,10 +237,13 @@ class Complaint {
         if ($month) {
             $this->db->bind(':month', $month);
         }
+        if ($category_id) {
+            $this->db->bind(':category_id', $category_id);
+        }
         return $this->db->resultSet();
     }
 
-    public function getComplaintsByUserId($user_id, $month = null) {
+    public function getComplaintsByUserId($user_id, $month = null, $category_id = null) {
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -227,6 +256,9 @@ class Complaint {
         if ($month) {
             $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
         }
+        if ($category_id) {
+            $sql .= ' AND c.category_id = :category_id ';
+        }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
@@ -234,6 +266,9 @@ class Complaint {
         $this->db->bind(':province', $province);
         if ($month) {
             $this->db->bind(':month', $month);
+        }
+        if ($category_id) {
+            $this->db->bind(':category_id', $category_id);
         }
         return $this->db->resultSet();
     }
@@ -292,7 +327,7 @@ class Complaint {
     }
 
     public function updateComplaint($id, $data, $details = []) {
-        $this->db->query('UPDATE complaints SET applicant_name = :applicant_name, nic = :nic, address = :address, mobile = :mobile, email = :email, subject = :subject, category_id = :category_id, description = :description, forward_department_id = :forward_department_id, person = :person WHERE id = :id');
+        $this->db->query('UPDATE complaints SET applicant_name = :applicant_name, nic = :nic, address = :address, mobile = :mobile, email = :email, subject = :subject, category_id = :category_id, letter_type = :letter_type, district = :district, description = :description, forward_department_id = :forward_department_id, person = :person WHERE id = :id');
         
         $this->db->bind(':applicant_name', $data['applicant_name']);
         $this->db->bind(':nic', $data['nic']);
@@ -301,6 +336,8 @@ class Complaint {
         $this->db->bind(':email', $data['email']);
         $this->db->bind(':subject', $data['subject']);
         $this->db->bind(':category_id', $data['category_id']);
+        $this->db->bind(':letter_type', $data['letter_type']);
+        $this->db->bind(':district', $data['district']);
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':forward_department_id', $data['forward_department_id']);
         $this->db->bind(':person', $data['person']);
@@ -428,31 +465,30 @@ class Complaint {
         return $this->db->resultSet();
     }
 
-    public function generateComplaintNo($type, $province) {
-        $prefix = ($type === 'external') ? 'E' : 'G';
-        
-        $provinceMap = [
-            'බස්නාහිර පළාත' => 'WP',
-            'මධ්‍යම පළාත' => 'CP',
-            'දකුණු පළාත' => 'SP',
-            'උතුරු පළාත' => 'NP',
-            'නැගෙනහිර පළාත' => 'EP',
-            'වයඹ පළාත' => 'NWP',
-            'උතුරු මැද පළාත' => 'NCP',
-            'ඌව පළාත' => 'UP',
-            'සබරගමුව පළාත' => 'SGP'
+    public function generateComplaintNo($district) {
+        $districtLetterMap = [
+            'කොළඹ' => 'C', 'ගම්පහ' => 'G', 'කළුතර' => 'K',
+            'මහනුවර' => 'K', 'මාතලේ' => 'M', 'නුවරඑළිය' => 'N',
+            'ගාල්ල' => 'G', 'මාතර' => 'M', 'හම්බන්තොට' => 'H',
+            'යාපනය' => 'J', 'කිලිනොච්චි' => 'K', 'මන්නාරම' => 'M', 'වවුනියාව' => 'V', 'මුලතිව්' => 'M',
+            'මඩකලපුව' => 'B', 'අම්පාර' => 'A', 'ත්‍රිකුණාමලය' => 'T',
+            'කුරුණෑගල' => 'K', 'පුත්තලම' => 'P',
+            'අනුරාධපුරය' => 'A', 'පොළොන්නරුව' => 'P',
+            'බදුල්ල' => 'B', 'මොණරාගල' => 'M',
+            'රත්නපුර' => 'R', 'කෑගල්ල' => 'K'
         ];
         
-        $shortProvince = isset($provinceMap[$province]) ? $provinceMap[$province] : 'XX';
-        $dateStr = date('Ymd');
+        $prefix = isset($districtLetterMap[$district]) ? $districtLetterMap[$district] : 'X';
+        $dateStr = date('ymd');
         $today = date('Y-m-d');
         
-        $this->db->query("SELECT COUNT(*) as count FROM complaints WHERE date = :today");
+        $this->db->query("SELECT COUNT(*) as count FROM complaints WHERE date = :today AND district = :district");
         $this->db->bind(':today', $today);
+        $this->db->bind(':district', $district);
         $row = $this->db->single();
         
         $count = (isset($row->count) ? $row->count : 0) + 1;
         
-        return sprintf("%s-%s-%s-%03d", $prefix, $shortProvince, $dateStr, $count);
+        return sprintf("%s-%s-%02d", $prefix, $dateStr, $count);
     }
 }

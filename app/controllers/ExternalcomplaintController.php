@@ -22,16 +22,17 @@ class ExternalcomplaintController extends Controller {
                 'district' => trim($_POST['district']),
                 'subject' => 'External Complaint', 
                 'category_id' => trim($_POST['category_id'] ?? 1), 
+                'letter_type' => isset($_POST['letter_type']) ? trim($_POST['letter_type']) : '',
                 'description' => trim($_POST['reason']),
                 'forward_department_id' => trim($_POST['forward_department_id']),
-                'complaint_no' => $this->complaintModel->generateComplaintNo('external', trim($_POST['province'])),
+                'complaint_no' => $this->complaintModel->generateComplaintNo(trim($_POST['district'] ?? '')),
                 'date' => date('Y-m-d'),
                 'departments' => $this->complaintModel->getDepartments(),
                 'categories' => $this->complaintModel->getCategories(),
                 'err' => ''
             ];
 
-            if(empty($data['applicant_name']) || empty($data['nic']) || empty($data['mobile']) || empty($data['description']) || empty($data['forward_department_id']) || empty($data['province']) || empty($data['district'])){
+            if(empty($data['applicant_name']) || empty($data['nic']) || empty($data['description']) || empty($data['forward_department_id']) || empty($data['province']) || empty($data['district'])){
                 $data['err'] = 'Please fill all required fields';
                 $this->view('external/create', $data);
             } else {

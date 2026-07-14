@@ -31,8 +31,8 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="mobile" class="form-label">Contact Number (Mobile) *</label>
-                            <input type="text" name="mobile" class="form-control" value="<?php echo isset($data['mobile']) ? $data['mobile'] : ''; ?>" required>
+                            <label for="mobile" class="form-label">Contact Number (Mobile)</label>
+                            <input type="text" name="mobile" class="form-control" value="<?php echo isset($data['mobile']) ? $data['mobile'] : ''; ?>">
                         </div>
                         <div class="form-group">
                             <label for="email" class="form-label">Email</label>
@@ -61,6 +61,14 @@
                                         <option value="<?php echo $category->id; ?>" <?php echo (isset($data['category_id']) && $data['category_id'] == $category->id) ? 'selected' : ''; ?>><?php echo $category->name; ?></option>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="letter_type" class="form-label">Letter Type *</label>
+                            <select name="letter_type" id="letter_type" class="form-control" required>
+                                <option value="">Select Letter Type</option>
+                                <option value="මහජන දින ලිපි" <?php echo (isset($data['letter_type']) && $data['letter_type'] == 'මහජන දින ලිපි') ? 'selected' : ''; ?>>මහජන දින ලිපි</option>
+                                <option value="දෛනික ලිපි" <?php echo (isset($data['letter_type']) && $data['letter_type'] == 'දෛනික ලිපි') ? 'selected' : ''; ?>>දෛනික ලිපි</option>
                             </select>
                         </div>
                         <div class="form-group">

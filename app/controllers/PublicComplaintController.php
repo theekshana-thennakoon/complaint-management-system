@@ -21,14 +21,15 @@ class PubliccomplaintController extends Controller {
                 'email' => trim($_POST['email']),
                 'subject' => trim($_POST['subject']),
                 'category_id' => trim($_POST['category_id']),
+                'letter_type' => isset($_POST['letter_type']) ? trim($_POST['letter_type']) : '',
                 'description' => isset($_POST['description']) ? trim($_POST['description']) : '',
-                'complaint_no' => $this->complaintModel->generateComplaintNo('external', $_SESSION['user_province'] ?? ''),
+                'complaint_no' => $this->complaintModel->generateComplaintNo(trim($_POST['district'] ?? '')),
                 'date' => date('Y-m-d'),
                 'categories' => $this->complaintModel->getCategories(),
                 'err' => ''
             ];
 
-            if(empty($data['applicant_name']) || empty($data['nic']) || empty($data['mobile']) || empty($data['subject']) || empty($data['category_id'])){
+            if(empty($data['applicant_name']) || empty($data['nic']) || empty($data['subject']) || empty($data['category_id'])){
                 $data['err'] = 'Please fill all required fields';
                 $this->view('public/create', $data);
             } else {

@@ -14,9 +14,10 @@ class AoController extends Controller {
 
     public function index() {
         $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+        $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
         // Fetch complaints currently pending AO approval (current_role_id = 4)
-        $complaints = $this->complaintModel->getComplaintsByRoleId(4, $month);
-        $all_complaints = $this->complaintModel->getComplaints($month);
+        $complaints = $this->complaintModel->getComplaintsByRoleId(4, $month, $category_id);
+        $all_complaints = $this->complaintModel->getComplaints($month, $category_id);
 
         $approved = 0;
         $rejected = 0;
@@ -45,7 +46,9 @@ class AoController extends Controller {
                 'rejected' => $rejected
             ],
             'all_complaints' => $all_complaints,
-            'month' => $month
+            'month' => $month,
+            'category_id' => $category_id,
+            'categories' => $this->complaintModel->getCategories()
         ];
 
         $this->view('ao/index', $data);

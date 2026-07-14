@@ -9,7 +9,8 @@ class DashboardController extends Controller {
 
     public function index(){
         $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
-        $user_complaints = $this->complaintModel->getComplaintsByUserId($_SESSION['user_id'], $month);
+        $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
+        $user_complaints = $this->complaintModel->getComplaintsByUserId($_SESSION['user_id'], $month, $category_id);
         
         $pending = 0;
         $approved = 0;
@@ -43,8 +44,10 @@ class DashboardController extends Controller {
             'user_complaints' => $user_complaints,
             'departments' => $this->complaintModel->getDepartments(),
             'month' => $month,
-            'all_complaints' => $this->complaintModel->getComplaints($month),
-            'external_complaints' => $this->complaintModel->getExternalComplaints($month)
+            'category_id' => $category_id,
+            'categories' => $this->complaintModel->getCategories(),
+            'all_complaints' => $this->complaintModel->getComplaints($month, $category_id),
+            'external_complaints' => $this->complaintModel->getExternalComplaints($month, $category_id)
         ];
         $this->view('dashboard/index', $data);
     }

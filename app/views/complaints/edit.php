@@ -63,7 +63,7 @@
                         </div>
                         
                         <div class="row mb-3">
-                            <div class="col-md-6 form-group mb-3">
+                            <div class="col-md-4 form-group mb-3">
                                 <label for="category_id" class="form-label fw-bold">Category *</label>
                                 <select name="category_id" class="form-control" required>
                                     <option value="">Select Category</option>
@@ -72,6 +72,25 @@
                                     <?php endforeach; ?>
                                 </select>
                             </div>
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="letter_type" class="form-label fw-bold">Letter Type *</label>
+                                <select name="letter_type" id="letter_type" class="form-control" required>
+                                    <option value="">Select Letter Type</option>
+                                    <option value="මහජන දින ලිපි" <?php echo (isset($data['complaint']->letter_type) && $data['complaint']->letter_type == 'මහජන දින ලිපි') ? 'selected' : ''; ?>>මහජන දින ලිපි</option>
+                                    <option value="දෛනික ලිපි" <?php echo (isset($data['complaint']->letter_type) && $data['complaint']->letter_type == 'දෛනික ලිපි') ? 'selected' : ''; ?>>දෛනික ලිපි</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 form-group mb-3">
+                                <label for="district" class="form-label fw-bold">District *</label>
+                                <select name="district" id="districtSelect" class="form-control" required>
+                                    <option value="">Select District</option>
+                                </select>
+                                <input type="hidden" id="userProvince" value="<?php echo htmlspecialchars($_SESSION['user_province'] ?? ''); ?>">
+                                <input type="hidden" id="selectedDistrict" value="<?php echo htmlspecialchars($data['complaint']->district ?? ''); ?>">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <div class="col-md-6 form-group mb-3">
                                 <label for="forward_department_id" class="form-label fw-bold">Forward To Department *</label>
                                 <div class="custom-select-wrapper" style="position: relative;">
@@ -98,9 +117,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row mb-3">
                             <div class="col-md-6 form-group mb-3">
                                 <label for="person" class="form-label fw-bold">Forward To Person *</label>
                                 <div class="custom-person-select-wrapper" style="position: relative;">
@@ -137,7 +153,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3"></div>
                         </div>
                         
 
@@ -317,6 +332,39 @@
 </style>
 
 <script>
+    const districts = {
+        'බස්නාහිර පළාත': ['කොළඹ', 'ගම්පහ', 'කළුතර'],
+        'මධ්‍යම පළාත': ['මහනුවර', 'මාතලේ', 'නුවරඑළිය'],
+        'දකුණු පළාත': ['ගාල්ල', 'මාතර', 'හම්බන්තොට'],
+        'උතුරු පළාත': ['යාපනය', 'කිලිනොච්චි', 'මන්නාරම', 'වවුනියාව', 'මුලතිව්'],
+        'නැගෙනහිර පළාත': ['මඩකලපුව', 'අම්පාර', 'ත්‍රිකුණාමලය'],
+        'වයඹ පළාත': ['කුරුණෑගල', 'පුත්තලම'],
+        'උතුරු මැද පළාත': ['අනුරාධපුරය', 'පොළොන්නරුව'],
+        'ඌව පළාත': ['බදුල්ල', 'මොණරාගල'],
+        'සබරගමුව පළාත': ['රත්නපුර', 'කෑගල්ල']
+    };
+
+    const userProvince = document.getElementById('userProvince').value;
+    const selectedDistrict = document.getElementById('selectedDistrict').value;
+    const districtSelect = document.getElementById('districtSelect');
+    
+    if (userProvince && districts[userProvince]) {
+        districts[userProvince].forEach(function(district) {
+            const option = document.createElement('option');
+            option.value = district;
+            option.textContent = district;
+            if (district === selectedDistrict) {
+                option.selected = true;
+            }
+            districtSelect.appendChild(option);
+        });
+    } else if (!userProvince) {
+        const option = document.createElement('option');
+        option.value = "";
+        option.textContent = "Province not configured";
+        districtSelect.appendChild(option);
+    }
+
     let rowCount = document.getElementById('detailsTbody').children.length;
     document.getElementById('addRowBtn').addEventListener('click', function() {
         rowCount++;

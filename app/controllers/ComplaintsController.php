@@ -73,10 +73,15 @@ class ComplaintsController extends Controller {
                 'email'                => trim($_POST['email']),
                 'subject'              => trim($_POST['subject']),
                 'category_id'          => trim($_POST['category_id']),
+                'letter_type'          => isset($_POST['letter_type']) ? trim($_POST['letter_type']) : '',
                 'forward_department_id'=> trim($_POST['forward_department_id']),
                 'person'               => isset($_POST['person']) ? trim($_POST['person']) : '',
                 'description'          => isset($_POST['description']) ? trim($_POST['description']) : '',
-                'complaint_no'         => $this->complaintModel->generateComplaintNo('internal', $_SESSION['user_province'] ?? ''),
+                'letter_intro'         => isset($_POST['letter_intro'])      ? trim($_POST['letter_intro'])      : NULL,
+                'letter_body'          => isset($_POST['letter_body'])       ? trim($_POST['letter_body'])       : NULL,
+                'signatory_name'       => isset($_POST['signatory_name'])    ? trim($_POST['signatory_name'])    : NULL,
+                'signatory_title'      => isset($_POST['signatory_title'])   ? trim($_POST['signatory_title'])   : NULL,
+                'complaint_no'         => $this->complaintModel->generateComplaintNo(trim($_POST['district'] ?? '')),
                 'date'                 => date('Y-m-d'),
                 'status'               => $status,
                 'current_role_id'      => $current_role,
@@ -142,6 +147,18 @@ class ComplaintsController extends Controller {
             ];
 
             $this->view('complaints/create', $data);
+        }
+    }
+
+    public function generateComplaintNoAjax() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $district = isset($_POST['district']) ? trim($_POST['district']) : '';
+            if ($district) {
+                $complaint_no = $this->complaintModel->generateComplaintNo($district);
+                echo json_encode(['success' => true, 'complaint_no' => $complaint_no]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'No district provided']);
+            }
         }
     }
 
@@ -313,6 +330,8 @@ class ComplaintsController extends Controller {
                 'email' => trim($_POST['email']),
                 'subject' => trim($_POST['subject']),
                 'category_id' => trim($_POST['category_id']),
+                'letter_type' => isset($_POST['letter_type']) ? trim($_POST['letter_type']) : null,
+                'district' => isset($_POST['district']) ? trim($_POST['district']) : null,
                 'forward_department_id' => trim($_POST['forward_department_id']),
                 'person' => isset($_POST['person']) ? trim($_POST['person']) : '',
                 'description' => isset($_POST['description']) ? trim($_POST['description']) : '',

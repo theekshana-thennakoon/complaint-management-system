@@ -35,8 +35,8 @@ header.main-header { display: none !important; }
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="mobile" class="form-label">Contact Number (Mobile) *</label>
-                            <input type="text" name="mobile" class="form-control" value="<?php echo isset($data['mobile']) ? $data['mobile'] : ''; ?>" required>
+                            <label for="mobile" class="form-label">Contact Number (Mobile)</label>
+                            <input type="text" name="mobile" class="form-control" value="<?php echo isset($data['mobile']) ? $data['mobile'] : ''; ?>">
                         </div>
                         <div class="form-group">
                             <label for="email" class="form-label">Email</label>
@@ -68,14 +68,6 @@ header.main-header { display: none !important; }
                                 ?>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label for="district" class="form-label">District *</label>
-                            <select name="district" class="form-control" required disabled>
-                                <option value="">Select District</option>
-                                <!-- Populated by JS -->
-                            </select>
-                            <input type="hidden" id="selected_district" value="<?php echo isset($data['district']) ? htmlspecialchars($data['district']) : ''; ?>">
-                        </div>
                     </div>
 
                     <div class="form-group" style="margin-bottom: 15px;">
@@ -102,6 +94,25 @@ header.main-header { display: none !important; }
                                 <?php endif; ?>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="letter_type" class="form-label">Letter Type *</label>
+                            <select name="letter_type" id="letter_type" class="form-control" required>
+                                <option value="">Select Letter Type</option>
+                                <option value="මහජන දින ලිපි" <?php echo (isset($data['letter_type']) && $data['letter_type'] == 'මහජන දින ලිපි') ? 'selected' : ''; ?>>මහජන දින ලිපි</option>
+                                <option value="දෛනික ලිපි" <?php echo (isset($data['letter_type']) && $data['letter_type'] == 'දෛනික ලිපි') ? 'selected' : ''; ?>>දෛනික ලිපි</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="district" class="form-label">District *</label>
+                            <select name="district" class="form-control" required disabled>
+                                <option value="">Select District</option>
+                                <!-- Populated by JS -->
+                            </select>
+                            <input type="hidden" id="selected_district" value="<?php echo isset($data['district']) ? htmlspecialchars($data['district']) : ''; ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="margin-top: 15px;">
                         <div class="form-group">
                             <label for="forward_department_id" class="form-label">Forward To Department *</label>
 
@@ -140,9 +151,8 @@ header.main-header { display: none !important; }
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="form-row" style="margin-top: 15px;">
+
                         <div class="form-group">
                             <label for="person" class="form-label">Forward To Person *</label>
 
