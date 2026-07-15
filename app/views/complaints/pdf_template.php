@@ -28,13 +28,22 @@
                 position: fixed;
                 bottom: 0;
             }
+            body {
+                box-shadow: none;
+                margin: 0 !important;
+            }
         }
 
         body {
             font-size: 12px;
             color: #000;
-            margin: 0;
+            margin: 20px auto;
             padding: 0;
+            width: 210mm;
+            min-height: 297mm;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+            position: relative;
         }
 
         .header-container {
@@ -86,19 +95,19 @@
         }
 
         .department-address {
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         .letter-intro {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-align: justify;
-            line-height: 1.5;
+            line-height: 1.8;
         }
 
         table.details-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
         }
 
         table.details-table th, table.details-table td {
@@ -108,9 +117,9 @@
         }
 
         .letter-body {
-            margin-bottom: 40px;
+            margin-bottom: 15px;
             text-align: justify;
-            line-height: 1.5;
+            line-height: 1.8;
         }
 
         .signature {
@@ -119,13 +128,13 @@
         }
 
         .cc-list {
-            margin-top: 50px;
-            line-height: 1.5;
-            margin-bottom: 150px; /* Space for the footer */
+            margin-top: 15px;
+            line-height: 1.8;
+            page-break-inside: avoid;
         }
 
         .footer-image {
-            position: fixed;
+            position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
@@ -180,7 +189,7 @@
         $my_number = 'NCP/GOV/01/PNPD';
     }
     ?>
-    <table style="width: 100%; font-size: 11px; margin-bottom: 30px; border-collapse: collapse; border: none; line-height: 1.2;">
+    <table style="width: 100%; font-size: 11px; margin-bottom: 15px; border-collapse: collapse; border: none; line-height: 1.2;">
         <tr>
             <td style="text-align: left; padding-right: 2px;">ඔබේ අංකය</td>
             <td rowspan="3" style="font-size: 28px; font-weight: 300; vertical-align: middle;">}</td>
@@ -264,7 +273,7 @@
         </div>
 
         <?php if($data['complaint']->district == 'පොළොන්නරුව'): ?>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
             <thead>
                 <tr>
                     <th style="width: 25%; text-align: left; padding: 8px 0; border: none;"><u>මහජන දින අංකය</u></th>
@@ -426,7 +435,7 @@
         <tfoot>
             <tr>
                 <td style="padding: 0; border: none;">
-                    <div style="height: 100px;"></div> <!-- Space for the fixed footer -->
+                    <div style="height: 60px;"></div> <!-- Space for the fixed footer -->
                 </td>
             </tr>
         </tfoot>
