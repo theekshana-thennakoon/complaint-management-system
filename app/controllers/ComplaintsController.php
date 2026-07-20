@@ -38,49 +38,32 @@ class ComplaintsController extends Controller {
         
         if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-            
             $details = [];
-            if (isset($_POST['detail_letter_no']) && isset($_POST['detail_name'])) {
-                for ($i = 0; $i < count($_POST['detail_letter_no']); $i++) {
-                    if (!empty(trim($_POST['detail_letter_no'][$i])) || !empty(trim($_POST['detail_name'][$i]))) {
-                        $details[] = [
-                            'letter_no' => trim($_POST['detail_letter_no'][$i]),
-                            'name' => trim($_POST['detail_name'][$i]),
-                            'subject' => ''
-                        ];
-                    }
-                }
-            }
+            $status = 'Draft';
+            $current_role = 6; // Draft role ID
 
-            // Determine routing based on button clicked
-            $direct_forward = isset($_POST['direct_forward']) ? trim($_POST['direct_forward']) : '';
-            if ($direct_forward === 'ao') {
-                $status        = 'Forwarded to AO';
-                $current_role  = 4; // AO role ID
-            } elseif ($direct_forward === 'gs') {
-                $status        = 'Forwarded to GS';
-                $current_role  = 3; // GS role ID
-            } else {
-                $status        = 'Pending CC';
-                $current_role  = 5; // CC role ID
-            }
+            $categories = $this->complaintModel->getCategories();
+            $departments = $this->complaintModel->getDepartments();
+            
+            $default_category_id = !empty($categories) ? $categories[0]->id : 1;
+            $default_department_id = !empty($departments) ? $departments[0]->id : 1;
 
             $data = [
-                'applicant_name'       => trim($_POST['applicant_name']),
-                'nic'                  => trim($_POST['nic']),
-                'address'              => trim($_POST['address']),
-                'mobile'               => trim($_POST['mobile']),
-                'email'                => trim($_POST['email']),
-                'subject'              => trim($_POST['subject']),
-                'category_id'          => trim($_POST['category_id']),
-                'letter_type'          => isset($_POST['letter_type']) ? trim($_POST['letter_type']) : '',
-                'forward_department_id'=> trim($_POST['forward_department_id']),
-                'person'               => isset($_POST['person']) ? trim($_POST['person']) : '',
-                'description'          => isset($_POST['description']) ? trim($_POST['description']) : '',
-                'letter_intro'         => isset($_POST['letter_intro'])      ? trim($_POST['letter_intro'])      : NULL,
-                'letter_body'          => isset($_POST['letter_body'])       ? trim($_POST['letter_body'])       : NULL,
-                'signatory_name'       => isset($_POST['signatory_name'])    ? trim($_POST['signatory_name'])    : NULL,
-                'signatory_title'      => isset($_POST['signatory_title'])   ? trim($_POST['signatory_title'])   : NULL,
+                'applicant_name'       => trim($_POST['applicant_name'] ?? ''),
+                'nic'                  => trim($_POST['nic'] ?? ''),
+                'address'              => trim($_POST['address'] ?? ''),
+                'mobile'               => trim($_POST['mobile'] ?? ''),
+                'email'                => trim($_POST['email'] ?? ''),
+                'subject'              => '',
+                'category_id'          => $default_category_id,
+                'letter_type'          => '',
+                'forward_department_id'=> $default_department_id,
+                'person'               => '',
+                'description'          => '',
+                'letter_intro'         => NULL,
+                'letter_body'          => NULL,
+                'signatory_name'       => NULL,
+                'signatory_title'      => NULL,
                 'complaint_no'         => $this->complaintModel->generateComplaintNo(trim($_POST['district'] ?? '')),
                 'date'                 => date('Y-m-d'),
                 'status'               => $status,
@@ -88,43 +71,18 @@ class ComplaintsController extends Controller {
                 'created_by'           => $_SESSION['user_id'],
                 'province'             => $_SESSION['user_province'] ?? NULL,
                 'district'             => isset($_POST['district']) ? trim($_POST['district']) : '',
-                'categories'           => $this->complaintModel->getCategories(),
-                'departments'          => $this->complaintModel->getDepartments(),
                 'err'                  => ''
             ];
 
-            if(empty($data['applicant_name']) || empty($data['subject']) || empty($data['category_id']) || empty($data['forward_department_id']) || empty($data['person']) || empty($data['district'])){
-                $data['err'] = 'Please fill all required fields';
+            if(empty($data['applicant_name']) || empty($data['district'])){
+                $data['err'] = 'Please fill all required fields (Name and District)';
                 $this->view('complaints/create', $data);
             } else {
                 $complaint_id = $this->complaintModel->addComplaint($data, $details);
                 if($complaint_id){
-                    // Handle file uploads
-                    $uploaded_files = [];
-                    if (!empty($_FILES['attachments']['name'][0])) {
-                        $upload_dir = APPROOT . '/../public/uploads/complaints/';
-                        if (!is_dir($upload_dir)) {
-                            @mkdir($upload_dir, 0755, true);
-                        }
-                        foreach ($_FILES['attachments']['name'] as $key => $name) {
-                            if ($_FILES['attachments']['error'][$key] == UPLOAD_ERR_OK) {
-                                $tmp_name = $_FILES['attachments']['tmp_name'][$key];
-                                $ext = pathinfo($name, PATHINFO_EXTENSION);
-                                $new_name = uniqid() . '_' . time() . '.' . $ext;
-                                if (move_uploaded_file($tmp_name, $upload_dir . $new_name)) {
-                                    $uploaded_files[] = [
-                                        'file_name' => $name,
-                                        'file_path' => 'uploads/complaints/' . $new_name
-                                    ];
-                                }
-                            }
-                        }
-                        $this->complaintModel->addAttachments($complaint_id, $uploaded_files);
-                    }
-
-                    $_SESSION['sweet_success'] = 'Complaint created successfully!';
+                    $_SESSION['sweet_success'] = 'Applicant Details Saved. Complaint No generated. You can now fill in the complaint details.';
                     $_SESSION['sweet_ref'] = $data['complaint_no'];
-                    redirect('complaints/show/' . $complaint_id);
+                    redirect('complaints/edit/' . $complaint_id);
                 } else {
                     die('Something went wrong');
                 }

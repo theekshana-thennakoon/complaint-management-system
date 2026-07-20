@@ -180,6 +180,10 @@
                                                 <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm">
                                                     <i class="fas fa-exclamation-circle me-1"></i> Fix Rejection
                                                 </a>
+                                            <?php elseif ($complaint->status == 'Draft'): ?>
+                                                <a href="<?php echo URLROOT; ?>/complaints/edit/<?php echo $complaint->id; ?>" class="btn btn-sm btn-secondary rounded-pill px-3 shadow-sm">
+                                                    <i class="fas fa-edit me-1"></i> Edit
+                                                </a>
                                             <?php else: ?>
                                                 <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
                                                     <i class="fas fa-search me-1"></i> View

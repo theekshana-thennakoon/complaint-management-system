@@ -163,13 +163,13 @@
                         <i class="fas fa-print"></i> Print PDF
                     </button>
                 </div>
-                <div style="border: 1px solid var(--panel-border); background: #fff; border-radius: 8px; overflow: hidden;">
+                <div style="border: 1px solid var(--panel-border); background: #fff; border-radius: 8px; overflow-x: auto; overflow-y: hidden;">
                     <?php
                     ob_start();
                     require APPROOT . '/views/complaints/pdf_template.php';
                     $letter_html = ob_get_clean();
                     ?>
-                    <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = this.contentWindow.document.documentElement.scrollHeight + 'px';" style="border: none; display: block; overflow: hidden; min-height: 800px;"></iframe>
+                    <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = (this.contentWindow.document.documentElement.scrollHeight + 50) + 'px';" style="border: none; display: block; overflow: hidden; min-height: 800px; min-width: 820px;"></iframe>
                 </div>
             </div>
         </div>
@@ -188,7 +188,7 @@
                     <i class="fas fa-paper-plane me-2"></i> Send to Department(s)
                 </h5>
                 <div class="ms-auto me-3" style="max-width: 280px; width: 100%;">
-                    <input type="text" id="popupDeptSearch" class="form-control form-control-sm border-0 shadow-sm" placeholder="🔍 Search department..." style="border-radius: 20px; padding: 6px 15px;">
+                    <input type="text" id="popupDeptSearch" class="form-control form-control-sm border-0 shadow-sm" placeholder="ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â Search department..." style="border-radius: 20px; padding: 6px 15px;">
                 </div>
                 <button type="button" class="btn-close btn-close-white ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

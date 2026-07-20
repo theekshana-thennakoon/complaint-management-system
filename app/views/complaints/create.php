@@ -58,190 +58,25 @@
                     <textarea name="address" class="form-control" rows="2"><?php echo $data['address']; ?></textarea>
                 </div>
 
-                <h4 style="margin: 20px 0 15px; color: var(--primary-color);">Complaint Details</h4>
-                <div class="form-group">
-                    <label for="subject" class="form-label">Subject *</label>
-                    <input type="text" name="subject" id="subject" class="form-control" value="<?php echo $data['subject']; ?>">
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="category_id" class="form-label">Category *</label>
-                        <select name="category_id" class="form-control">
-                            <option value="">Select Category</option>
-                            <?php foreach($data['categories'] as $category) : ?>
-                                <option value="<?php echo $category->id; ?>" <?php echo ($data['category_id'] == $category->id) ? 'selected' : ''; ?>><?php echo $category->name; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="letter_type" class="form-label">Letter Type *</label>
-                        <select name="letter_type" id="letter_type" class="form-control" required>
-                            <option value="">Select Letter Type</option>
-                            <option value="මහජන දින ලිපි" <?php echo (isset($data['letter_type']) && $data['letter_type'] == 'මහජන දින ලිපි') ? 'selected' : ''; ?>>මහජන දින ලිපි</option>
-                            <option value="දෛනික ලිපි" <?php echo (isset($data['letter_type']) && $data['letter_type'] == 'දෛනික ලිපි') ? 'selected' : ''; ?>>දෛනික ලිපි</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="district" class="form-label">District *</label>
-                        <select name="district" id="districtSelect" class="form-control" required>
-                            <option value="">Select District</option>
-                        </select>
-                        <input type="hidden" id="userProvince" value="<?php echo htmlspecialchars($_SESSION['user_province'] ?? ''); ?>">
-                        <input type="hidden" id="selectedDistrict" value="<?php echo htmlspecialchars($data['district'] ?? ''); ?>">
-                    </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label for="district" class="form-label">District *</label>
+                    <select name="district" id="districtSelect" class="form-control" required>
+                        <option value="">Select District</option>
+                    </select>
+                    <input type="hidden" id="userProvince" value="<?php echo htmlspecialchars($_SESSION['user_province'] ?? ''); ?>">
+                    <input type="hidden" id="selectedDistrict" value="<?php echo htmlspecialchars($data['district'] ?? ''); ?>">
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="forward_department_id" class="form-label">Forward To Department *</label>
-                        
-                        <div class="custom-select-wrapper" style="position: relative;">
-                            <!-- Fake Select Trigger -->
-                            <div id="customSelectTrigger" class="form-control d-flex justify-content-between align-items-center" tabindex="0" style="cursor: pointer; min-height: 48px; position: relative;">
-                                <span id="customSelectText" class="text-muted">Select Department</span>
-                                <i class="fas fa-chevron-down text-muted" style="font-size: 0.8rem;"></i>
-                            </div>
-                            
-                            <!-- Hidden Select Input for form submission -->
-                            <input type="hidden" name="forward_department_id" id="forward_department_id" value="<?php echo $data['forward_department_id']; ?>">
-                            
-                            <!-- Dropdown Menu -->
-                            <div id="customSelectDropdown" class="card shadow border-0 p-2 d-none" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; margin-top: 5px; max-height: 300px; display: flex; flex-direction: column; background: var(--panel-bg); border: 1px solid var(--panel-border) !important; border-radius: var(--radius-md) !important; box-shadow: var(--shadow-lg) !important;">
-                                <!-- Search Box inside Dropdown -->
-                                <div class="p-1 mb-2">
-                                    <input type="text" id="deptSearch" class="form-control form-control-sm" placeholder="🔍 Search department..." style="font-size: 0.85rem; padding: 6px 12px;">
-                                </div>
-                                <!-- Custom (typed) option – shown when no match found -->
-                                <div id="deptCustomOption" class="custom-option d-none" data-custom="true" style="cursor: pointer; font-size: 0.9rem; border: 1px dashed var(--primary-color); background: var(--primary-50); color: var(--primary-color); margin: 0 0 4px;">
-                                    <i class="fas fa-plus-circle" style="margin-right:6px;"></i><span id="deptCustomOptionText"></span>
-                                </div>
-                                <!-- Options List -->
-                                <div id="customSelectOptions" style="overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 2px;">
-                                    <div class="custom-option text-muted" data-value="" style="cursor: pointer; font-size: 0.9rem;">Select Department</div>
-                                    <?php foreach($data['departments'] as $department) : ?>
-                                        <div class="custom-option" data-value="<?php echo $department->id; ?>" style="cursor: pointer; font-size: 0.9rem;">
-                                            <?php echo htmlspecialchars($department->name); ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="person" class="form-label">Forward To Person *</label>
-                        
-                        <div class="custom-person-select-wrapper" style="position: relative;">
-                            <!-- Fake Select Trigger -->
-                            <div id="customPersonSelectTrigger" class="form-control d-flex justify-content-between align-items-center" tabindex="0" style="cursor: pointer; min-height: 48px; position: relative;">
-                                <span id="customPersonSelectText" class="text-muted">Select Person</span>
-                                <i class="fas fa-chevron-down text-muted" style="font-size: 0.8rem;"></i>
-                            </div>
-                            
-                            <!-- Hidden Select Input for form submission -->
-                            <input type="hidden" name="person" id="person" value="<?php echo $data['person']; ?>">
-                            
-                            <!-- Dropdown Menu -->
-                            <div id="customPersonSelectDropdown" class="card shadow border-0 p-2 d-none" style="position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; margin-top: 5px; max-height: 300px; display: flex; flex-direction: column; background: var(--panel-bg); border: 1px solid var(--panel-border) !important; border-radius: var(--radius-md) !important; box-shadow: var(--shadow-lg) !important;">
-                                <!-- Search Box inside Dropdown -->
-                                <div class="p-1 mb-2">
-                                    <input type="text" id="personSearch" class="form-control form-control-sm" placeholder="🔍 Search person..." style="font-size: 0.85rem; padding: 6px 12px;">
-                                </div>
-                                <!-- Custom (typed) option – shown when no match found -->
-                                <div id="personCustomOption" class="custom-person-option d-none" data-custom="true" style="cursor: pointer; font-size: 0.9rem; border: 1px dashed var(--primary-color); background: var(--primary-50); color: var(--primary-color); margin: 0 0 4px;">
-                                    <i class="fas fa-plus-circle" style="margin-right:6px;"></i><span id="personCustomOptionText"></span>
-                                </div>
-                                <!-- Options List -->
-                                <div id="customPersonSelectOptions" style="overflow-y: auto; max-height: 200px; display: flex; flex-direction: column; gap: 2px;">
-                                    <div class="custom-person-option text-muted" data-value="" style="cursor: pointer; font-size: 0.9rem;">Select Person</div>
-                                    <?php 
-                                    $persons = [
-                                        'ප්‍රධාන ලේකම්',
-                                        'ලේකම්',
-                                        'අධ්‍යක්ෂක',
-                                        'කොමසාරිස්',
-                                        'සභාපති',
-                                        'නියෝජ්‍ය ප්‍රධාන ලේකම්',
-                                        'ආණ්ඩුකාර ලේකම්'
-                                    ];
-                                    foreach($persons as $p) : ?>
-                                        <div class="custom-person-option" data-value="<?php echo htmlspecialchars($p); ?>" style="cursor: pointer; font-size: 0.9rem;">
-                                            <?php echo htmlspecialchars($p); ?>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <!-- Empty spacer group to align layout -->
-                    </div>
-                </div>
-                
-
-                
-                <h4 style="margin: 30px 0 15px; color: var(--primary-color);">Additional Details</h4>
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="detailsTable">
-                        <thead>
-                            <tr>
-                                <th style="width: 10%;">අනු අංක</th>
-                                <th style="width: 30%;">ලිපියේ අංකය</th>
-                                <th style="width: 50%;">නම හා කාරණය</th>
-                                <th style="width: 10%;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="detailsTbody">
-                            <tr>
-                                <td>1</td>
-                                <td><input type="text" name="detail_letter_no[]" id="firstDetailLetterNo" class="form-control"></td>
-                                <td><input type="text" name="detail_name[]" id="firstDetailName" class="form-control"></td>
-                                <td>
-                                    <button type="button" class="btn btn-danger btn-sm remove-row"><i class="fas fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <button type="button" class="btn btn-secondary btn-sm" id="addRowBtn" style="margin-top: 10px;">
-                        <i class="fas fa-plus"></i> Add Row
-                    </button>
-                </div>
-
-                <div class="form-group" style="margin-top: 20px;">
-                    <label class="form-label">Attachments (Optional, multiple files allowed)</label>
-                    <div class="advanced-dropzone" id="advancedDropzone">
-                        <input type="file" name="attachments[]" id="attachments" class="d-none" style="display:none;" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
-                        <div class="dropzone-content">
-                            <i class="fas fa-cloud-upload-alt dropzone-icon"></i>
-                            <p style="margin-bottom: 10px; color: var(--text-secondary);">Drag & Drop files here or</p>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('attachments').click()">Browse Files</button>
-                        </div>
-                    </div>
-                    <div id="filePreviewContainer" class="file-preview-container mt-3"></div>
-                </div>
-                
-                <input type="hidden" name="direct_forward"   id="direct_forward"   value="">
-                <input type="hidden" name="letter_intro"      id="letter_intro_hidden"  value="">
-                <input type="hidden" name="letter_body"       id="letter_body_hidden"   value="">
-                <input type="hidden" name="signatory_name"    id="signatory_name_hidden" value="">
-                <input type="hidden" name="signatory_title"   id="signatory_title_hidden" value="">
-
-                <div style="margin-top: 30px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                    <button type="button" class="btn btn-primary" onclick="openLetterModal('')">
-                        <i class="fas fa-eye me-1"></i> Preview &amp; Edit Letter — Submit to CC
-                    </button>
-                    <div style="width: 1px; height: 36px; background: var(--gray-200);"></div>
-                    <button type="button" class="btn btn-warning" onclick="openLetterModal('ao')">
-                        <i class="fas fa-user-tie me-1"></i> Preview &amp; Edit — Forward to AO
-                    </button>
-                    <button type="button" class="btn btn-info" onclick="openLetterModal('gs')">
-                        <i class="fas fa-landmark me-1"></i> Preview &amp; Edit — Forward to GS
+                <div style="margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save Applicant &amp; Generate Complaint No
                     </button>
                 </div>
             </form>
         </div>
     </main>
 </div>
+
 
 <!-- ═══════════════════════════════════════════════════════════════════
      LETTER PREVIEW & EDIT MODAL

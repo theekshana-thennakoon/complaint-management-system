@@ -52,13 +52,13 @@
                     <div class="row mb-4">
                         <div class="col-md-12">
                             <p class="mb-1 text-muted small fw-bold">Letter Preview</p>
-                            <div class="border rounded overflow-hidden shadow-sm" style="background: #fff;">
+                            <div class="border rounded overflow-auto shadow-sm" style="background: #fff;">
                                 <?php
                                 ob_start();
                                 require APPROOT . '/views/complaints/pdf_template.php';
                                 $letter_html = ob_get_clean();
                                 ?>
-                                <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = this.contentWindow.document.documentElement.scrollHeight + 'px';" style="border: none; display: block; overflow: hidden; min-height: 800px;"></iframe>
+                                <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = (this.contentWindow.document.documentElement.scrollHeight + 50) + 'px';" style="border: none; display: block; overflow: hidden; min-height: 800px; min-width: 820px;"></iframe>
                             </div>
                         </div>
                     </div>
