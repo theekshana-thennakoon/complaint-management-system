@@ -66,6 +66,7 @@ class GovernorController extends Controller {
             'complaint' => $complaint,
             'details' => $details,
             'rejections' => $rejections,
+            'attachments' => $this->complaintModel->getAttachments($id),
         ];
 
         $this->view('governor/show', $data);

@@ -83,6 +83,21 @@
                         </div>
                     </div>
 
+                    <?php if(!empty($data['attachments'])): ?>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <p class="mb-1 text-muted small">Attachments</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <?php foreach($data['attachments'] as $attachment): ?>
+                                    <a href="<?php echo URLROOT; ?>/<?php echo $attachment->file_path; ?>" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-paperclip"></i> <?php echo htmlspecialchars($attachment->file_name); ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Letter Preview -->
                     <div class="row mb-4">
                         <div class="col-md-12">
@@ -93,7 +108,7 @@
                                 require APPROOT . '/views/complaints/pdf_template.php';
                                 $letter_html = ob_get_clean();
                                 ?>
-                                <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = (this.contentWindow.document.documentElement.scrollHeight + 50) + 'px';" style="border: none; display: block; overflow: hidden; min-height: 800px; min-width: 820px;"></iframe>
+                                <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = (this.contentWindow.document.documentElement.scrollHeight + 50) + 'px';" style="border: none; display: block; overflow: hidden;"></iframe>
                             </div>
                         </div>
                     </div>

@@ -34,6 +34,16 @@
             }
         }
 
+        @media screen {
+            body {
+                width: 100% !important;
+                min-height: auto !important;
+                margin: 0 auto !important;
+                box-shadow: none !important;
+                box-sizing: border-box;
+            }
+        }
+
         body {
             font-size: 12px;
             color: #000;

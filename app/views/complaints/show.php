@@ -169,7 +169,7 @@
                     require APPROOT . '/views/complaints/pdf_template.php';
                     $letter_html = ob_get_clean();
                     ?>
-                    <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = (this.contentWindow.document.documentElement.scrollHeight + 50) + 'px';" style="border: none; display: block; overflow: hidden; min-height: 800px; min-width: 820px;"></iframe>
+                    <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = (this.contentWindow.document.documentElement.scrollHeight + 50) + 'px';" style="border: none; display: block; overflow: hidden;"></iframe>
                 </div>
             </div>
         </div>

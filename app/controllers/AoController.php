@@ -77,6 +77,7 @@ class AoController extends Controller {
             'complaint' => $complaint,
             'details' => $details,
             'rejections' => $rejections,
+            'attachments' => $this->complaintModel->getAttachments($id),
             'remarks' => '',
             'remarks_err' => ''
         ];
