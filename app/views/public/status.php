@@ -2,7 +2,7 @@
 
 <main class="container">
     <div style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 50px;">
-        <div style="width: 100%; max-width: 600px;">
+        <div style="width: 100%; max-width: 800px;">
             <div class="card">
                 <div class="card-header">
                     <div>
@@ -30,7 +30,7 @@
                 <?php if(!empty($data['ref'])): ?>
                     <hr style="border: 0; border-top: 1px solid var(--panel-border); margin: 30px 0;">
                     <?php if($data['complaint']): ?>
-                        <div class="alert alert-success">
+                        <div class="alert alert-success" style="display: block;">
                             <h4>Complaint Found!</h4>
                             <p><strong>Subject:</strong> <?php echo htmlspecialchars($data['complaint']->subject); ?></p>
                             <p><strong>Status:</strong> <span class="badge status-<?php echo strtolower($data['complaint']->status); ?>"><?php echo htmlspecialchars($data['complaint']->status); ?></span></p>
