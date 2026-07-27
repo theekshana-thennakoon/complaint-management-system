@@ -129,7 +129,7 @@ class ComplaintsController extends Controller {
         $details = $this->complaintModel->getComplaintDetails($id);
         
         $reject_log = null;
-        if ($complaint->status == 'Rejected by CC') {
+        if (strpos($complaint->status, 'Rejected') !== false) {
             $reject_log = $this->complaintModel->getLatestWorkflowLog($id, 'Reject');
         }
 
@@ -248,7 +248,7 @@ class ComplaintsController extends Controller {
         
         // Ensure complaint exists and is editable
         $can_edit = false;
-        if ($complaint && $complaint->created_by == $_SESSION['user_id'] && $complaint->status == 'Rejected by CC') {
+        if ($complaint && $complaint->created_by == $_SESSION['user_id'] && strpos($complaint->status, 'Rejected') !== false) {
             $can_edit = true;
         } elseif ($complaint && $complaint->status == 'Draft') {
             $can_edit = true;

@@ -32,10 +32,10 @@
             </div>
         </div>
 
-        <?php if($data['complaint']->status == 'Rejected by CC' && !empty($data['reject_log'])): ?>
+        <?php if(strpos($data['complaint']->status, 'Rejected') !== false && !empty($data['reject_log'])): ?>
             <div class="alert alert-danger shadow-sm border-danger border-start border-5 mb-4 rounded d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="alert-heading text-danger fw-bold mb-1"><i class="fas fa-exclamation-triangle"></i> Rejected by Chief Clerk</h5>
+                    <h5 class="alert-heading text-danger fw-bold mb-1"><i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($data['complaint']->status); ?></h5>
                     <p class="mb-0"><strong>Reason:</strong> <?php echo htmlspecialchars($data['reject_log']->remarks); ?></p>
                 </div>
                 <?php if ($data['complaint']->created_by == $_SESSION['user_id']): ?>

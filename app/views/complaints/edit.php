@@ -7,9 +7,9 @@
                 <i class="fas fa-arrow-left"></i> Back to Dashboard
             </a>
             
-            <?php if($data['complaint']->status == 'Rejected by CC' && $data['reject_log']): ?>
+            <?php if(strpos($data['complaint']->status, 'Rejected') !== false && $data['reject_log']): ?>
             <div class="alert alert-danger shadow-sm border-danger border-start border-5 mb-4 rounded">
-                <h5 class="alert-heading text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> Rejected by Chief Clerk</h5>
+                <h5 class="alert-heading text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($data['complaint']->status); ?></h5>
                 <p class="mb-0 mt-2"><strong>Reason for Rejection:</strong> <?php echo htmlspecialchars($data['reject_log']->remarks); ?></p>
                 <hr>
                 <p class="mb-0 small text-danger">Please correct the information below based on the remarks and resubmit.</p>
