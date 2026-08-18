@@ -88,9 +88,28 @@ class Complaint {
     }
 
     public function getComplaintByNo($complaint_no){
-        $this->db->query('SELECT * FROM complaints WHERE complaint_no = :complaint_no');
+        $this->db->query('
+            SELECT c.*, cat.name as category_name, d.name as department_name 
+            FROM complaints c 
+            LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
+            LEFT JOIN departments d ON c.forward_department_id = d.id 
+            WHERE c.complaint_no = :complaint_no
+        ');
         $this->db->bind(':complaint_no', $complaint_no);
         return $this->db->single();
+    }
+
+    public function getComplaintsByNicOrMobile($nic_or_mobile){
+        $this->db->query('
+            SELECT c.*, cat.name as category_name, d.name as department_name 
+            FROM complaints c 
+            LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
+            LEFT JOIN departments d ON c.forward_department_id = d.id 
+            WHERE c.nic = :val OR c.mobile = :val 
+            ORDER BY c.created_at DESC
+        ');
+        $this->db->bind(':val', $nic_or_mobile);
+        return $this->db->resultSet();
     }
 
     public function getComplaints($month = null, $category_id = null){

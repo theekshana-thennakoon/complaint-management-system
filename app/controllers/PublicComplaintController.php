@@ -91,34 +91,56 @@ class PubliccomplaintController extends Controller {
             $nic_or_mobile = isset($_POST['nic_or_mobile']) ? trim($_POST['nic_or_mobile']) : '';
         } else {
             $ref = isset($_GET['ref']) ? trim($_GET['ref']) : '';
+            $nic_or_mobile = isset($_GET['nic']) ? trim($_GET['nic']) : '';
         }
 
         $data = [
             'ref' => $ref,
             'nic_or_mobile' => $nic_or_mobile,
-            'complaint' => null,
-            'attachments' => [],
+            'complaints' => [],
             'err' => ''
         ];
 
-        if(!empty($data['ref'])){
-            $complaint = $this->complaintModel->getComplaintByNo($data['ref']);
-            if($complaint){
-                if(!isLoggedIn()) {
-                    if(empty($data['nic_or_mobile']) && $_SERVER['REQUEST_METHOD'] == 'POST'){
-                        $data['err'] = 'NIC or Mobile number is required to verify identity.';
-                    } else if(!empty($data['nic_or_mobile']) && $complaint->nic !== $data['nic_or_mobile'] && $complaint->mobile !== $data['nic_or_mobile']) {
-                        $data['err'] = 'Verification failed. Incorrect NIC or Mobile number.';
-                    } else if (!empty($data['nic_or_mobile'])) {
-                        $data['complaint'] = $complaint;
-                        $data['attachments'] = $this->complaintModel->getAttachments($complaint->id);
+        if($_SERVER['REQUEST_METHOD'] == 'POST' || !empty($ref) || !empty($nic_or_mobile)){
+            if(!empty($ref) && !empty($nic_or_mobile)){
+                // Both Reference Number and NIC/Mobile supplied
+                $complaint = $this->complaintModel->getComplaintByNo($ref);
+                if($complaint){
+                    if($complaint->nic === $nic_or_mobile || $complaint->mobile === $nic_or_mobile){
+                        $complaint->attachments = $this->complaintModel->getAttachments($complaint->id);
+                        $data['complaints'][] = $complaint;
+                    } else {
+                        $data['err'] = 'Verification failed. Reference Number and NIC / Mobile Number do not match.';
                     }
                 } else {
-                    $data['complaint'] = $complaint;
-                    $data['attachments'] = $this->complaintModel->getAttachments($complaint->id);
+                    $data['err'] = 'No complaint found with this Reference Number.';
+                }
+            } else if(!empty($ref)){
+                // Only Reference Number supplied
+                $complaint = $this->complaintModel->getComplaintByNo($ref);
+                if($complaint){
+                    if(!isLoggedIn()){
+                        $data['err'] = 'NIC or Mobile number is required to verify identity.';
+                    } else {
+                        $complaint->attachments = $this->complaintModel->getAttachments($complaint->id);
+                        $data['complaints'][] = $complaint;
+                    }
+                } else {
+                    $data['err'] = 'No complaint found with this Reference Number.';
+                }
+            } else if(!empty($nic_or_mobile)){
+                // Only NIC or Mobile supplied (returns all matching complaints)
+                $complaints = $this->complaintModel->getComplaintsByNicOrMobile($nic_or_mobile);
+                if(!empty($complaints)){
+                    foreach($complaints as $c){
+                        $c->attachments = $this->complaintModel->getAttachments($c->id);
+                        $data['complaints'][] = $c;
+                    }
+                } else {
+                    $data['err'] = 'No complaints found for the provided NIC / Mobile number.';
                 }
             } else {
-                $data['err'] = 'No complaint found with this reference number.';
+                $data['err'] = 'Please enter a Reference Number or NIC / Mobile Number to check status.';
             }
         }
 

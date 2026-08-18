@@ -381,7 +381,7 @@
         $signSrc = '';
         $sealSrc = '';
         if ($isApprovedByGS) {
-            $signPath = APPROOT . '/../public/img/sign_w_b.png';
+            $signPath = APPROOT . '/../public/img/sign.png';
             $sealPath = APPROOT . '/../public/img/seal.png';
             
             if (file_exists($signPath)) {
@@ -405,8 +405,8 @@
                     <?php endif; ?>
                     <div class="signature" style="margin-top: 0; white-space: nowrap;">
                         <?php
-                        $sigName  = !empty($data['complaint']->signatory_name)  ? $data['complaint']->signatory_name  : 'එම්.ශ්‍රීස්කන්දකුමාර්';
-                        $sigTitle = "ආණ්ඩුකාරවර ලේකම්(වැ.බ.)," . "\n" . "ආණ්ඩුකාරවර ලේකම් කාර්යාලය," . "\n" . "උතුරු මැද පළාත.";
+                        $sigName  = !empty($data['complaint']->signatory_name)  ? $data['complaint']->signatory_name  : 'නන්දන ගලබොඩ';
+                        $sigTitle = "ආණ්ඩුකාරවර ලේකම්," . "\n" . "ආණ්ඩුකාරවර ලේකම් කාර්යාලය," . "\n" . "උතුරු මැද පළාත.";
                         echo '(' . htmlspecialchars($sigName) . ')<br>';
                         echo nl2br(htmlspecialchars($sigTitle));
                         ?>
