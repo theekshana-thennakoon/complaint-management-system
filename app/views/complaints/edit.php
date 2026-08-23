@@ -158,11 +158,28 @@
                                         </div>
                                     </div>
                                 </div>
+                        </div>
+
+                        <h5 class="text-primary mb-3 border-bottom pb-2 mt-4"><i class="fas fa-signature me-2"></i> Letter Sign Person (Signatory)</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="signatory_id" class="form-label fw-bold">Select Letter Sign Person *</label>
+                                <select name="signatory_id" id="signatory_id_select" class="form-select">
+                                    <?php if(!empty($data['signatories'])): ?>
+                                        <?php foreach($data['signatories'] as $sig): ?>
+                                            <?php 
+                                                $isSelected = (isset($data['complaint']->signatory_id) && $data['complaint']->signatory_id == $sig->id) || (!isset($data['complaint']->signatory_id) && $sig->is_default == 1);
+                                            ?>
+                                            <option value="<?php echo $sig->id; ?>" <?php echo $isSelected ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($sig->name); ?> <?php echo !empty($sig->title) ? '(' . htmlspecialchars($sig->title) . ')' : ''; ?> <?php echo ($sig->is_default == 1) ? '[Active Default]' : ''; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                                <div class="form-text">Selecting a sign person updates the signature image, name, and title on this specific complaint letter.</div>
                             </div>
                         </div>
-                        
 
-                        
                         <h5 class="text-primary mb-3 border-bottom pb-2">Additional Details</h5>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="detailsTable">

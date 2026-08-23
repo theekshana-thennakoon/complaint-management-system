@@ -7,7 +7,7 @@ class Complaint {
     }
 
     public function addComplaint($data, $details = []){
-        $this->db->query('INSERT INTO complaints (complaint_no, date, applicant_name, nic, address, mobile, email, subject, category_id, letter_type, description, letter_intro, letter_body, signatory_name, signatory_title, status, current_role_id, created_by, forward_department_id, person, province, district) VALUES (:complaint_no, :date, :applicant_name, :nic, :address, :mobile, :email, :subject, :category_id, :letter_type, :description, :letter_intro, :letter_body, :signatory_name, :signatory_title, :status, :current_role_id, :created_by, :forward_department_id, :person, :province, :district)');
+        $this->db->query('INSERT INTO complaints (complaint_no, date, applicant_name, nic, address, mobile, email, subject, category_id, letter_type, description, letter_intro, letter_body, signatory_id, signatory_name, signatory_title, status, current_role_id, created_by, forward_department_id, person, province, district) VALUES (:complaint_no, :date, :applicant_name, :nic, :address, :mobile, :email, :subject, :category_id, :letter_type, :description, :letter_intro, :letter_body, :signatory_id, :signatory_name, :signatory_title, :status, :current_role_id, :created_by, :forward_department_id, :person, :province, :district)');
 
         // Bind values
         $this->db->bind(':complaint_no', $data['complaint_no']);
@@ -23,6 +23,7 @@ class Complaint {
         $this->db->bind(':description', isset($data['description']) ? $data['description'] : null);
         $this->db->bind(':letter_intro', isset($data['letter_intro']) ? $data['letter_intro'] : null);
         $this->db->bind(':letter_body', isset($data['letter_body']) ? $data['letter_body'] : null);
+        $this->db->bind(':signatory_id',    $data['signatory_id']    ?? NULL);
         $this->db->bind(':signatory_name',  $data['signatory_name']  ?? NULL);
         $this->db->bind(':signatory_title', $data['signatory_title'] ?? NULL);
         $this->db->bind(':status', $data['status'] ?? 'Draft');
@@ -346,7 +347,27 @@ class Complaint {
     }
 
     public function updateComplaint($id, $data, $details = []) {
-        $this->db->query('UPDATE complaints SET applicant_name = :applicant_name, nic = :nic, address = :address, mobile = :mobile, email = :email, subject = :subject, category_id = :category_id, letter_type = :letter_type, district = :district, description = :description, forward_department_id = :forward_department_id, person = :person WHERE id = :id');
+        $sql = 'UPDATE complaints SET applicant_name = :applicant_name, nic = :nic, address = :address, mobile = :mobile, email = :email, subject = :subject, category_id = :category_id, letter_type = :letter_type, district = :district, description = :description, forward_department_id = :forward_department_id, person = :person';
+        
+        if (array_key_exists('letter_intro', $data)) {
+            $sql .= ', letter_intro = :letter_intro';
+        }
+        if (array_key_exists('letter_body', $data)) {
+            $sql .= ', letter_body = :letter_body';
+        }
+        if (array_key_exists('signatory_id', $data)) {
+            $sql .= ', signatory_id = :signatory_id';
+        }
+        if (array_key_exists('signatory_name', $data)) {
+            $sql .= ', signatory_name = :signatory_name';
+        }
+        if (array_key_exists('signatory_title', $data)) {
+            $sql .= ', signatory_title = :signatory_title';
+        }
+        
+        $sql .= ' WHERE id = :id';
+
+        $this->db->query($sql);
         
         $this->db->bind(':applicant_name', $data['applicant_name']);
         $this->db->bind(':nic', $data['nic']);
@@ -360,6 +381,23 @@ class Complaint {
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':forward_department_id', $data['forward_department_id']);
         $this->db->bind(':person', $data['person']);
+        
+        if (array_key_exists('letter_intro', $data)) {
+            $this->db->bind(':letter_intro', $data['letter_intro']);
+        }
+        if (array_key_exists('letter_body', $data)) {
+            $this->db->bind(':letter_body', $data['letter_body']);
+        }
+        if (array_key_exists('signatory_id', $data)) {
+            $this->db->bind(':signatory_id', $data['signatory_id']);
+        }
+        if (array_key_exists('signatory_name', $data)) {
+            $this->db->bind(':signatory_name', $data['signatory_name']);
+        }
+        if (array_key_exists('signatory_title', $data)) {
+            $this->db->bind(':signatory_title', $data['signatory_title']);
+        }
+
         $this->db->bind(':id', $id);
 
         if ($this->db->execute()) {
@@ -509,5 +547,14 @@ class Complaint {
         $count = (isset($row->count) ? $row->count : 0) + 1;
         
         return sprintf("%s-%s-%02d", $prefix, $dateStr, $count);
+    }
+
+    public function updateComplaintSignatory($id, $signatory_id, $signatory_name = null, $signatory_title = null) {
+        $this->db->query('UPDATE complaints SET signatory_id = :signatory_id, signatory_name = :signatory_name, signatory_title = :signatory_title WHERE id = :id');
+        $this->db->bind(':signatory_id', $signatory_id);
+        $this->db->bind(':signatory_name', $signatory_name);
+        $this->db->bind(':signatory_title', $signatory_title);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
     }
 }

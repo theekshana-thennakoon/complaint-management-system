@@ -5,6 +5,7 @@ class ComplaintsController extends Controller {
             redirect('auth');
         }
         $this->complaintModel = $this->model('Complaint');
+        $this->signatoryModel = $this->model('Signatory');
     }
 
     public function index(){
@@ -48,6 +49,8 @@ class ComplaintsController extends Controller {
             $default_category_id = !empty($categories) ? $categories[0]->id : 1;
             $default_department_id = !empty($departments) ? $departments[0]->id : 1;
 
+            $activeSignatory = $this->signatoryModel->getDefaultSignatory();
+
             $data = [
                 'applicant_name'       => trim($_POST['applicant_name'] ?? ''),
                 'nic'                  => trim($_POST['nic'] ?? ''),
@@ -62,8 +65,9 @@ class ComplaintsController extends Controller {
                 'description'          => '',
                 'letter_intro'         => NULL,
                 'letter_body'          => NULL,
-                'signatory_name'       => NULL,
-                'signatory_title'      => NULL,
+                'signatory_id'         => $activeSignatory ? $activeSignatory->id : NULL,
+                'signatory_name'       => $activeSignatory ? $activeSignatory->name : NULL,
+                'signatory_title'      => $activeSignatory ? $activeSignatory->title : NULL,
                 'complaint_no'         => $this->complaintModel->generateComplaintNo(trim($_POST['district'] ?? '')),
                 'date'                 => date('Y-m-d'),
                 'status'               => $status,
@@ -71,6 +75,7 @@ class ComplaintsController extends Controller {
                 'created_by'           => $_SESSION['user_id'],
                 'province'             => $_SESSION['user_province'] ?? NULL,
                 'district'             => isset($_POST['district']) ? trim($_POST['district']) : '',
+                'signatories'          => $this->signatoryModel->getSignatories(),
                 'err'                  => ''
             ];
 
@@ -277,6 +282,9 @@ class ComplaintsController extends Controller {
                 }
             }
 
+            $selectedSigId = isset($_POST['signatory_id']) ? (int)$_POST['signatory_id'] : null;
+            $sigObj = $selectedSigId ? $this->signatoryModel->getSignatoryById($selectedSigId) : null;
+
             $data = [
                 'id' => $id,
                 'complaint' => $complaint,
@@ -293,8 +301,14 @@ class ComplaintsController extends Controller {
                 'forward_department_id' => trim($_POST['forward_department_id']),
                 'person' => isset($_POST['person']) ? trim($_POST['person']) : '',
                 'description' => isset($_POST['description']) ? trim($_POST['description']) : '',
+                'letter_intro' => isset($_POST['letter_intro']) ? trim($_POST['letter_intro']) : null,
+                'letter_body' => isset($_POST['letter_body']) ? trim($_POST['letter_body']) : null,
+                'signatory_id' => $selectedSigId ?: ($complaint->signatory_id ?? null),
+                'signatory_name' => isset($_POST['signatory_name']) && trim($_POST['signatory_name']) !== '' ? trim($_POST['signatory_name']) : ($sigObj ? $sigObj->name : $complaint->signatory_name),
+                'signatory_title' => isset($_POST['signatory_title']) && trim($_POST['signatory_title']) !== '' ? trim($_POST['signatory_title']) : ($sigObj ? $sigObj->title : $complaint->signatory_title),
                 'categories' => $this->complaintModel->getCategories(),
                 'departments' => $this->complaintModel->getDepartments(),
+                'signatories' => $this->signatoryModel->getSignatories(),
                 'err' => ''
             ];
 
@@ -373,6 +387,7 @@ class ComplaintsController extends Controller {
                 'description' => $complaint->description,
                 'categories' => $this->complaintModel->getCategories(),
                 'departments' => $this->complaintModel->getDepartments(),
+                'signatories' => $this->signatoryModel->getSignatories(),
                 'attachments' => $this->complaintModel->getAttachments($id),
                 'err' => ''
             ];
@@ -400,5 +415,21 @@ class ComplaintsController extends Controller {
             echo json_encode(['success' => false, 'message' => 'Failed to add department']);
         }
         exit;
+    }
+
+    public function updateSignatory($id) {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $signatory_id = isset($_POST['signatory_id']) ? (int)$_POST['signatory_id'] : null;
+            if ($signatory_id) {
+                $sig = $this->signatoryModel->getSignatoryById($signatory_id);
+                if ($sig) {
+                    $this->complaintModel->updateComplaintSignatory($id, $sig->id, $sig->name, $sig->title);
+                    flash('complaint_success', 'Signatory updated for this complaint letter.');
+                }
+            }
+            redirect(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'complaints/show/' . $id);
+        } else {
+            redirect('dashboard');
+        }
     }
 }

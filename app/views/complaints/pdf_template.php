@@ -376,7 +376,7 @@
         </div>
 
         <?php
-        // Load Signatory details dynamically
+        // Load Signatory details dynamically according to the complaint
         require_once APPROOT . '/models/Signatory.php';
         $signatoryModel = new Signatory();
         $activeSignatory = null;
@@ -389,7 +389,7 @@
         }
 
         $isApprovedByGS = strpos($data['complaint']->status, 'Approved by GS') !== false;
-        
+
         $signSrc = '';
         if ($isApprovedByGS && $activeSignatory) {
             $signImg = !empty($activeSignatory->signature_image) ? $activeSignatory->signature_image : 'sign.png';
@@ -413,8 +413,8 @@
         <table style="border-collapse: collapse; border: none; margin-top: 20px;">
             <tr>
                 <td style="vertical-align: top; border: none; padding: 0; padding-right: 40px;">
-                    <?php if ($isApprovedByGS && !empty($signSrc)): ?>
-                        <div style="">
+                    <?php if (!empty($signSrc)): ?>
+                        <div style="margin-bottom: 5px;">
                             <img src="<?php echo $signSrc; ?>" style="width: 120px; height: auto;" />
                         </div>
                     <?php else: ?>

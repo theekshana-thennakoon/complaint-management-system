@@ -119,6 +119,19 @@
                     <textarea id="edit_letter_body" class="form-control" rows="8" style="font-size:0.82rem; font-family:'Noto Sans Sinhala',sans-serif; line-height:1.7;"></textarea>
                 </div>
 
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label class="form-label" style="font-size:0.82rem; font-weight:600;">Select Sign Person (Signatory)</label>
+                    <select id="signatory_select" class="form-select" style="font-size:0.82rem;" onchange="onSignatoryChange(this)">
+                        <?php if(!empty($data['signatories'])): ?>
+                            <?php foreach($data['signatories'] as $sig): ?>
+                                <option value="<?php echo $sig->id; ?>" data-name="<?php echo htmlspecialchars($sig->name); ?>" data-title="<?php echo htmlspecialchars($sig->title ?? ''); ?>" <?php echo ($sig->is_default == 1) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($sig->name); ?> <?php echo !empty($sig->title) ? '(' . htmlspecialchars($sig->title) . ')' : ''; ?> <?php echo ($sig->is_default == 1) ? '[Active Default]' : ''; ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
                     <div class="form-group">
                         <label class="form-label" style="font-size:0.82rem; font-weight:600;">Signatory Name</label>
