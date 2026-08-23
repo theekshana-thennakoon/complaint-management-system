@@ -232,6 +232,31 @@ class ComplaintsController extends Controller {
             }
             $deptHtml .= '</ul></div>';
 
+            // Handle optional file attachments uploaded during dispatch
+            $uploaded_files = [];
+            if (!empty($_FILES['attachments']['name'][0])) {
+                $upload_dir = APPROOT . '/../public/uploads/complaints/';
+                if (!is_dir($upload_dir)) {
+                    @mkdir($upload_dir, 0755, true);
+                }
+                foreach ($_FILES['attachments']['name'] as $key => $name) {
+                    if (isset($_FILES['attachments']['error'][$key]) && $_FILES['attachments']['error'][$key] == UPLOAD_ERR_OK) {
+                        $tmp_name = $_FILES['attachments']['tmp_name'][$key];
+                        $ext = pathinfo($name, PATHINFO_EXTENSION);
+                        $new_name = uniqid() . '_' . time() . '.' . $ext;
+                        if (move_uploaded_file($tmp_name, $upload_dir . $new_name)) {
+                            $uploaded_files[] = [
+                                'file_name' => $name,
+                                'file_path' => 'uploads/complaints/' . $new_name
+                            ];
+                        }
+                    }
+                }
+                if (!empty($uploaded_files)) {
+                    $this->complaintModel->addAttachments($id, $uploaded_files);
+                }
+            }
+
             if ($this->complaintModel->dispatchToDepartments($id, $department_ids, $_SESSION['user_id'])) {
                 $_SESSION['sweet_success'] = 'Complaint Dispatched Successfully!';
                 $_SESSION['sweet_html'] = $deptHtml;

@@ -188,14 +188,25 @@
                     <i class="fas fa-paper-plane me-2"></i> Send to Department(s)
                 </h5>
                 <div class="ms-auto me-3" style="max-width: 280px; width: 100%;">
-                    <input type="text" id="popupDeptSearch" class="form-control form-control-sm border-0 shadow-sm" placeholder="ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â Search department..." style="border-radius: 20px; padding: 6px 15px;">
+                    <input type="text" id="popupDeptSearch" class="form-control form-control-sm border-0 shadow-sm" placeholder="🔍 Search department..." style="border-radius: 20px; padding: 6px 15px;">
                 </div>
                 <button type="button" class="btn-close btn-close-white ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="dispatchForm" method="POST" action="<?php echo URLROOT; ?>/complaints/dispatch/<?php echo $data['complaint']->id; ?>">
+            <form id="dispatchForm" method="POST" action="<?php echo URLROOT; ?>/complaints/dispatch/<?php echo $data['complaint']->id; ?>" enctype="multipart/form-data">
                 <div class="modal-body p-4">
-                    <p class="text-muted small mb-1">Complaint: <span class="fw-bold" style="color: var(--primary-color);"><?php echo htmlspecialchars($data['complaint']->complaint_no); ?></span></p>
-                    <p class="text-muted small mb-3">Select one or more departments to forward this complaint letter to:</p>
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 mb-4 rounded-3 border" style="background-color: #f8f9fa;">
+                        <div>
+                            <p class="text-muted small mb-1">Complaint Number: <span class="fw-bold fs-6" style="color: var(--primary-color);"><?php echo htmlspecialchars($data['complaint']->complaint_no); ?></span></p>
+                            <p class="text-muted small mb-0">Select one or more departments to forward this complaint letter to:</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-3 border shadow-sm" style="min-width: 320px; max-width: 420px; flex: 1;">
+                            <label for="dispatchAttachments" class="form-label fw-bold small text-primary mb-1 d-flex align-items-center">
+                                <i class="fas fa-paperclip me-2"></i> Attach Files / Documents (Optional)
+                            </label>
+                            <input type="file" form="dispatchForm" name="attachments[]" id="dispatchAttachments" multiple class="form-control form-control-sm border" style="font-size:0.82rem; background:#ffffff;">
+                            <div class="form-text mt-1" style="font-size:0.72rem; color:#6c757d;">You can select one or more files to attach.</div>
+                        </div>
+                    </div>
 
                     <?php
                     $offices = [];
@@ -312,6 +323,8 @@
 function openDispatchModal(complaintId, complaintNo) {
     document.querySelectorAll('.dept-checkbox').forEach(cb => cb.checked = false);
     document.getElementById('deptError').classList.add('d-none');
+    const att = document.getElementById('dispatchAttachments');
+    if (att) att.value = '';
     
     // Clear search and reset visibility
     const searchInput = document.getElementById('popupDeptSearch');

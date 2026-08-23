@@ -329,10 +329,21 @@
                 </div>
                 <button type="button" class="btn-close btn-close-white ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="dispatchForm" method="POST" action="">
+            <form id="dispatchForm" method="POST" action="" enctype="multipart/form-data">
                 <div class="modal-body p-4">
-                    <p class="text-muted mb-1 small">Complaint: <span id="modalComplaintNo" class="fw-bold" style="color: var(--primary-color);"></span></p>
-                    <p class="text-muted small mb-3">Select one or more departments to forward this complaint letter to:</p>
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 mb-4 rounded-3 border" style="background-color: #f8f9fa;">
+                        <div>
+                            <p class="text-muted small mb-1">Complaint Number: <span id="modalComplaintNo" class="fw-bold fs-6" style="color: var(--primary-color);"></span></p>
+                            <p class="text-muted small mb-0">Select one or more departments to forward this complaint letter to:</p>
+                        </div>
+                        <div class="bg-white p-2 rounded-3 border shadow-sm" style="min-width: 320px; max-width: 420px; flex: 1;">
+                            <label for="dispatchAttachments" class="form-label fw-bold small text-primary mb-1 d-flex align-items-center">
+                                <i class="fas fa-paperclip me-2"></i> Attach Files / Documents (Optional)
+                            </label>
+                            <input type="file" form="dispatchForm" name="attachments[]" id="dispatchAttachments" multiple class="form-control form-control-sm border" style="font-size:0.82rem; background:#ffffff;">
+                            <div class="form-text mt-1" style="font-size:0.72rem; color:#6c757d;">You can select one or more files to attach.</div>
+                        </div>
+                    </div>
 
                     <?php
                     $offices = [];
@@ -426,6 +437,8 @@ function openDispatchModal(complaintId, complaintNo) {
     document.getElementById('dispatchForm').action = '<?php echo URLROOT; ?>/complaints/dispatch/' + complaintId;
     document.querySelectorAll('.dept-checkbox').forEach(cb => cb.checked = false);
     document.getElementById('deptError').classList.add('d-none');
+    const att = document.getElementById('dispatchAttachments');
+    if (att) att.value = '';
     const s = document.getElementById('popupDeptSearch');
     if (s) { s.value = ''; document.querySelectorAll('#dispatchModal .dept-check-item').forEach(i => i.style.setProperty('display','flex','important')); }
     new bootstrap.Modal(document.getElementById('dispatchModal')).show();
