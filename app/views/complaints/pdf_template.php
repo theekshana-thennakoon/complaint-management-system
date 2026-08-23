@@ -376,21 +376,38 @@
         </div>
 
         <?php
+        // Load Signatory details dynamically
+        require_once APPROOT . '/models/Signatory.php';
+        $signatoryModel = new Signatory();
+        $activeSignatory = null;
+
+        if (!empty($data['complaint']->signatory_id)) {
+            $activeSignatory = $signatoryModel->getSignatoryById($data['complaint']->signatory_id);
+        }
+        if (!$activeSignatory) {
+            $activeSignatory = $signatoryModel->getDefaultSignatory();
+        }
+
         $isApprovedByGS = strpos($data['complaint']->status, 'Approved by GS') !== false;
         
         $signSrc = '';
-        $sealSrc = '';
-        if ($isApprovedByGS) {
-            $signPath = APPROOT . '/../public/img/sign.png';
-            $sealPath = APPROOT . '/../public/img/seal.png';
+        if ($isApprovedByGS && $activeSignatory) {
+            $signImg = !empty($activeSignatory->signature_image) ? $activeSignatory->signature_image : 'sign.png';
+            if (strpos($signImg, 'uploads/') === 0) {
+                $signPath = APPROOT . '/../public/' . $signImg;
+            } else {
+                $signPath = APPROOT . '/../public/img/' . $signImg;
+            }
             
             if (file_exists($signPath)) {
-                $signSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($signPath));
-            }
-            if (file_exists($sealPath)) {
-                $sealSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($sealPath));
+                $ext = strtolower(pathinfo($signPath, PATHINFO_EXTENSION));
+                $mimeType = ($ext === 'png') ? 'image/png' : (($ext === 'jpg' || $ext === 'jpeg') ? 'image/jpeg' : 'image/png');
+                $signSrc = 'data:' . $mimeType . ';base64,' . base64_encode(file_get_contents($signPath));
             }
         }
+
+        $sigName  = !empty($data['complaint']->signatory_name) ? $data['complaint']->signatory_name : ($activeSignatory ? $activeSignatory->name : 'නන්දන ගලබොඩ');
+        $sigTitle = !empty($data['complaint']->signatory_title) ? $data['complaint']->signatory_title : ($activeSignatory ? $activeSignatory->title : "ආණ්ඩුකාරවර ලේකම්," . "\n" . "ආණ්ඩුකාරවර ලේකම් කාර්යාලය," . "\n" . "උතුරු මැද පළාත.");
         ?>
 
         <table style="border-collapse: collapse; border: none; margin-top: 20px;">
@@ -405,19 +422,12 @@
                     <?php endif; ?>
                     <div class="signature" style="margin-top: 0; white-space: nowrap;">
                         <?php
-                        $sigName  = !empty($data['complaint']->signatory_name)  ? $data['complaint']->signatory_name  : 'නන්දන ගලබොඩ';
-                        $sigTitle = "ආණ්ඩුකාරවර ලේකම්," . "\n" . "ආණ්ඩුකාරවර ලේකම් කාර්යාලය," . "\n" . "උතුරු මැද පළාත.";
                         echo '(' . htmlspecialchars($sigName) . ')<br>';
                         echo nl2br(htmlspecialchars($sigTitle));
                         ?>
                     </div>
                 </td>
                 <td style="vertical-align: bottom; border: none; padding: 0;">
-                    <!-- <?php if ($isApprovedByGS && !empty($sealSrc)): ?>
-                        <div style="margin-bottom: -10px;">
-                            <img src="<?php echo $sealSrc; ?>" style="width: 160px; height: auto;" />
-                        </div>
-                    <?php endif; ?> -->
                 </td>
             </tr>
         </table>

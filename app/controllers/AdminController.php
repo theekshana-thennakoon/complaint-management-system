@@ -6,6 +6,7 @@ class AdminController extends Controller {
         }
         $this->userModel = $this->model('User');
         $this->complaintModel = $this->model('Complaint');
+        $this->signatoryModel = $this->model('Signatory');
     }
 
     private function _getDashboardData(){
@@ -45,6 +46,7 @@ class AdminController extends Controller {
         $dashboardData['roles'] = $this->userModel->getManagedRoles();
         $dashboardData['departments'] = $this->complaintModel->getDepartments();
         $dashboardData['all_complaints'] = $this->complaintModel->getComplaints();
+        $dashboardData['signatories'] = $this->signatoryModel->getSignatories();
         $this->view('admin/index', $dashboardData);
     }
 
@@ -262,6 +264,114 @@ class AdminController extends Controller {
                 flash('admin_message', 'User removed successfully');
             } else {
                 flash('admin_message', 'Cannot remove user as they are linked to existing complaints.', 'alert alert-danger');
+            }
+            redirect('admin');
+        } else {
+            redirect('admin');
+        }
+    }
+
+    public function addSignatory(){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            $name = trim($_POST['name'] ?? '');
+            $title = trim($_POST['title'] ?? '');
+            $is_default = isset($_POST['is_default']) ? 1 : 0;
+
+            if(empty($name)){
+                flash('admin_message', 'Signatory name is required.', 'alert alert-danger');
+                redirect('admin');
+                return;
+            }
+
+            $signature_image = null;
+            if(!empty($_FILES['signature_image']['name'])){
+                $upload_dir = APPROOT . '/../public/uploads/signatures/';
+                if(!is_dir($upload_dir)){
+                    @mkdir($upload_dir, 0755, true);
+                }
+                $filename = uniqid('sig_') . '_' . time() . '.' . pathinfo($_FILES['signature_image']['name'], PATHINFO_EXTENSION);
+                if(move_uploaded_file($_FILES['signature_image']['tmp_name'], $upload_dir . $filename)){
+                    $signature_image = 'uploads/signatures/' . $filename;
+                }
+            }
+
+            $data = [
+                'name' => $name,
+                'title' => $title,
+                'signature_image' => $signature_image,
+                'is_default' => $is_default
+            ];
+
+            if($this->signatoryModel->addSignatory($data)){
+                flash('admin_message', 'Sign person added successfully.');
+            } else {
+                flash('admin_message', 'Failed to add sign person.', 'alert alert-danger');
+            }
+            redirect('admin');
+        } else {
+            redirect('admin');
+        }
+    }
+
+    public function editSignatory($id){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            $name = trim($_POST['name'] ?? '');
+            $title = trim($_POST['title'] ?? '');
+            $is_default = isset($_POST['is_default']) ? 1 : 0;
+
+            if(empty($name)){
+                flash('admin_message', 'Signatory name is required.', 'alert alert-danger');
+                redirect('admin');
+                return;
+            }
+
+            $data = [
+                'name' => $name,
+                'title' => $title,
+                'is_default' => $is_default
+            ];
+
+            if(!empty($_FILES['signature_image']['name'])){
+                $upload_dir = APPROOT . '/../public/uploads/signatures/';
+                if(!is_dir($upload_dir)){
+                    @mkdir($upload_dir, 0755, true);
+                }
+                $filename = uniqid('sig_') . '_' . time() . '.' . pathinfo($_FILES['signature_image']['name'], PATHINFO_EXTENSION);
+                if(move_uploaded_file($_FILES['signature_image']['tmp_name'], $upload_dir . $filename)){
+                    $data['signature_image'] = 'uploads/signatures/' . $filename;
+                }
+            }
+
+            if($this->signatoryModel->updateSignatory($id, $data)){
+                flash('admin_message', 'Sign person updated successfully.');
+            } else {
+                flash('admin_message', 'Failed to update sign person.', 'alert alert-danger');
+            }
+            redirect('admin');
+        } else {
+            redirect('admin');
+        }
+    }
+
+    public function selectSignatory($id){
+        if($this->signatoryModel->setDefaultSignatory($id)){
+            flash('admin_message', 'Sign person selected as active letter signer successfully.');
+        } else {
+            flash('admin_message', 'Failed to select sign person.', 'alert alert-danger');
+        }
+        redirect('admin');
+    }
+
+    public function deleteSignatory($id){
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            if($this->signatoryModel->deleteSignatory($id)){
+                flash('admin_message', 'Sign person deleted successfully.');
+            } else {
+                flash('admin_message', 'Failed to delete sign person.', 'alert alert-danger');
             }
             redirect('admin');
         } else {

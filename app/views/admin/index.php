@@ -10,8 +10,8 @@
                 <?php endif; ?>
             </h2>
             <div>
+                <button type="button" class="btn btn-outline-primary btn-lg rounded-pill shadow-sm px-4 me-2" data-bs-toggle="modal" data-bs-target="#addSignatoryModal"><i class="fas fa-file-signature me-2"></i> Add Sign Person</button>
                 <button type="button" class="btn btn-primary btn-lg rounded-pill shadow-sm px-4 me-2" data-bs-toggle="modal" data-bs-target="#addUserModal"><i class="fas fa-plus me-2"></i> Add New User</button>
-                
             </div>
         </div>
         
@@ -89,6 +89,9 @@
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link rounded-pill fw-bold" id="departments-tab" data-bs-toggle="tab" data-bs-target="#departments" type="button" role="tab" aria-controls="departments" aria-selected="false"><i class="fas fa-building me-2"></i> Managed Department Officers List</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill fw-bold" id="signatories-tab" data-bs-toggle="tab" data-bs-target="#signatories" type="button" role="tab" aria-controls="signatories" aria-selected="false"><i class="fas fa-signature me-2"></i> Sign Persons List</button>
                     </li>
                 </ul>
             </div>
@@ -228,11 +231,182 @@
                             </table>
                         </div>
                     </div>
+
+                    <div class="tab-pane fade" id="signatories" role="tabpanel" aria-labelledby="signatories-tab">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-pen-nib me-2"></i> Authorized Letter Sign Persons</h5>
+                            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addSignatoryModal">
+                                <i class="fas fa-plus me-1"></i> Add Sign Person
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light text-muted small text-uppercase">
+                                    <tr>
+                                        <th class="py-3 rounded-start">Sign Person Name & Title</th>
+                                        <th class="py-3">Signature Image</th>
+                                        <th class="py-3">Status</th>
+                                        <th class="py-3 text-end rounded-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="border-top-0">
+                                    <?php if(empty($data['signatories'])): ?>
+                                        <tr>
+                                            <td colspan="4" class="text-center py-5 text-muted">
+                                                <i class="fas fa-signature fa-3x mb-3 text-light"></i>
+                                                <h5>No Sign Persons found</h5>
+                                                <p>Click "Add Sign Person" to create one.</p>
+                                            </td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach($data['signatories'] as $sig): ?>
+                                            <tr>
+                                                <td class="py-3">
+                                                    <div class="fw-bold fs-6 text-dark"><?php echo htmlspecialchars($sig->name); ?></div>
+                                                    <div class="text-muted small"><?php echo nl2br(htmlspecialchars($sig->title ?? '')); ?></div>
+                                                </td>
+                                                <td class="py-3">
+                                                    <?php 
+                                                        $sigImgSrc = '';
+                                                        if(!empty($sig->signature_image)){
+                                                            if(strpos($sig->signature_image, 'uploads/') === 0){
+                                                                $sigImgSrc = URLROOT . '/' . $sig->signature_image;
+                                                            } else {
+                                                                $sigImgSrc = URLROOT . '/public/img/' . $sig->signature_image;
+                                                            }
+                                                        }
+                                                    ?>
+                                                    <?php if($sigImgSrc): ?>
+                                                        <div class="bg-light p-2 rounded border d-inline-block shadow-sm">
+                                                            <img src="<?php echo $sigImgSrc; ?>" alt="Signature" style="max-height: 45px; max-width: 130px; object-fit: contain;">
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <span class="badge bg-light text-muted border">No Image</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="py-3">
+                                                    <?php if($sig->is_default == 1): ?>
+                                                        <span class="badge bg-success px-3 py-2 rounded-pill shadow-sm"><i class="fas fa-check-circle me-1"></i> Active / Selected</span>
+                                                    <?php else: ?>
+                                                        <a href="<?php echo URLROOT; ?>/admin/selectSignatory/<?php echo $sig->id; ?>" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                            <i class="fas fa-hand-pointer me-1"></i> Select Person
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td class="py-3 text-end">
+                                                    <button type="button" class="btn btn-sm btn-light text-primary rounded-circle p-2 mx-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#editSignatoryModal<?php echo $sig->id; ?>" title="Edit Sign Person">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <?php if($sig->is_default != 1): ?>
+                                                        <form action="<?php echo URLROOT; ?>/admin/deleteSignatory/<?php echo $sig->id; ?>" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this sign person?');">
+                                                            <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle p-2 mx-1 shadow-sm" title="Delete Sign Person">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </form>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Add Sign Person Modal -->
+<div class="modal fade" id="addSignatoryModal" tabindex="-1" aria-labelledby="addSignatoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-bottom-0 py-3">
+                <h5 class="modal-title fw-bold text-primary" id="addSignatoryModalLabel"><i class="fas fa-signature me-2"></i> Add New Sign Person</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4">
+                <form action="<?php echo URLROOT; ?>/admin/addSignatory" method="post" enctype="multipart/form-data" id="addSignatoryForm">
+                    <div class="mb-3">
+                        <label for="sig_name" class="form-label fw-semibold">Sign Person Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="sig_name" class="form-control rounded-3" placeholder="e.g. නන්දන ගලබොඩ" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sig_title" class="form-label fw-semibold">Title / Designation</label>
+                        <textarea name="title" id="sig_title" class="form-control rounded-3" rows="3" placeholder="e.g. ආණ්ඩුකාරවර ලේකම්,&#10;ආණ්ඩුකාරවර ලේකම් කාර්යාලය,&#10;උතුරු මැද පළාත."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signature_image" class="form-label fw-semibold">Signature Image (PNG / JPG)</label>
+                        <input type="file" name="signature_image" id="signature_image" class="form-control rounded-3" accept="image/*">
+                        <div class="form-text">Transparent PNG image is recommended for best letter appearance.</div>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" name="is_default" value="1" id="is_default_add" checked>
+                        <label class="form-check-label fw-semibold" for="is_default_add">
+                            Set as Active / Selected Sign Person for letters
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top-0 pt-0 pb-3 px-4">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addSignatoryForm" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="fas fa-save me-2"></i> Save Sign Person</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Sign Person Modals -->
+<?php if(!empty($data['signatories'])): ?>
+    <?php foreach($data['signatories'] as $sig): ?>
+        <div class="modal fade" id="editSignatoryModal<?php echo $sig->id; ?>" tabindex="-1" aria-labelledby="editSignatoryModalLabel<?php echo $sig->id; ?>" aria-hidden="true">
+            <div class="modal-dialog modal-md">
+                <div class="modal-content border-0 shadow-lg rounded-4">
+                    <div class="modal-header border-bottom-0 py-3">
+                        <h5 class="modal-title fw-bold text-primary" id="editSignatoryModalLabel<?php echo $sig->id; ?>"><i class="fas fa-edit me-2"></i> Edit Sign Person</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body px-4">
+                        <form action="<?php echo URLROOT; ?>/admin/editSignatory/<?php echo $sig->id; ?>" method="post" enctype="multipart/form-data" id="editSignatoryForm<?php echo $sig->id; ?>">
+                            <div class="mb-3">
+                                <label for="sig_name_<?php echo $sig->id; ?>" class="form-label fw-semibold">Sign Person Name <span class="text-danger">*</span></label>
+                                <input type="text" name="name" id="sig_name_<?php echo $sig->id; ?>" class="form-control rounded-3" value="<?php echo htmlspecialchars($sig->name); ?>" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sig_title_<?php echo $sig->id; ?>" class="form-label fw-semibold">Title / Designation</label>
+                                <textarea name="title" id="sig_title_<?php echo $sig->id; ?>" class="form-control rounded-3" rows="3"><?php echo htmlspecialchars($sig->title ?? ''); ?></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sig_image_<?php echo $sig->id; ?>" class="form-label fw-semibold">Change Signature Image (Optional)</label>
+                                <input type="file" name="signature_image" id="sig_image_<?php echo $sig->id; ?>" class="form-control rounded-3" accept="image/*">
+                                <?php if(!empty($sig->signature_image)): ?>
+                                    <div class="mt-2">
+                                        <small class="text-muted d-block mb-1">Current Signature:</small>
+                                        <?php 
+                                            $currSigSrc = (strpos($sig->signature_image, 'uploads/') === 0) ? URLROOT . '/' . $sig->signature_image : URLROOT . '/public/img/' . $sig->signature_image;
+                                        ?>
+                                        <img src="<?php echo $currSigSrc; ?>" style="max-height: 50px; border: 1px border-light;" class="bg-light p-1 rounded">
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="is_default" value="1" id="is_default_edit_<?php echo $sig->id; ?>" <?php echo ($sig->is_default == 1) ? 'checked' : ''; ?>>
+                                <label class="form-check-label fw-semibold" for="is_default_edit_<?php echo $sig->id; ?>">
+                                    Set as Active / Selected Sign Person for letters
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0 pb-3 px-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" form="editSignatoryForm<?php echo $sig->id; ?>" class="btn btn-primary rounded-pill px-4 shadow-sm"><i class="fas fa-save me-2"></i> Update Sign Person</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
 
 <!-- Add User Modal -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
