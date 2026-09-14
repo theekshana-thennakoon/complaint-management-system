@@ -433,8 +433,9 @@
                                 }
                             }
 
-                            $sigName  = !empty($data['complaint']->signatory_name) ? $data['complaint']->signatory_name : ($activeSignatory ? $activeSignatory->name : 'නන්දන ගලබොඩ');
-                            $sigTitle = !empty($data['complaint']->signatory_title) ? $data['complaint']->signatory_title : ($activeSignatory ? $activeSignatory->title : "නන්දන ගලබොඩ," . "\n" . "ආණ්ඩුකාරවර ලේකම් කාර්යාලය," . "\n" . "උතුරු මැද පළාත.");
+                            $sigName  = ($activeSignatory && !empty($activeSignatory->name)) ? $activeSignatory->name : (!empty($data['complaint']->signatory_name) ? $data['complaint']->signatory_name : 'නන්දන ගලබොඩ');
+                            $sigTitle = ($activeSignatory && !empty($activeSignatory->title)) ? $activeSignatory->title : (!empty($data['complaint']->signatory_title) ? $data['complaint']->signatory_title : "ආණ්ඩුකාරවර ලේකම්,\nආණ්ඩුකාරවර ලේකම් කාර්යාලය,\nඋතුරු මැද පළාත.");
+                            $sigTitle = str_replace(['<br>', '<br/>', '<br />'], "\n", $sigTitle);
                             ?>
 
                             <table style="border-collapse: collapse; border: none; margin-top: 20px;">
