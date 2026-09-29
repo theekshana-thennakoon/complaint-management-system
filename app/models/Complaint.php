@@ -113,7 +113,7 @@ class Complaint {
         return $this->db->resultSet();
     }
 
-    public function getComplaints($month = null, $category_id = null){
+    public function getComplaints($month = null, $category_id = null, $date = null, $status = null){
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -123,56 +123,48 @@ class Complaint {
             LEFT JOIN roles r ON c.current_role_id = r.id
             WHERE (:province = "" OR c.province = :province)
         ';
-        if ($month) {
-            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        if ($date) {
+            $sql .= ' AND (c.date = :date OR DATE(c.created_at) = :date) ';
+        } elseif ($month) {
+            $sql .= ' AND (DATE_FORMAT(c.created_at, "%Y-%m") = :month OR DATE_FORMAT(c.date, "%Y-%m") = :month) ';
         }
         if ($category_id) {
             $sql .= ' AND c.category_id = :category_id ';
+        }
+        if ($status) {
+            if ($status === 'Rejected') {
+                $sql .= ' AND c.status LIKE "%Reject%" ';
+            } elseif ($status === 'Approved') {
+                $sql .= ' AND c.status LIKE "%Approve%" ';
+            } elseif ($status === 'Pending') {
+                $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
+            } else {
+                $sql .= ' AND c.status = :status ';
+            }
         }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
         $this->db->bind(':province', $province);
-        if ($month) {
+        if ($date) {
+            $this->db->bind(':date', $date);
+        } elseif ($month) {
             $this->db->bind(':month', $month);
         }
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
-        return $this->db->resultSet();
-    }
-
-    public function getComplaintsByUser($user_id, $month = null, $category_id = null){
-        $province = $_SESSION['user_province'] ?? '';
-        $sql = '
-            SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
-            FROM complaints c 
-            LEFT JOIN complaint_categories cat ON c.category_id = cat.id 
-            LEFT JOIN departments d ON c.forward_department_id = d.id
-            LEFT JOIN roles r ON c.current_role_id = r.id
-            WHERE c.created_by = :user_id AND (:province = "" OR c.province = :province)
-        ';
-        if ($month) {
-            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
-        }
-        if ($category_id) {
-            $sql .= ' AND c.category_id = :category_id ';
-        }
-        $sql .= ' ORDER BY c.created_at DESC';
-
-        $this->db->query($sql);
-        $this->db->bind(':user_id', $user_id);
-        $this->db->bind(':province', $province);
-        if ($month) {
-            $this->db->bind(':month', $month);
-        }
-        if ($category_id) {
-            $this->db->bind(':category_id', $category_id);
+        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending'])) {
+            $this->db->bind(':status', $status);
         }
         return $this->db->resultSet();
     }
 
-    public function getExternalComplaints($month = null, $category_id = null){
+    public function getComplaintsByUser($user_id, $month = null, $category_id = null, $date = null, $status = null){
+        return $this->getComplaintsByUserId($user_id, $month, $category_id, $date, $status);
+    }
+
+    public function getExternalComplaints($month = null, $category_id = null, $date = null, $status = null){
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -182,21 +174,39 @@ class Complaint {
             LEFT JOIN roles r ON c.current_role_id = r.id
             WHERE c.created_by IS NULL AND (:province = "" OR c.province = :province)
         ';
-        if ($month) {
-            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        if ($date) {
+            $sql .= ' AND (c.date = :date OR DATE(c.created_at) = :date) ';
+        } elseif ($month) {
+            $sql .= ' AND (DATE_FORMAT(c.created_at, "%Y-%m") = :month OR DATE_FORMAT(c.date, "%Y-%m") = :month) ';
         }
         if ($category_id) {
             $sql .= ' AND c.category_id = :category_id ';
+        }
+        if ($status) {
+            if ($status === 'Rejected') {
+                $sql .= ' AND c.status LIKE "%Reject%" ';
+            } elseif ($status === 'Approved') {
+                $sql .= ' AND c.status LIKE "%Approve%" ';
+            } elseif ($status === 'Pending') {
+                $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
+            } else {
+                $sql .= ' AND c.status = :status ';
+            }
         }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
         $this->db->bind(':province', $province);
-        if ($month) {
+        if ($date) {
+            $this->db->bind(':date', $date);
+        } elseif ($month) {
             $this->db->bind(':month', $month);
         }
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
+        }
+        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending'])) {
+            $this->db->bind(':status', $status);
         }
         return $this->db->resultSet();
     }
@@ -233,7 +243,7 @@ class Complaint {
         return $this->db->execute();
     }
 
-    public function getComplaintsByRoleId($role_id, $month = null, $category_id = null) {
+    public function getComplaintsByRoleId($role_id, $month = null, $category_id = null, $date = null, $status = null) {
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -243,27 +253,45 @@ class Complaint {
             LEFT JOIN roles r ON c.current_role_id = r.id
             WHERE c.current_role_id = :role_id AND (:province = "" OR c.province = :province)
         ';
-        if ($month) {
-            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        if ($date) {
+            $sql .= ' AND (c.date = :date OR DATE(c.created_at) = :date) ';
+        } elseif ($month) {
+            $sql .= ' AND (DATE_FORMAT(c.created_at, "%Y-%m") = :month OR DATE_FORMAT(c.date, "%Y-%m") = :month) ';
         }
         if ($category_id) {
             $sql .= ' AND c.category_id = :category_id ';
+        }
+        if ($status) {
+            if ($status === 'Rejected') {
+                $sql .= ' AND c.status LIKE "%Reject%" ';
+            } elseif ($status === 'Approved') {
+                $sql .= ' AND c.status LIKE "%Approve%" ';
+            } elseif ($status === 'Pending') {
+                $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
+            } else {
+                $sql .= ' AND c.status = :status ';
+            }
         }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
         $this->db->bind(':role_id', $role_id);
         $this->db->bind(':province', $province);
-        if ($month) {
+        if ($date) {
+            $this->db->bind(':date', $date);
+        } elseif ($month) {
             $this->db->bind(':month', $month);
         }
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
+        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending'])) {
+            $this->db->bind(':status', $status);
+        }
         return $this->db->resultSet();
     }
 
-    public function getComplaintsByUserId($user_id, $month = null, $category_id = null) {
+    public function getComplaintsByUserId($user_id, $month = null, $category_id = null, $date = null, $status = null) {
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -273,27 +301,45 @@ class Complaint {
             LEFT JOIN roles r ON c.current_role_id = r.id
             WHERE c.created_by = :user_id AND (:province = "" OR c.province = :province)
         ';
-        if ($month) {
-            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        if ($date) {
+            $sql .= ' AND (c.date = :date OR DATE(c.created_at) = :date) ';
+        } elseif ($month) {
+            $sql .= ' AND (DATE_FORMAT(c.created_at, "%Y-%m") = :month OR DATE_FORMAT(c.date, "%Y-%m") = :month) ';
         }
         if ($category_id) {
             $sql .= ' AND c.category_id = :category_id ';
+        }
+        if ($status) {
+            if ($status === 'Rejected') {
+                $sql .= ' AND c.status LIKE "%Reject%" ';
+            } elseif ($status === 'Approved') {
+                $sql .= ' AND c.status LIKE "%Approve%" ';
+            } elseif ($status === 'Pending') {
+                $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
+            } else {
+                $sql .= ' AND c.status = :status ';
+            }
         }
         $sql .= ' ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
         $this->db->bind(':user_id', $user_id);
         $this->db->bind(':province', $province);
-        if ($month) {
+        if ($date) {
+            $this->db->bind(':date', $date);
+        } elseif ($month) {
             $this->db->bind(':month', $month);
         }
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
+        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending'])) {
+            $this->db->bind(':status', $status);
+        }
         return $this->db->resultSet();
     }
 
-    public function getDispatchedComplaintsByUserId($user_id, $month = null) {
+    public function getDispatchedComplaintsByUserId($user_id, $month = null, $date = null) {
         $province = $_SESSION['user_province'] ?? '';
         $sql = '
             SELECT c.*, cat.name as category_name, d.name as department_name, r.name as current_role_name 
@@ -304,18 +350,91 @@ class Complaint {
             LEFT JOIN roles r ON c.current_role_id = r.id
             WHERE c.created_by = :user_id AND (:province = "" OR c.province = :province)
         ';
-        if ($month) {
-            $sql .= ' AND DATE_FORMAT(c.created_at, "%Y-%m") = :month ';
+        if ($date) {
+            $sql .= ' AND (c.date = :date OR DATE(c.created_at) = :date) ';
+        } elseif ($month) {
+            $sql .= ' AND (DATE_FORMAT(c.created_at, "%Y-%m") = :month OR DATE_FORMAT(c.date, "%Y-%m") = :month) ';
         }
         $sql .= ' GROUP BY c.id ORDER BY c.created_at DESC';
 
         $this->db->query($sql);
         $this->db->bind(':user_id', $user_id);
         $this->db->bind(':province', $province);
-        if ($month) {
+        if ($date) {
+            $this->db->bind(':date', $date);
+        } elseif ($month) {
             $this->db->bind(':month', $month);
         }
         return $this->db->resultSet();
+    }
+
+    public function getStatusSummary($user_id = null, $month = null, $category_id = null, $date = null) {
+        $complaints = ($user_id !== null) 
+            ? $this->getComplaintsByUserId($user_id, $month, $category_id, $date)
+            : $this->getComplaints($month, $category_id, $date);
+
+        $summary = [
+            'total'          => count($complaints),
+            'draft'          => 0,
+            'pending_cc'     => 0,
+            'approved_cc'    => 0,
+            'rejected_cc'    => 0,
+            'approved_ao'    => 0,
+            'rejected_ao'    => 0,
+            'approved_gs'    => 0,
+            'rejected_gs'    => 0,
+            'pending_total'  => 0,
+            'approved_total' => 0,
+            'rejected_total' => 0,
+            'dispatched'     => 0,
+        ];
+
+        foreach ($complaints as $c) {
+            $status = $c->status;
+            $statusLower = strtolower($status);
+
+            if ($status === 'Draft') {
+                $summary['draft']++;
+            }
+            if (strpos($status, 'Pending CC') !== false) {
+                $summary['pending_cc']++;
+            }
+            if (strpos($status, 'Approved by CC') !== false) {
+                $summary['approved_cc']++;
+            }
+            if (strpos($status, 'Rejected by CC') !== false) {
+                $summary['rejected_cc']++;
+            }
+            if (strpos($status, 'Approved by AO') !== false) {
+                $summary['approved_ao']++;
+            }
+            if (strpos($status, 'Rejected by AO') !== false) {
+                $summary['rejected_ao']++;
+            }
+            if ($status === 'Approved by GS') {
+                $summary['approved_gs']++;
+            }
+            if ($status === 'Rejected by GS') {
+                $summary['rejected_gs']++;
+            }
+
+            // High-level grouping
+            if (strpos($statusLower, 'pending') !== false || $status === 'Draft') {
+                $summary['pending_total']++;
+            }
+            if (strpos($statusLower, 'approve') !== false) {
+                $summary['approved_total']++;
+            }
+            if (strpos($statusLower, 'reject') !== false) {
+                $summary['rejected_total']++;
+            }
+
+            if ($this->isDispatched($c->id)) {
+                $summary['dispatched']++;
+            }
+        }
+
+        return $summary;
     }
 
     public function logWorkflow($complaint_id, $from_role_id, $to_role_id, $action, $remarks, $action_by) {

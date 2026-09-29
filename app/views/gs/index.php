@@ -55,12 +55,12 @@
 
             <div class="row mb-4">
                 <div class="col-md-12 d-flex justify-content-end">
-                    <form method="GET" action="" class="d-flex flex-wrap align-items-center bg-white py-2 px-3 rounded-pill shadow-sm border" style="gap: 15px; border-color: rgba(0,0,0,0.05) !important;">
-                        <div class="input-group input-group-sm" style="width: auto; flex: 1; min-width: 200px;">
-                            <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-2">
+                    <form method="GET" action="" class="d-flex flex-wrap align-items-center bg-white py-2 px-3 rounded-4 shadow-sm border" style="gap: 12px; border-color: rgba(0,0,0,0.06) !important;">
+                        <div class="input-group input-group-sm" style="width: auto; min-width: 170px;">
+                            <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-1">
                                 <i class="fas fa-filter"></i>
                             </span>
-                            <select name="category_id" id="categoryFilter" class="form-select border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);" onchange="this.form.submit()">
+                            <select name="category_id" id="categoryFilter" class="form-select border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer;" onchange="this.form.submit()">
                                 <option value="">All Categories</option>
                                 <?php foreach($data['categories'] as $category): ?>
                                     <option value="<?php echo $category->id; ?>" <?php echo (isset($data['category_id']) && $data['category_id'] == $category->id) ? 'selected' : ''; ?>>
@@ -70,14 +70,29 @@
                             </select>
                         </div>
                         
-                        <div class="vr bg-secondary opacity-25 d-none d-md-block" style="width: 2px; border-radius: 2px; margin-top: 4px; margin-bottom: 4px;"></div>
+                        <div class="vr bg-secondary opacity-25 d-none d-md-block" style="width: 1px; height: 26px;"></div>
                         
+                        <!-- Date Filter -->
                         <div class="input-group input-group-sm" style="width: auto;">
-                            <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-2">
-                                <i class="fas fa-calendar-alt"></i>
+                            <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-1" title="Filter by date">
+                                <i class="fas fa-calendar-day"></i> <span class="d-none d-xl-inline ms-1 small">Date:</span>
                             </span>
-                            <input type="month" name="month" id="monthFilter" class="form-control border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);" value="<?php echo isset($data['month']) ? $data['month'] : date('Y-m'); ?>" onchange="this.form.submit()">
+                            <input type="date" name="date" id="dateFilter" class="form-control border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer;" value="<?php echo htmlspecialchars($data['date'] ?? ''); ?>" onchange="if(this.value) { const m = document.getElementById('monthFilter'); if(m) m.value = ''; } this.form.submit()">
                         </div>
+
+                        <!-- Month Filter -->
+                        <div class="input-group input-group-sm" style="width: auto;">
+                            <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-1" title="Filter by month">
+                                <i class="fas fa-calendar-alt"></i> <span class="d-none d-xl-inline ms-1 small">Month:</span>
+                            </span>
+                            <input type="month" name="month" id="monthFilter" class="form-control border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer;" value="<?php echo htmlspecialchars($data['month'] ?? ''); ?>" onchange="if(this.value) { const d = document.getElementById('dateFilter'); if(d) d.value = ''; } this.form.submit()">
+                        </div>
+
+                        <?php if(!empty($data['date']) || !empty($data['month']) || !empty($data['category_id'])): ?>
+                            <a href="<?php echo URLROOT; ?>/gs?month=&date=&category_id=" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Clear filters">
+                                <i class="fas fa-times me-1"></i> Clear
+                            </a>
+                        <?php endif; ?>
                     </form>
                 </div>
             </div>

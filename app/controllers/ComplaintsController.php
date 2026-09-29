@@ -9,18 +9,32 @@ class ComplaintsController extends Controller {
     }
 
     public function index(){
-        // Get complaints for logged-in user only
-        $complaints = $this->complaintModel->getComplaintsByUser($_SESSION['user_id']);
+        $date = isset($_GET['date']) ? trim($_GET['date']) : '';
+        $month = isset($_GET['month']) ? trim($_GET['month']) : '';
+        $category_id = isset($_GET['category_id']) ? trim($_GET['category_id']) : '';
+        $status = isset($_GET['status']) ? trim($_GET['status']) : '';
+
+        $complaints = $this->complaintModel->getComplaintsByUser($_SESSION['user_id'], $month, $category_id, $date, $status);
+        $status_summary = $this->complaintModel->getStatusSummary($_SESSION['user_id'], $month, $category_id, $date);
 
         $data = [
             'title' => 'Complaints',
-            'complaints' => $complaints
+            'complaints' => $complaints,
+            'date' => $date,
+            'month' => $month,
+            'category_id' => $category_id,
+            'status_filter' => $status,
+            'status_summary' => $status_summary,
+            'categories' => $this->complaintModel->getCategories()
         ];
         $this->view('complaints/index', $data);
     }
 
     public function sent(){
-        $complaints = $this->complaintModel->getDispatchedComplaintsByUserId($_SESSION['user_id']);
+        $date = isset($_GET['date']) ? trim($_GET['date']) : '';
+        $month = isset($_GET['month']) ? trim($_GET['month']) : '';
+
+        $complaints = $this->complaintModel->getDispatchedComplaintsByUserId($_SESSION['user_id'], $month, $date);
 
         foreach ($complaints as $complaint) {
             $complaint->dispatched_departments = $this->complaintModel->getDispatchedDepartments($complaint->id);
@@ -28,7 +42,9 @@ class ComplaintsController extends Controller {
 
         $data = [
             'title' => 'Sent to Departments',
-            'complaints' => $complaints
+            'complaints' => $complaints,
+            'date' => $date,
+            'month' => $month
         ];
         $this->view('complaints/sent', $data);
     }
@@ -57,9 +73,9 @@ class ComplaintsController extends Controller {
                 'address'              => trim($_POST['address'] ?? ''),
                 'mobile'               => trim($_POST['mobile'] ?? ''),
                 'email'                => trim($_POST['email'] ?? ''),
-                'subject'              => '',
-                'category_id'          => $default_category_id,
-                'letter_type'          => '',
+                'subject'              => trim($_POST['subject'] ?? ''),
+                'category_id'          => trim($_POST['category_id'] ?? ''),
+                'letter_type'          => trim($_POST['letter_type'] ?? ''),
                 'forward_department_id'=> $default_department_id,
                 'person'               => '',
                 'description'          => '',
@@ -75,17 +91,19 @@ class ComplaintsController extends Controller {
                 'created_by'           => $_SESSION['user_id'],
                 'province'             => $_SESSION['user_province'] ?? NULL,
                 'district'             => isset($_POST['district']) ? trim($_POST['district']) : '',
+                'categories'           => $categories,
+                'departments'          => $departments,
                 'signatories'          => $this->signatoryModel->getSignatories(),
                 'err'                  => ''
             ];
 
-            if(empty($data['applicant_name']) || empty($data['district'])){
-                $data['err'] = 'Please fill all required fields (Name and District)';
+            if(empty($data['applicant_name']) || empty($data['district']) || empty($data['subject']) || empty($data['category_id']) || empty($data['letter_type'])){
+                $data['err'] = 'Please fill all required fields (Applicant Name, District, Subject, Category, and Letter Type)';
                 $this->view('complaints/create', $data);
             } else {
                 $complaint_id = $this->complaintModel->addComplaint($data, $details);
                 if($complaint_id){
-                    $_SESSION['sweet_success'] = 'Applicant Details Saved. Complaint No generated. You can now fill in the complaint details.';
+                    $_SESSION['sweet_success'] = 'Complaint Created Successfully! Complaint No generated.';
                     $_SESSION['sweet_ref'] = $data['complaint_no'];
                     redirect('complaints/edit/' . $complaint_id);
                 } else {
@@ -101,6 +119,8 @@ class ComplaintsController extends Controller {
                 'email' => '',
                 'subject' => '',
                 'category_id' => '',
+                'letter_type' => '',
+                'district' => '',
                 'forward_department_id' => '',
                 'person' => '',
                 'description' => '',

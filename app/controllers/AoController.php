@@ -13,11 +13,12 @@ class AoController extends Controller {
     }
 
     public function index() {
-        $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
-        $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
+        $date = isset($_GET['date']) ? trim($_GET['date']) : '';
+        $month = isset($_GET['month']) ? trim($_GET['month']) : ($date ? '' : date('Y-m'));
+        $category_id = isset($_GET['category_id']) ? trim($_GET['category_id']) : '';
         // Fetch complaints currently pending AO approval (current_role_id = 4)
-        $complaints = $this->complaintModel->getComplaintsByRoleId(4, $month, $category_id);
-        $all_complaints = $this->complaintModel->getComplaints($month, $category_id);
+        $complaints = $this->complaintModel->getComplaintsByRoleId(4, $month, $category_id, $date);
+        $all_complaints = $this->complaintModel->getComplaints($month, $category_id, $date);
 
         $approved = 0;
         $rejected = 0;
@@ -47,6 +48,7 @@ class AoController extends Controller {
             ],
             'all_complaints' => $all_complaints,
             'month' => $month,
+            'date' => $date,
             'category_id' => $category_id,
             'categories' => $this->complaintModel->getCategories()
         ];

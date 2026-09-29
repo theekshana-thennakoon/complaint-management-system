@@ -13,10 +13,11 @@ class CcController extends Controller {
     }
 
     public function index() {
-        $month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
-        $category_id = isset($_GET['category_id']) ? $_GET['category_id'] : '';
-        $raw_complaints = $this->complaintModel->getComplaintsByRoleId(5, $month, $category_id);
-        $all_complaints = $this->complaintModel->getComplaints($month, $category_id);
+        $date = isset($_GET['date']) ? trim($_GET['date']) : '';
+        $month = isset($_GET['month']) ? trim($_GET['month']) : ($date ? '' : date('Y-m'));
+        $category_id = isset($_GET['category_id']) ? trim($_GET['category_id']) : '';
+        $raw_complaints = $this->complaintModel->getComplaintsByRoleId(5, $month, $category_id, $date);
+        $all_complaints = $this->complaintModel->getComplaints($month, $category_id, $date);
 
         $complaints = [];
         foreach($raw_complaints as $c) {
@@ -53,6 +54,7 @@ class CcController extends Controller {
             ],
             'all_complaints' => $all_complaints,
             'month' => $month,
+            'date' => $date,
             'category_id' => $category_id,
             'categories' => $this->complaintModel->getCategories()
         ];

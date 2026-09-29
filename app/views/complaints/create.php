@@ -55,21 +55,53 @@
 
                 <div class="form-group">
                     <label for="address" class="form-label">Address</label>
-                    <textarea name="address" class="form-control" rows="2"><?php echo $data['address']; ?></textarea>
+                    <textarea name="address" class="form-control" rows="2"><?php echo htmlspecialchars($data['address'] ?? ''); ?></textarea>
                 </div>
 
-                <div class="form-group" style="margin-top: 15px;">
-                    <label for="district" class="form-label">District *</label>
-                    <select name="district" id="districtSelect" class="form-control" required>
-                        <option value="">Select District</option>
-                    </select>
-                    <input type="hidden" id="userProvince" value="<?php echo htmlspecialchars($_SESSION['user_province'] ?? ''); ?>">
-                    <input type="hidden" id="selectedDistrict" value="<?php echo htmlspecialchars($data['district'] ?? ''); ?>">
+                <h4 style="margin: 25px 0 15px; color: var(--primary-color);">Complaint Details</h4>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="subject" class="form-label">Complaint Subject *</label>
+                    <input type="text" name="subject" id="subject" class="form-control" placeholder="Enter complaint subject" value="<?php echo htmlspecialchars($data['subject'] ?? ''); ?>" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category_id" class="form-label">Category *</label>
+                        <select name="category_id" id="category_id" class="form-control" required>
+                            <option value="">Select Category</option>
+                            <?php if(!empty($data['categories'])): ?>
+                                <?php foreach($data['categories'] as $category): ?>
+                                    <option value="<?php echo $category->id; ?>" <?php echo (isset($data['category_id']) && $data['category_id'] == $category->id) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($category->name); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="letter_type" class="form-label">Letter Type *</label>
+                        <select name="letter_type" id="letter_type" class="form-control" required>
+                            <option value="">Select Letter Type</option>
+                            <option value="මහජන දින ලිපි" <?php echo (isset($data['letter_type']) && $data['letter_type'] == 'මහජන දින ලිපි') ? 'selected' : ''; ?>>මහජන දින ලිපි (Public Day Letter)</option>
+                            <option value="දෛනික ලිපි" <?php echo (isset($data['letter_type']) && $data['letter_type'] == 'දෛනික ලිපි') ? 'selected' : ''; ?>>දෛනික ලිපි (Daily Letter)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="district" class="form-label">District *</label>
+                        <select name="district" id="districtSelect" class="form-control" required>
+                            <option value="">Select District</option>
+                        </select>
+                        <input type="hidden" id="userProvince" value="<?php echo htmlspecialchars($_SESSION['user_province'] ?? ''); ?>">
+                        <input type="hidden" id="selectedDistrict" value="<?php echo htmlspecialchars($data['district'] ?? ''); ?>">
+                    </div>
                 </div>
 
                 <div style="margin-top: 30px;">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Save Applicant &amp; Generate Complaint No
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">
+                        <i class="fas fa-save me-1"></i> Save &amp; Generate Complaint No
                     </button>
                 </div>
             </form>
@@ -612,12 +644,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             districtSelect.appendChild(option);
         });
-    } else if (!userProvince) {
-        // If province is not found, we can leave it empty or show a message
-        const option = document.createElement('option');
-        option.value = "";
-        option.textContent = "Province not configured";
-        districtSelect.appendChild(option);
+    } else {
+        // Fallback: list all districts grouped by province
+        for (const [prov, distList] of Object.entries(districts)) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = prov;
+            distList.forEach(function(district) {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                if (district === selectedDistrict) {
+                    option.selected = true;
+                }
+                optgroup.appendChild(option);
+            });
+            districtSelect.appendChild(optgroup);
+        }
     }
 
     // Fetch and populate letter number when district changes
