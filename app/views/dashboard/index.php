@@ -96,6 +96,7 @@
                     elseif ($sf === 'Approved by GS') echo $data['status_summary']['approved_gs'];
                     elseif ($sf === 'Rejected') echo $data['status_summary']['rejected_total'];
                     elseif ($sf === 'Approved') echo $data['status_summary']['approved_total'];
+                    elseif ($sf === 'Sent to Department' || $sf === 'Sent to Departments') echo $data['status_summary']['dispatched'];
                     else echo $data['status_summary']['total'];
                 ?></span>
             </button>
@@ -145,9 +146,9 @@
                 </li>
                 <li><hr class="dropdown-divider my-1"></li>
                 <li>
-                    <a class="dropdown-item rounded-3 d-flex justify-content-between align-items-center py-2" href="<?php echo URLROOT; ?>/complaints/sent">
-                        <span><i class="fas fa-paper-plane me-2 text-dark"></i> Sent to Departments</span>
-                        <span class="badge bg-dark text-white rounded-pill"><?php echo $data['status_summary']['dispatched']; ?></span>
+                    <a class="dropdown-item rounded-3 d-flex justify-content-between align-items-center py-2 <?php echo (in_array(($data['status_filter'] ?? ''), ['Sent to Department', 'Sent to Departments'])) ? 'active bg-primary text-white' : ''; ?>" href="<?php echo URLROOT; ?>/dashboard?status=Sent to Department&month=<?php echo urlencode($data['month']); ?>&date=<?php echo urlencode($data['date'] ?? ''); ?>&category_id=<?php echo urlencode($data['category_id']); ?>">
+                        <span><i class="fas fa-paper-plane me-2 <?php echo (in_array(($data['status_filter'] ?? ''), ['Sent to Department', 'Sent to Departments'])) ? 'text-white' : 'text-dark'; ?>"></i> Sent to Departments</span>
+                        <span class="badge <?php echo (in_array(($data['status_filter'] ?? ''), ['Sent to Department', 'Sent to Departments'])) ? 'bg-white text-primary' : 'bg-dark text-white'; ?> rounded-pill"><?php echo $data['status_summary']['dispatched']; ?></span>
                     </a>
                 </li>
             </ul>
@@ -259,6 +260,8 @@
                                         <td>
                                             <?php if ($complaint->status == 'Rejected by CC'): ?>
                                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2"><i class="fas fa-times-circle me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
+                                            <?php elseif (strpos($complaint->status, 'Department') !== false): ?>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3 py-2"><i class="fas fa-paper-plane me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
                                             <?php elseif (strpos($complaint->status, 'Approved') !== false): ?>
                                                 <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2"><i class="fas fa-check-circle me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
                                             <?php else: ?>

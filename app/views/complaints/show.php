@@ -23,12 +23,13 @@
             </a>
             <?php 
                 $badge_class = 'status-pending';
-                if($data['complaint']->status == 'Approved') $badge_class = 'status-resolved';
-                if($data['complaint']->status == 'Rejected') $badge_class = 'status-rejected';
-                if($data['complaint']->status == 'Sent to CC') $badge_class = 'status-info-requested';
+                if(strpos($data['complaint']->status, 'Approved') !== false) $badge_class = 'status-resolved';
+                if(strpos($data['complaint']->status, 'Rejected') !== false) $badge_class = 'status-rejected';
+                if(strpos($data['complaint']->status, 'Sent to CC') !== false) $badge_class = 'status-info-requested';
+                if(strpos(strtolower($data['complaint']->status), 'department') !== false) $badge_class = 'status-resolved';
             ?>
             <div>
-                <strong>Status:</strong> <span class="badge <?php echo $badge_class; ?>"><?php echo $data['complaint']->status; ?></span>
+                <strong>Status:</strong> <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($data['complaint']->status); ?></span>
             </div>
         </div>
 
@@ -80,7 +81,7 @@
                     <!-- <a href="<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $data['complaint']->id; ?>" class="btn btn-accent btn-sm">
                         <i class="fas fa-file-pdf"></i> Generate PDF Letter
                     </a> -->
-                    <?php if ($data['complaint']->status == 'Approved by GS'): ?>
+                    <?php if ($data['complaint']->status == 'Approved by GS' || strpos(strtolower($data['complaint']->status), 'department') !== false): ?>
                     <button type="button" class="btn btn-warning btn-sm fw-semibold"
                         onclick="openDispatchModal(<?php echo $data['complaint']->id; ?>, '<?php echo htmlspecialchars($data['complaint']->complaint_no, ENT_QUOTES); ?>')"
                         style="background: linear-gradient(135deg,#f7971e,#ffd200); border:none; color:#333;">
@@ -137,6 +138,17 @@
                             <th>Date</th>
                             <td><?php echo $data['complaint']->date; ?></td>
                         </tr>
+                        <?php if(!empty($data['complaint']->signatory_name)): ?>
+                        <tr>
+                            <th>Sign Person</th>
+                            <td>
+                                <strong><?php echo htmlspecialchars($data['complaint']->signatory_name); ?></strong>
+                                <?php if (!empty($data['complaint']->signatory_title)): ?>
+                                    <br><small class="text-muted"><?php echo nl2br(htmlspecialchars($data['complaint']->signatory_title)); ?></small>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endif; ?>
                     </table>
 
                     <?php if(!empty($data['attachments'])): ?>
@@ -178,7 +190,7 @@
     </main>
 </div>
 
-<?php if ($data['complaint']->status == 'Approved by GS'): ?>
+<?php if ($data['complaint']->status == 'Approved by GS' || strpos(strtolower($data['complaint']->status), 'department') !== false): ?>
 <!-- Send to Department Modal -->
 <div class="modal fade" id="dispatchModal" tabindex="-1" aria-labelledby="dispatchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">

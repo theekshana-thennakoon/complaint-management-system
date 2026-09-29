@@ -135,9 +135,11 @@ class Complaint {
             if ($status === 'Rejected') {
                 $sql .= ' AND c.status LIKE "%Reject%" ';
             } elseif ($status === 'Approved') {
-                $sql .= ' AND c.status LIKE "%Approve%" ';
+                $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
             } elseif ($status === 'Pending') {
                 $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
+            } elseif (strpos(strtolower($status), 'department') !== false) {
+                $sql .= ' AND (c.status LIKE "%Department%" OR c.id IN (SELECT complaint_id FROM complaint_dispatches)) ';
             } else {
                 $sql .= ' AND c.status = :status ';
             }
@@ -154,7 +156,7 @@ class Complaint {
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
-        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending'])) {
+        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending']) && strpos(strtolower($status), 'department') === false) {
             $this->db->bind(':status', $status);
         }
         return $this->db->resultSet();
@@ -186,9 +188,11 @@ class Complaint {
             if ($status === 'Rejected') {
                 $sql .= ' AND c.status LIKE "%Reject%" ';
             } elseif ($status === 'Approved') {
-                $sql .= ' AND c.status LIKE "%Approve%" ';
+                $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
             } elseif ($status === 'Pending') {
                 $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
+            } elseif (strpos(strtolower($status), 'department') !== false) {
+                $sql .= ' AND (c.status LIKE "%Department%" OR c.id IN (SELECT complaint_id FROM complaint_dispatches)) ';
             } else {
                 $sql .= ' AND c.status = :status ';
             }
@@ -205,7 +209,7 @@ class Complaint {
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
-        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending'])) {
+        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending']) && strpos(strtolower($status), 'department') === false) {
             $this->db->bind(':status', $status);
         }
         return $this->db->resultSet();
@@ -313,9 +317,11 @@ class Complaint {
             if ($status === 'Rejected') {
                 $sql .= ' AND c.status LIKE "%Reject%" ';
             } elseif ($status === 'Approved') {
-                $sql .= ' AND c.status LIKE "%Approve%" ';
+                $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
             } elseif ($status === 'Pending') {
                 $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
+            } elseif (strpos(strtolower($status), 'department') !== false) {
+                $sql .= ' AND (c.status LIKE "%Department%" OR c.id IN (SELECT complaint_id FROM complaint_dispatches)) ';
             } else {
                 $sql .= ' AND c.status = :status ';
             }
@@ -333,7 +339,7 @@ class Complaint {
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
-        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending'])) {
+        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending']) && strpos(strtolower($status), 'department') === false) {
             $this->db->bind(':status', $status);
         }
         return $this->db->resultSet();
@@ -422,14 +428,14 @@ class Complaint {
             if (strpos($statusLower, 'pending') !== false || $status === 'Draft') {
                 $summary['pending_total']++;
             }
-            if (strpos($statusLower, 'approve') !== false) {
+            if (strpos($statusLower, 'approve') !== false || strpos($statusLower, 'department') !== false) {
                 $summary['approved_total']++;
             }
             if (strpos($statusLower, 'reject') !== false) {
                 $summary['rejected_total']++;
             }
 
-            if ($this->isDispatched($c->id)) {
+            if ($this->isDispatched($c->id) || strpos($statusLower, 'department') !== false) {
                 $summary['dispatched']++;
             }
         }
@@ -567,6 +573,16 @@ class Complaint {
             $this->db->bind(':dispatched_by', $user_id);
             $this->db->execute();
         }
+
+        // Update complaint status to 'Sent to Department'
+        $this->db->query('UPDATE complaints SET status = "Sent to Department" WHERE id = :complaint_id');
+        $this->db->bind(':complaint_id', $complaint_id);
+        $this->db->execute();
+
+        // Log workflow
+        $role_id = $_SESSION['user_role_id'] ?? 5;
+        $this->logWorkflow($complaint_id, $role_id, 7, 'Send to Department', 'Dispatched to department(s)', $user_id);
+
         return true;
     }
 

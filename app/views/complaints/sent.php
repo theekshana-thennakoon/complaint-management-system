@@ -70,6 +70,8 @@
                                             $status = $complaint->status;
                                             if (strpos($status, 'Rejected') !== false) {
                                                 echo '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2"><i class="fas fa-times-circle me-1"></i> ' . htmlspecialchars($status) . '</span>';
+                                            } elseif (strpos($status, 'Department') !== false) {
+                                                echo '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3 py-2"><i class="fas fa-paper-plane me-1"></i> ' . htmlspecialchars($status) . '</span>';
                                             } elseif (strpos($status, 'Approved') !== false) {
                                                 echo '<span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2"><i class="fas fa-check-circle me-1"></i> ' . htmlspecialchars($status) . '</span>';
                                             } else {

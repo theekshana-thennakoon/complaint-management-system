@@ -224,7 +224,7 @@ class ComplaintsController extends Controller {
     public function dispatch($id) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $complaint = $this->complaintModel->getComplaintById($id);
-            if (!$complaint || strpos($complaint->status, 'Approved by GS') === false) {
+            if (!$complaint || (strpos($complaint->status, 'Approved by GS') === false && strpos(strtolower($complaint->status), 'department') === false)) {
                 flash('complaint_error', 'Invalid complaint or not eligible for dispatch.', 'alert alert-danger');
                 redirect('dashboard');
             }

@@ -415,11 +415,18 @@
                                 $activeSignatory = $signatoryModel->getDefaultSignatory();
                             }
 
-                            $isApprovedByGS = strpos($data['complaint']->status, 'Approved by GS') !== false;
+                            $isApprovedOrSent = (
+                                strpos($data['complaint']->status, 'Approved by GS') !== false ||
+                                strpos(strtolower($data['complaint']->status), 'department') !== false ||
+                                !empty($data['complaint']->is_dispatched) ||
+                                (isset($data['dispatched_departments']) && !empty($data['dispatched_departments']))
+                            );
 
                             $signSrc = '';
-                            if ($isApprovedByGS && $activeSignatory) {
-                                $signImg = !empty($activeSignatory->signature_image) ? $activeSignatory->signature_image : 'sign.png';
+                            if ($isApprovedOrSent) {
+                                $signImg = (!empty($activeSignatory) && !empty($activeSignatory->signature_image)) 
+                                    ? $activeSignatory->signature_image 
+                                    : 'sign.png';
                                 if (strpos($signImg, 'uploads/') === 0) {
                                     $signPath = APPROOT . '/../public/' . $signImg;
                                 } else {
