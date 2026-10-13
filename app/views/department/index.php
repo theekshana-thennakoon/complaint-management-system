@@ -78,14 +78,23 @@
                                             <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                             <td><?php echo htmlspecialchars($complaint->subject); ?></td>
                                             <td>
-                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3 py-1">
-                                                    <?php echo htmlspecialchars($complaint->status); ?>
-                                                </span>
+                                                <?php if ($complaint->status === 'Reply Received'): ?>
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1">
+                                                        <i class="fas fa-check-circle me-1"></i> <?php echo htmlspecialchars($complaint->status); ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3 py-1">
+                                                        <?php echo htmlspecialchars($complaint->status); ?>
+                                                    </span>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <div class="d-flex gap-2">
+                                                    <a href="<?php echo URLROOT; ?>/department/show/<?php echo $complaint->id; ?>#reply_text" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                                                        <i class="fas fa-reply me-1"></i> Reply
+                                                    </a>
                                                     <a href="<?php echo URLROOT; ?>/department/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
-                                                        <i class="fas fa-eye me-1"></i> View Letter
+                                                        <i class="fas fa-eye me-1"></i> View
                                                     </a>
                                                     <button type="button" onclick="window.open('<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $complaint->id; ?>?action=print', 'PrintPDF', 'width=1000,height=800');" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                                                         <i class="fas fa-print me-1"></i> Print / PDF

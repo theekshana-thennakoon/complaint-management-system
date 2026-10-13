@@ -97,6 +97,7 @@
                     elseif ($sf === 'Rejected') echo $data['status_summary']['rejected_total'];
                     elseif ($sf === 'Approved') echo $data['status_summary']['approved_total'];
                     elseif ($sf === 'Sent to Department' || $sf === 'Sent to Departments') echo $data['status_summary']['dispatched'];
+                    elseif ($sf === 'Reply Received') echo $data['status_summary']['reply_received'] ?? 0;
                     else echo $data['status_summary']['total'];
                 ?></span>
             </button>
@@ -149,6 +150,12 @@
                     <a class="dropdown-item rounded-3 d-flex justify-content-between align-items-center py-2 <?php echo (in_array(($data['status_filter'] ?? ''), ['Sent to Department', 'Sent to Departments'])) ? 'active bg-primary text-white' : ''; ?>" href="<?php echo URLROOT; ?>/dashboard?status=Sent to Department&month=<?php echo urlencode($data['month']); ?>&date=<?php echo urlencode($data['date'] ?? ''); ?>&category_id=<?php echo urlencode($data['category_id']); ?>">
                         <span><i class="fas fa-paper-plane me-2 <?php echo (in_array(($data['status_filter'] ?? ''), ['Sent to Department', 'Sent to Departments'])) ? 'text-white' : 'text-dark'; ?>"></i> Sent to Departments</span>
                         <span class="badge <?php echo (in_array(($data['status_filter'] ?? ''), ['Sent to Department', 'Sent to Departments'])) ? 'bg-white text-primary' : 'bg-dark text-white'; ?> rounded-pill"><?php echo $data['status_summary']['dispatched']; ?></span>
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item rounded-3 d-flex justify-content-between align-items-center py-2 <?php echo (($data['status_filter'] ?? '') === 'Reply Received') ? 'active bg-primary text-white' : ''; ?>" href="<?php echo URLROOT; ?>/dashboard?status=<?php echo urlencode('Reply Received'); ?>&month=<?php echo urlencode($data['month']); ?>&date=<?php echo urlencode($data['date'] ?? ''); ?>&category_id=<?php echo urlencode($data['category_id']); ?>">
+                        <span><i class="fas fa-reply me-2 <?php echo (($data['status_filter'] ?? '') === 'Reply Received') ? 'text-white' : 'text-info'; ?>"></i> Reply Received</span>
+                        <span class="badge <?php echo (($data['status_filter'] ?? '') === 'Reply Received') ? 'bg-white text-primary' : 'bg-info text-white'; ?> rounded-pill"><?php echo $data['status_summary']['reply_received'] ?? 0; ?></span>
                     </a>
                 </li>
             </ul>
@@ -257,6 +264,8 @@
                                         <td>
                                             <?php if ($complaint->status == 'Rejected by CC'): ?>
                                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2"><i class="fas fa-times-circle me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
+                                            <?php elseif ($complaint->status == 'Reply Received'): ?>
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2"><i class="fas fa-reply me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
                                             <?php elseif (strpos($complaint->status, 'Department') !== false): ?>
                                                 <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-3 py-2"><i class="fas fa-paper-plane me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
                                             <?php elseif (strpos($complaint->status, 'Approved') !== false): ?>
@@ -278,6 +287,11 @@
                                                 <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
                                                     <i class="fas fa-search me-1"></i> View
                                                 </a>
+                                            <?php endif; ?>
+                                            <?php if ($complaint->status == 'Reply Received'): ?>
+                                                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 shadow-sm" onclick="openReplyModal(<?php echo $complaint->id; ?>, '<?php echo htmlspecialchars($complaint->complaint_no, ENT_QUOTES); ?>')">
+                                                    <i class="fas fa-reply me-1"></i> View / Update Reply
+                                                </button>
                                             <?php endif; ?>
                                             <?php if ($complaint->status == 'Approved by GS'): ?>
                                                 <!-- <button type="button"
@@ -329,11 +343,22 @@
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
                                         <td>
+                                            <?php if ($complaint->status == 'Reply Received'): ?>
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><i class="fas fa-reply me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="d-flex gap-2 flex-wrap">
                                             <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm">
                                                 <i class="fas fa-eye me-1"></i> View
                                             </a>
+                                            <?php if ($complaint->status == 'Reply Received'): ?>
+                                                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 shadow-sm" onclick="openReplyModal(<?php echo $complaint->id; ?>, '<?php echo htmlspecialchars($complaint->complaint_no, ENT_QUOTES); ?>')">
+                                                    <i class="fas fa-reply me-1"></i> View / Update Reply
+                                                </button>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -377,11 +402,22 @@
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
                                         <td>
+                                            <?php if ($complaint->status == 'Reply Received'): ?>
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><i class="fas fa-reply me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="d-flex gap-2 flex-wrap">
                                             <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
                                                 <i class="fas fa-eye me-1"></i> View
                                             </a>
+                                            <?php if ($complaint->status == 'Reply Received'): ?>
+                                                <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 shadow-sm" onclick="openReplyModal(<?php echo $complaint->id; ?>, '<?php echo htmlspecialchars($complaint->complaint_no, ENT_QUOTES); ?>')">
+                                                    <i class="fas fa-reply me-1"></i> View / Update Reply
+                                                </button>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -499,6 +535,68 @@
     </div>
 </div>
 
+<!-- View / Update Reply Modal -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header text-white px-4 py-3" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2 mb-0" id="replyModalLabel">
+                    <i class="fas fa-reply"></i>
+                    <span>Department Reply — <span id="replyModalComplaintNo" class="text-warning"></span></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="replyUpdateForm" method="POST" action="" enctype="multipart/form-data">
+                <div class="modal-body p-4">
+                    <!-- Reply Meta Info Card -->
+                    <div class="p-3 mb-3 rounded-3 border bg-light d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <small class="text-muted d-block text-uppercase fw-bold" style="font-size:0.75rem;">Replying Department</small>
+                            <span id="replyDeptName" class="fw-bold text-dark fs-6">Loading...</span>
+                        </div>
+                        <div class="text-sm-end">
+                            <small class="text-muted d-block text-uppercase fw-bold" style="font-size:0.75rem;">Received Date & Time</small>
+                            <span id="replyDate" class="text-muted small fw-semibold"></span>
+                            <span id="replyReplier" class="text-muted small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Current Attachment Display -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small text-uppercase mb-1">Attached Document / File</label>
+                        <div id="modalCurrentAttachment">
+                            <span class="text-muted small">Loading attachment...</span>
+                        </div>
+                    </div>
+
+                    <!-- Reply Text -->
+                    <div class="mb-3">
+                        <label for="modalReplyText" class="form-label fw-bold text-secondary small text-uppercase mb-1">
+                            Reply Message / Remarks <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control rounded-3 border" id="modalReplyText" name="reply_text" rows="5" placeholder="Enter or update department reply remarks..." required style="resize:vertical;"></textarea>
+                    </div>
+
+                    <!-- Upload New / Update Attachment -->
+                    <div class="p-3 rounded-3 border" style="background: #f8fafc;">
+                        <label for="modalReplyAttachment" class="form-label fw-bold small text-primary mb-1 d-flex align-items-center">
+                            <i class="fas fa-paperclip me-2"></i> Update or Attach New File (Optional)
+                        </label>
+                        <input type="file" class="form-control form-control-sm border" id="modalReplyAttachment" name="attachment" style="background:#fff;">
+                        <div class="form-text small text-muted mt-1">Upload a PDF, document, or image to replace or add attachment to this reply.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info text-white rounded-pill px-4 fw-semibold shadow-sm">
+                        <i class="fas fa-save me-1"></i> Save & Update Reply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
 .dept-check-item:has(.dept-checkbox:checked) {
     background: var(--primary-50) !important;
@@ -512,6 +610,62 @@
 </style>
 
 <script>
+function openReplyModal(complaintId, complaintNo) {
+    document.getElementById('replyModalComplaintNo').textContent = complaintNo;
+    const form = document.getElementById('replyUpdateForm');
+    form.action = '<?php echo URLROOT; ?>/complaints/updateReply/' + complaintId;
+
+    // Reset fields to loading state
+    document.getElementById('modalReplyText').value = 'Loading...';
+    document.getElementById('replyDeptName').textContent = 'Loading...';
+    document.getElementById('replyDate').textContent = '';
+    document.getElementById('replyReplier').textContent = '';
+    document.getElementById('modalCurrentAttachment').innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading...';
+    const fileInput = document.getElementById('modalReplyAttachment');
+    if (fileInput) fileInput.value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('replyModal'));
+    modal.show();
+
+    fetch('<?php echo URLROOT; ?>/complaints/getReply/' + complaintId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.reply) {
+                const r = data.reply;
+                document.getElementById('modalReplyText').value = r.reply_text || '';
+                document.getElementById('replyDeptName').textContent = r.department_name || 'N/A';
+                document.getElementById('replyDate').textContent = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+                document.getElementById('replyReplier').textContent = r.replier_name ? ' (' + r.replier_name + ')' : '';
+
+                if (r.attachment_path) {
+                    const dlUrl = '<?php echo URLROOT; ?>/' + r.attachment_path;
+                    document.getElementById('modalCurrentAttachment').innerHTML = `
+                        <div class="alert alert-light border d-flex align-items-center justify-content-between p-2 mb-0 rounded-3">
+                            <div class="d-flex align-items-center text-truncate me-2">
+                                <i class="fas fa-paperclip text-primary me-2 fs-5"></i>
+                                <span class="fw-semibold text-truncate small">${r.attachment_name || 'Attachment'}</span>
+                            </div>
+                            <a href="${dlUrl}" target="_blank" download class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-shrink-0">
+                                <i class="fas fa-download me-1"></i> Download
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('modalCurrentAttachment').innerHTML = '<span class="text-muted small">No attachment uploaded yet.</span>';
+                }
+            } else {
+                document.getElementById('modalReplyText').value = '';
+                document.getElementById('replyDeptName').textContent = 'Not specified';
+                document.getElementById('modalCurrentAttachment').innerHTML = '<span class="text-muted small">No reply details recorded yet.</span>';
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching reply:', err);
+            document.getElementById('modalReplyText').value = '';
+            document.getElementById('modalCurrentAttachment').innerHTML = '<span class="text-danger small">Failed to load reply data.</span>';
+        });
+}
+
 function openDispatchModal(complaintId, complaintNo) {
     document.getElementById('modalComplaintNo').textContent = complaintNo;
     document.getElementById('dispatchForm').action = '<?php echo URLROOT; ?>/complaints/dispatch/' + complaintId;

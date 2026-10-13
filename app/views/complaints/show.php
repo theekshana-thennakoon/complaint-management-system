@@ -81,18 +81,22 @@
                     <!-- <a href="<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $data['complaint']->id; ?>" class="btn btn-accent btn-sm">
                         <i class="fas fa-file-pdf"></i> Generate PDF Letter
                     </a> -->
-                    <?php if ($data['complaint']->status == 'Approved by GS' || strpos(strtolower($data['complaint']->status), 'department') !== false): ?>
+                    <?php if ($data['complaint']->status == 'Approved by GS' || strpos(strtolower($data['complaint']->status), 'department') !== false || $data['complaint']->status == 'Reply Received'): ?>
                     <button type="button" class="btn btn-warning btn-sm fw-semibold"
                         onclick="openDispatchModal(<?php echo $data['complaint']->id; ?>, '<?php echo htmlspecialchars($data['complaint']->complaint_no, ENT_QUOTES); ?>')"
                         style="background: linear-gradient(135deg,#f7971e,#ffd200); border:none; color:#333;">
                         <i class="fas fa-paper-plane me-1"></i> Send to Department
                     </button>
-                    <?php endif; ?>
-                    <?php if ($data['complaint']->status == 'Approved by GS' ||  strpos(strtolower($data['complaint']->status), 'department') !== false): ?>
                     <button type="button" class="btn btn-sm fw-semibold" id="openEmailModalBtn"
                         onclick="openEmailModal()"
                         style="background:linear-gradient(135deg, var(--primary-color, #2d9150), var(--primary-dark, #1b5c36));border:none;color:#fff;box-shadow:0 2px 8px rgba(45,145,80,0.3);">
                         <i class="fas fa-envelope me-1"></i> Send via Email
+                    </button>
+                    <?php endif; ?>
+                    <?php if ($data['complaint']->status == 'Reply Received' || !empty($data['reply'])): ?>
+                    <button type="button" class="btn btn-info btn-sm text-white fw-semibold"
+                        onclick="openReplyModal(<?php echo $data['complaint']->id; ?>, '<?php echo htmlspecialchars($data['complaint']->complaint_no, ENT_QUOTES); ?>')">
+                        <i class="fas fa-reply me-1"></i> Update Reply
                     </button>
                     <?php endif; ?>
                 </div>
@@ -175,6 +179,54 @@
                 </div>
             </div>
 
+            <?php if (!empty($data['reply']) || $data['complaint']->status == 'Reply Received'): ?>
+            <div class="card mb-4 border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid rgba(2,132,199,0.25) !important;">
+                <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+                    <h4 class="mb-0 fw-bold d-flex align-items-center gap-2" style="color: #0284c7; font-size: 1.15rem;">
+                        <i class="fas fa-reply"></i> Department Reply
+                    </h4>
+                    <button type="button" class="btn btn-sm btn-info text-white rounded-pill px-3 shadow-sm fw-semibold"
+                        onclick="openReplyModal(<?php echo $data['complaint']->id; ?>, '<?php echo htmlspecialchars($data['complaint']->complaint_no, ENT_QUOTES); ?>')">
+                        <i class="fas fa-edit me-1"></i> Update Reply
+                    </button>
+                </div>
+                <div class="card-body p-4">
+                    <?php if (!empty($data['reply'])): ?>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size:0.75rem;">Department</small>
+                                <span class="fw-semibold text-dark"><?php echo htmlspecialchars($data['reply']->department_name ?? 'N/A'); ?></span>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size:0.75rem;">Replied On</small>
+                                <span class="text-dark"><?php echo date('Y-m-d h:i A', strtotime($data['reply']->created_at)); ?></span>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size:0.75rem;">Replied By</small>
+                                <span class="text-dark"><?php echo htmlspecialchars($data['reply']->replier_name ?? 'Staff'); ?></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size:0.75rem;">Reply Message</small>
+                            <div class="p-3 bg-light rounded-3 border" style="white-space: pre-line;"><?php echo htmlspecialchars($data['reply']->reply_text); ?></div>
+                        </div>
+
+                        <?php if (!empty($data['reply']->attachment_path)): ?>
+                        <div>
+                            <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size:0.75rem;">Attachment</small>
+                            <a href="<?php echo URLROOT; ?>/<?php echo $data['reply']->attachment_path; ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="fas fa-paperclip me-1"></i> <?php echo htmlspecialchars($data['reply']->attachment_name ?? 'Download Attachment'); ?>
+                            </a>
+                        </div>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <p class="text-muted mb-0">Status is marked as Reply Received, but no reply message has been submitted yet.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h4 style="color: var(--primary-color); margin: 0;">Letter Preview</h4>
@@ -197,7 +249,7 @@
     </main>
 </div>
 
-<?php if ($data['complaint']->status == 'Approved by GS' || strpos(strtolower($data['complaint']->status), 'department') !== false): ?>
+<?php if ($data['complaint']->status == 'Approved by GS' || strpos(strtolower($data['complaint']->status), 'department') !== false || $data['complaint']->status == 'Reply Received'): ?>
 <!-- Send to Department Modal -->
 <div class="modal fade" id="dispatchModal" tabindex="-1" aria-labelledby="dispatchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -685,5 +737,125 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php endif; ?>
+
+<!-- View / Update Reply Modal -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header text-white px-4 py-3" style="background: linear-gradient(135deg, #0284c7, #0369a1);">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2 mb-0" id="replyModalLabel">
+                    <i class="fas fa-reply"></i>
+                    <span>Department Reply — <span id="replyModalComplaintNo" class="text-warning"></span></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="replyUpdateForm" method="POST" action="" enctype="multipart/form-data">
+                <div class="modal-body p-4">
+                    <!-- Reply Meta Info Card -->
+                    <div class="p-3 mb-3 rounded-3 border bg-light d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <small class="text-muted d-block text-uppercase fw-bold" style="font-size:0.75rem;">Replying Department</small>
+                            <span id="replyDeptName" class="fw-bold text-dark fs-6">Loading...</span>
+                        </div>
+                        <div class="text-sm-end">
+                            <small class="text-muted d-block text-uppercase fw-bold" style="font-size:0.75rem;">Received Date & Time</small>
+                            <span id="replyDate" class="text-muted small fw-semibold"></span>
+                            <span id="replyReplier" class="text-muted small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Current Attachment Display -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-secondary small text-uppercase mb-1">Attached Document / File</label>
+                        <div id="modalCurrentAttachment">
+                            <span class="text-muted small">Loading attachment...</span>
+                        </div>
+                    </div>
+
+                    <!-- Reply Text -->
+                    <div class="mb-3">
+                        <label for="modalReplyText" class="form-label fw-bold text-secondary small text-uppercase mb-1">
+                            Reply Message / Remarks <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control rounded-3 border" id="modalReplyText" name="reply_text" rows="5" placeholder="Enter or update department reply remarks..." required style="resize:vertical;"></textarea>
+                    </div>
+
+                    <!-- Upload New / Update Attachment -->
+                    <div class="p-3 rounded-3 border" style="background: #f8fafc;">
+                        <label for="modalReplyAttachment" class="form-label fw-bold small text-primary mb-1 d-flex align-items-center">
+                            <i class="fas fa-paperclip me-2"></i> Update or Attach New File (Optional)
+                        </label>
+                        <input type="file" class="form-control form-control-sm border" id="modalReplyAttachment" name="attachment" style="background:#fff;">
+                        <div class="form-text small text-muted mt-1">Upload a PDF, document, or image to replace or add attachment to this reply.</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4 pt-0">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info text-white rounded-pill px-4 fw-semibold shadow-sm">
+                        <i class="fas fa-save me-1"></i> Save & Update Reply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openReplyModal(complaintId, complaintNo) {
+    document.getElementById('replyModalComplaintNo').textContent = complaintNo;
+    const form = document.getElementById('replyUpdateForm');
+    form.action = '<?php echo URLROOT; ?>/complaints/updateReply/' + complaintId;
+
+    // Reset fields to loading state
+    document.getElementById('modalReplyText').value = 'Loading...';
+    document.getElementById('replyDeptName').textContent = 'Loading...';
+    document.getElementById('replyDate').textContent = '';
+    document.getElementById('replyReplier').textContent = '';
+    document.getElementById('modalCurrentAttachment').innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading...';
+    const fileInput = document.getElementById('modalReplyAttachment');
+    if (fileInput) fileInput.value = '';
+
+    const modal = new bootstrap.Modal(document.getElementById('replyModal'));
+    modal.show();
+
+    fetch('<?php echo URLROOT; ?>/complaints/getReply/' + complaintId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.reply) {
+                const r = data.reply;
+                document.getElementById('modalReplyText').value = r.reply_text || '';
+                document.getElementById('replyDeptName').textContent = r.department_name || 'N/A';
+                document.getElementById('replyDate').textContent = r.created_at ? new Date(r.created_at).toLocaleString() : '';
+                document.getElementById('replyReplier').textContent = r.replier_name ? ' (' + r.replier_name + ')' : '';
+
+                if (r.attachment_path) {
+                    const dlUrl = '<?php echo URLROOT; ?>/' + r.attachment_path;
+                    document.getElementById('modalCurrentAttachment').innerHTML = `
+                        <div class="alert alert-light border d-flex align-items-center justify-content-between p-2 mb-0 rounded-3">
+                            <div class="d-flex align-items-center text-truncate me-2">
+                                <i class="fas fa-paperclip text-primary me-2 fs-5"></i>
+                                <span class="fw-semibold text-truncate small">${r.attachment_name || 'Attachment'}</span>
+                            </div>
+                            <a href="${dlUrl}" target="_blank" download class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-shrink-0">
+                                <i class="fas fa-download me-1"></i> Download
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('modalCurrentAttachment').innerHTML = '<span class="text-muted small">No attachment uploaded yet.</span>';
+                }
+            } else {
+                document.getElementById('modalReplyText').value = '';
+                document.getElementById('replyDeptName').textContent = 'Not specified';
+                document.getElementById('modalCurrentAttachment').innerHTML = '<span class="text-muted small">No reply details recorded yet.</span>';
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching reply:', err);
+            document.getElementById('modalReplyText').value = '';
+            document.getElementById('modalCurrentAttachment').innerHTML = '<span class="text-danger small">Failed to load reply data.</span>';
+        });
+}
+</script>
 
 <?php require APPROOT . '/views/layout/footer.php'; ?>

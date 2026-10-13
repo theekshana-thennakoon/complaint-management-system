@@ -167,7 +167,9 @@ class ComplaintsController extends Controller {
             'rejections' => $rejections,
             'departments' => $this->complaintModel->getDepartments(),
             'dispatched_departments' => $this->complaintModel->getDispatchedDepartments($id),
-            'attachments' => $this->complaintModel->getAttachments($id)
+            'attachments' => $this->complaintModel->getAttachments($id),
+            'reply' => $this->complaintModel->getComplaintReply($id),
+            'replies' => $this->complaintModel->getRepliesByComplaintId($id)
         ];
 
         $this->view('complaints/show', $data);
@@ -561,6 +563,69 @@ class ComplaintsController extends Controller {
             echo json_encode(['success' => false, 'message' => $result['message']]);
         }
         exit;
+    }
+
+    public function getReply($id) {
+        $reply = $this->complaintModel->getComplaintReply($id);
+        header('Content-Type: application/json');
+        if ($reply) {
+            echo json_encode(['success' => true, 'reply' => $reply]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No reply found.']);
+        }
+        exit;
+    }
+
+    public function updateReply($id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            redirect('dashboard');
+        }
+
+        $complaint = $this->complaintModel->getComplaintById($id);
+        if (!$complaint) {
+            flash('complaint_error', 'Complaint not found.', 'alert alert-danger');
+            redirect('dashboard');
+        }
+
+        $reply_text = isset($_POST['reply_text']) ? trim($_POST['reply_text']) : '';
+        if (empty($reply_text)) {
+            flash('complaint_error', 'Reply text cannot be empty.', 'alert alert-danger');
+            redirect('dashboard');
+        }
+
+        $attachment = null;
+        if (!empty($_FILES['attachment']['name'])) {
+            $upload_dir = APPROOT . '/../public/uploads/replies/';
+            if (!is_dir($upload_dir)) {
+                @mkdir($upload_dir, 0755, true);
+            }
+            if ($_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+                $file_name = $_FILES['attachment']['name'];
+                $tmp_name = $_FILES['attachment']['tmp_name'];
+                $ext = pathinfo($file_name, PATHINFO_EXTENSION);
+                $new_name = 'reply_' . $id . '_' . time() . '_' . uniqid() . '.' . $ext;
+                $target_path = $upload_dir . $new_name;
+                if (move_uploaded_file($tmp_name, $target_path)) {
+                    $attachment = [
+                        'name' => $file_name,
+                        'path' => 'uploads/replies/' . $new_name
+                    ];
+                }
+            }
+        }
+
+        $existingReply = $this->complaintModel->getComplaintReply($id);
+        if ($existingReply) {
+            $this->complaintModel->updateReply($existingReply->id, $reply_text, $attachment, $_SESSION['user_id']);
+        } else {
+            $this->complaintModel->saveDepartmentReply($id, $complaint->forward_department_id ?? null, $reply_text, $attachment, $_SESSION['user_id']);
+        }
+
+        $_SESSION['sweet_success'] = 'Reply updated successfully!';
+        $redirect = isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], '/complaints/show/') !== false
+            ? 'complaints/show/' . $id
+            : 'dashboard';
+        redirect($redirect);
     }
 }
 

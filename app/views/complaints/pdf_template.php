@@ -418,6 +418,7 @@
                             $isApprovedOrSent = (
                                 strpos($data['complaint']->status, 'Approved by GS') !== false ||
                                 strpos(strtolower($data['complaint']->status), 'department') !== false ||
+                                strpos(strtolower($data['complaint']->status), 'reply received') !== false ||
                                 !empty($data['complaint']->is_dispatched) ||
                                 (isset($data['dispatched_departments']) && !empty($data['dispatched_departments']))
                             );

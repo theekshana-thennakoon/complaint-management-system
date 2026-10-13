@@ -393,6 +393,7 @@ class Complaint {
             'approved_total' => 0,
             'rejected_total' => 0,
             'dispatched'     => 0,
+            'reply_received' => 0,
         ];
 
         foreach ($complaints as $c) {
@@ -401,6 +402,9 @@ class Complaint {
 
             if ($status === 'Draft') {
                 $summary['draft']++;
+            }
+            if ($status === 'Reply Received' || strpos($statusLower, 'reply received') !== false) {
+                $summary['reply_received']++;
             }
             if (strpos($status, 'Pending CC') !== false) {
                 $summary['pending_cc']++;
@@ -707,5 +711,73 @@ class Complaint {
         $this->db->bind(':performed_by', $userId);
         $this->db->bind(':remarks', $remarks);
         return $this->db->execute();
+    }
+
+    public function saveDepartmentReply($complaint_id, $department_id, $reply_text, $attachment = null, $user_id = null) {
+        $attachment_name = $attachment['name'] ?? null;
+        $attachment_path = $attachment['path'] ?? null;
+
+        $this->db->query('INSERT INTO complaint_replies (complaint_id, department_id, reply_text, attachment_name, attachment_path, created_by) VALUES (:complaint_id, :department_id, :reply_text, :attachment_name, :attachment_path, :created_by)');
+        $this->db->bind(':complaint_id', $complaint_id);
+        $this->db->bind(':department_id', $department_id);
+        $this->db->bind(':reply_text', $reply_text);
+        $this->db->bind(':attachment_name', $attachment_name);
+        $this->db->bind(':attachment_path', $attachment_path);
+        $this->db->bind(':created_by', $user_id);
+        $executed = $this->db->execute();
+
+        if ($executed) {
+            // Update complaint status to 'Reply Received'
+            $this->db->query('UPDATE complaints SET status = "Reply Received" WHERE id = :complaint_id');
+            $this->db->bind(':complaint_id', $complaint_id);
+            $this->db->execute();
+
+            // Log workflow
+            $this->logWorkflow($complaint_id, 7, 6, 'Reply Received', 'Department submitted reply: ' . mb_substr($reply_text, 0, 50), $user_id);
+            return true;
+        }
+        return false;
+    }
+
+    public function updateReply($reply_id, $reply_text, $attachment = null, $user_id = null) {
+        if ($attachment && !empty($attachment['path'])) {
+            $this->db->query('UPDATE complaint_replies SET reply_text = :reply_text, attachment_name = :attachment_name, attachment_path = :attachment_path, updated_by = :updated_by WHERE id = :id');
+            $this->db->bind(':attachment_name', $attachment['name']);
+            $this->db->bind(':attachment_path', $attachment['path']);
+        } else {
+            $this->db->query('UPDATE complaint_replies SET reply_text = :reply_text, updated_by = :updated_by WHERE id = :id');
+        }
+        $this->db->bind(':reply_text', $reply_text);
+        $this->db->bind(':updated_by', $user_id);
+        $this->db->bind(':id', $reply_id);
+        return $this->db->execute();
+    }
+
+    public function getComplaintReply($complaint_id) {
+        $this->db->query('
+            SELECT cr.*, d.name as department_name, u.name as replier_name
+            FROM complaint_replies cr
+            LEFT JOIN departments d ON cr.department_id = d.id
+            LEFT JOIN users u ON cr.created_by = u.id
+            WHERE cr.complaint_id = :complaint_id
+            ORDER BY cr.created_at DESC
+            LIMIT 1
+        ');
+        $this->db->bind(':complaint_id', $complaint_id);
+        return $this->db->single();
+    }
+
+    public function getRepliesByComplaintId($complaint_id) {
+        $this->db->query('
+            SELECT cr.*, d.name as department_name, u.name as replier_name, uu.name as updater_name
+            FROM complaint_replies cr
+            LEFT JOIN departments d ON cr.department_id = d.id
+            LEFT JOIN users u ON cr.created_by = u.id
+            LEFT JOIN users uu ON cr.updated_by = uu.id
+            WHERE cr.complaint_id = :complaint_id
+            ORDER BY cr.created_at DESC
+        ');
+        $this->db->bind(':complaint_id', $complaint_id);
+        return $this->db->resultSet();
     }
 }
