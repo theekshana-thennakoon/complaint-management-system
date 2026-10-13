@@ -692,4 +692,20 @@ class Complaint {
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
+
+    /**
+     * Log that a complaint email was sent to an external organisation.
+     */
+    public function logEmailSent(int $complaintId, int $userId, string $orgName, string $orgEmail): bool {
+        $remarks = "Email sent to {$orgName} <{$orgEmail}>";
+        $this->db->query(
+            'INSERT INTO workflow_logs (complaint_id, action, performed_by, remarks, created_at)
+             VALUES (:complaint_id, :action, :performed_by, :remarks, NOW())'
+        );
+        $this->db->bind(':complaint_id', $complaintId);
+        $this->db->bind(':action', 'Email Sent');
+        $this->db->bind(':performed_by', $userId);
+        $this->db->bind(':remarks', $remarks);
+        return $this->db->execute();
+    }
 }

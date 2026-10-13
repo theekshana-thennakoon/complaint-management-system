@@ -241,8 +241,8 @@
                                 <tr>
                                     <th class="ps-3">Complaint No</th>
                                     <th>Date</th>
+                                    <th>Name</th>
                                     <th>Subject</th>
-                                    <th>Category</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -252,11 +252,8 @@
                                     <tr style="transition: all 0.2s ease;">
                                         <td class="ps-3"><span class="text-primary fw-bold"><?php echo htmlspecialchars($complaint->complaint_no); ?></span><br><small class="text-muted" style="font-size: 0.85em;"><?php echo !empty($complaint->district) ? htmlspecialchars($complaint->district) : ""; ?></small></td>
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
+                                        <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td>
-                                            <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-2"><i class="fas fa-tag me-1"></i> <?php echo htmlspecialchars($complaint->category_name); ?></span>
-                                            <?php if(!empty($complaint->letter_type)): ?><br><small class="text-muted text-lowercase"><?php echo htmlspecialchars($complaint->letter_type); ?></small><?php endif; ?>
-                                        </td>
                                         <td>
                                             <?php if ($complaint->status == 'Rejected by CC'): ?>
                                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2"><i class="fas fa-times-circle me-1"></i> <?php echo htmlspecialchars($complaint->status); ?></span>
@@ -319,10 +316,9 @@
                                 <tr>
                                     <th class="ps-3">Complaint No</th>
                                     <th>Date</th>
-                                    <th>Applicant</th>
+                                    <th>Name</th>
                                     <th>Subject</th>
-                                    <th>Category</th>
-                                    <th>Current Status</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -333,10 +329,6 @@
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td>
-                                            <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span>
-                                            <?php if(!empty($complaint->letter_type)): ?><br><small class="text-muted text-lowercase"><?php echo htmlspecialchars($complaint->letter_type); ?></small><?php endif; ?>
-                                        </td>
                                         <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
                                         <td>
                                             <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm">
@@ -372,10 +364,9 @@
                                 <tr>
                                     <th class="ps-3">Complaint No</th>
                                     <th>Date</th>
-                                    <th>Applicant</th>
+                                    <th>Name</th>
                                     <th>Subject</th>
-                                    <th>Category</th>
-                                    <th>Current Status</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -386,10 +377,6 @@
                                         <td><?php echo htmlspecialchars($complaint->date); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                         <td><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                        <td>
-                                            <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->category_name); ?></span>
-                                            <?php if(!empty($complaint->letter_type)): ?><br><small class="text-muted text-lowercase"><?php echo htmlspecialchars($complaint->letter_type); ?></small><?php endif; ?>
-                                        </td>
                                         <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3 py-1"><?php echo htmlspecialchars($complaint->status); ?></span></td>
                                         <td>
                                             <a href="<?php echo URLROOT; ?>/complaints/show/<?php echo $complaint->id; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">

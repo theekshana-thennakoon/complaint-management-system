@@ -88,6 +88,13 @@
                         <i class="fas fa-paper-plane me-1"></i> Send to Department
                     </button>
                     <?php endif; ?>
+                    <?php if ($data['complaint']->status == 'Approved by GS' ||  strpos(strtolower($data['complaint']->status), 'department') !== false): ?>
+                    <button type="button" class="btn btn-sm fw-semibold" id="openEmailModalBtn"
+                        onclick="openEmailModal()"
+                        style="background:linear-gradient(135deg, var(--primary-color, #2d9150), var(--primary-dark, #1b5c36));border:none;color:#fff;box-shadow:0 2px 8px rgba(45,145,80,0.3);">
+                        <i class="fas fa-envelope me-1"></i> Send via Email
+                    </button>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -387,6 +394,295 @@ function initPopupSearch() {
 // Run immediately and on DOMContentLoaded
 initPopupSearch();
 document.addEventListener('DOMContentLoaded', initPopupSearch);
+</script>
+<?php endif; ?>
+
+<?php if ($data['complaint']->status == 'Approved by GS' || strpos(strtolower($data['complaint']->status), 'department') !== false): ?>
+<!-- ════════════════════════════════════════════════
+     Send via Email Modal
+════════════════════════════════════════════════ -->
+<div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden;">
+
+            <!-- Header -->
+            <div class="modal-header border-0 px-4 pt-4 pb-3"
+                 style="background:linear-gradient(135deg, var(--primary-dark, #1b5c36), var(--primary-color, #2d9150));">
+                <div>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="emailModalLabel">
+                        <i class="fas fa-envelope me-2"></i>Send via Email
+                    </h5>
+                    <p class="text-white mb-0" style="font-size:12px;opacity:0.9;margin-top:3px;">
+                        Forward complaint details to an external organisation
+                    </p>
+                </div>
+                <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Complaint ref pill -->
+            <div class="px-4 pt-3">
+                <div class="d-flex align-items-center gap-2 p-2 rounded-3" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+                    <i class="fas fa-hashtag" style="color:var(--primary-color, #2d9150);font-size:13px;"></i>
+                    <span style="font-size:13px;color:#166534;">
+                        Complaint: <strong><?php echo htmlspecialchars($data['complaint']->complaint_no); ?></strong>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body px-4 pt-3 pb-2">
+
+                <!-- Toast message area -->
+                <div id="emailToast" class="d-none mb-3 rounded-3 p-3" style="font-size:13px;"></div>
+
+                <div id="emailFormFields">
+                    <!-- Org Name -->
+                    <div class="mb-3">
+                        <label for="emailOrgName" class="form-label fw-semibold" style="font-size:13px;color:#374151;">
+                            <i class="fas fa-building me-1" style="color:var(--primary-color, #2d9150);"></i> Organisation / Department Name
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="modern-input-wrapper" id="emailOrgNameWrapper">
+                            <span class="modern-input-icon">
+                                <i class="fas fa-building"></i>
+                            </span>
+                            <input type="text" id="emailOrgName" class="modern-input-field"
+                                   placeholder="e.g. Ministry of Health">
+                        </div>
+                        <div id="emailOrgNameErr" class="text-danger mt-1 d-none" style="font-size:12px;">
+                            <i class="fas fa-exclamation-circle me-1"></i>Organisation name is required.
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="emailOrgEmail" class="form-label fw-semibold" style="font-size:13px;color:#374151;">
+                            <i class="fas fa-at me-1" style="color:var(--primary-color, #2d9150);"></i> Email Address
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="modern-input-wrapper" id="emailOrgEmailWrapper">
+                            <span class="modern-input-icon">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" id="emailOrgEmail" class="modern-input-field"
+                                   placeholder="e.g. info@organisation.lk">
+                        </div>
+                        <div id="emailOrgEmailErr" class="text-danger mt-1 d-none" style="font-size:12px;">
+                            <i class="fas fa-exclamation-circle me-1"></i>A valid email address is required.
+                        </div>
+                    </div>
+
+                    <p style="font-size:11.5px;color:#9ca3af;margin-top:8px;">
+                        <i class="fas fa-info-circle me-1"></i>
+                        A formally formatted email containing all complaint details will be sent to the provided address.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 px-4 pb-4 pt-1">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
+                        data-bs-dismiss="modal" style="font-size:14px;">Cancel</button>
+                <button type="button" id="sendEmailBtn" class="btn rounded-pill px-4 fw-semibold text-white"
+                        onclick="submitEmail()"
+                        style="background:linear-gradient(135deg, var(--primary-color, #2d9150), var(--primary-dark, #1b5c36));border:none;font-size:14px;box-shadow:0 2px 8px rgba(45,145,80,0.3);">
+                    <span id="sendEmailBtnText"><i class="fas fa-paper-plane me-1"></i> Send Email</span>
+                    <span id="sendEmailBtnSpinner" class="d-none">
+                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Sending...
+                    </span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+/* Modern Designer Input Borders for Email Modal */
+.modern-input-wrapper {
+    display: flex;
+    align-items: stretch;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.modern-input-wrapper:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.modern-input-wrapper:focus-within {
+    border-color: var(--primary-color, #2d9150) !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(45, 145, 80, 0.16), 0 2px 8px rgba(45, 145, 80, 0.08) !important;
+}
+
+.modern-input-wrapper.is-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+}
+
+.modern-input-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    background: #f8fafc;
+    border-right: 1.5px solid #e2e8f0;
+    color: #64748b;
+    font-size: 14px;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.modern-input-wrapper:focus-within .modern-input-icon {
+    background: #f0fdf4;
+    border-right-color: rgba(45, 145, 80, 0.35);
+    color: var(--primary-color, #2d9150);
+}
+
+.modern-input-wrapper.is-invalid .modern-input-icon {
+    background: #fef2f2;
+    border-right-color: rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+}
+
+.modern-input-field {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 12px 16px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: #1e293b;
+    width: 100%;
+}
+
+.modern-input-field::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.modern-input-field:focus {
+    outline: none;
+    box-shadow: none;
+}
+</style>
+
+<script>
+function openEmailModal() {
+    // Reset
+    document.getElementById('emailOrgName').value = '';
+    document.getElementById('emailOrgEmail').value = '';
+    ['emailOrgNameErr','emailOrgEmailErr'].forEach(id => document.getElementById(id).classList.add('d-none'));
+    ['emailOrgNameWrapper','emailOrgEmailWrapper'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('is-invalid');
+    });
+    document.getElementById('emailToast').className = 'd-none mb-3 rounded-3 p-3';
+    document.getElementById('emailToast').innerHTML = '';
+    document.getElementById('emailFormFields').classList.remove('d-none');
+    const sendBtn = document.getElementById('sendEmailBtn');
+    sendBtn.disabled = false;
+    sendBtn.classList.remove('d-none');
+    document.getElementById('sendEmailBtnText').classList.remove('d-none');
+    document.getElementById('sendEmailBtnSpinner').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('emailModal')).show();
+}
+
+function validateEmailForm() {
+    let valid = true;
+    const orgName   = document.getElementById('emailOrgName');
+    const orgEmail  = document.getElementById('emailOrgEmail');
+    const nameErr   = document.getElementById('emailOrgNameErr');
+    const emailErr  = document.getElementById('emailOrgEmailErr');
+    const nameWrap  = document.getElementById('emailOrgNameWrapper');
+    const emailWrap = document.getElementById('emailOrgEmailWrapper');
+
+    if (!orgName.value.trim()) {
+        nameErr.classList.remove('d-none');
+        if (nameWrap) nameWrap.classList.add('is-invalid');
+        valid = false;
+    } else {
+        nameErr.classList.add('d-none');
+        if (nameWrap) nameWrap.classList.remove('is-invalid');
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!orgEmail.value.trim() || !emailRegex.test(orgEmail.value.trim())) {
+        emailErr.classList.remove('d-none');
+        if (emailWrap) emailWrap.classList.add('is-invalid');
+        valid = false;
+    } else {
+        emailErr.classList.add('d-none');
+        if (emailWrap) emailWrap.classList.remove('is-invalid');
+    }
+    return valid;
+}
+
+function showEmailToast(msg, success) {
+    const toast = document.getElementById('emailToast');
+    if (success) {
+        toast.style.cssText = 'background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;';
+        toast.innerHTML = '<i class="fas fa-check-circle me-2"></i>' + msg;
+    } else {
+        toast.style.cssText = 'background:#fef2f2;border:1px solid #fecaca;color:#991b1b;';
+        toast.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + msg;
+    }
+    toast.className = 'mb-3 rounded-3 p-3';
+}
+
+function submitEmail() {
+    if (!validateEmailForm()) return;
+
+    const btn = document.getElementById('sendEmailBtn');
+    document.getElementById('sendEmailBtnText').classList.add('d-none');
+    document.getElementById('sendEmailBtnSpinner').classList.remove('d-none');
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('org_name',  document.getElementById('emailOrgName').value.trim());
+    formData.append('org_email', document.getElementById('emailOrgEmail').value.trim());
+
+    fetch('<?php echo URLROOT; ?>/complaints/sendEmail/<?php echo $data['complaint']->id; ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('sendEmailBtnText').classList.remove('d-none');
+        document.getElementById('sendEmailBtnSpinner').classList.add('d-none');
+        btn.disabled = false;
+
+        showEmailToast(data.message, data.success);
+
+        if (data.success) {
+            // Hide form fields after success; keep modal open to show success message
+            document.getElementById('emailFormFields').classList.add('d-none');
+            btn.classList.add('d-none');
+        }
+    })
+    .catch(err => {
+        document.getElementById('sendEmailBtnText').classList.remove('d-none');
+        document.getElementById('sendEmailBtnSpinner').classList.add('d-none');
+        btn.disabled = false;
+        showEmailToast('Network error. Please try again.', false);
+    });
+}
+
+// Live validation on blur
+document.addEventListener('DOMContentLoaded', function() {
+    const orgNameInput = document.getElementById('emailOrgName');
+    const orgEmailInput = document.getElementById('emailOrgEmail');
+    if (orgNameInput) orgNameInput.addEventListener('blur', validateEmailForm);
+    if (orgEmailInput) orgEmailInput.addEventListener('blur', validateEmailForm);
+});
 </script>
 <?php endif; ?>
 

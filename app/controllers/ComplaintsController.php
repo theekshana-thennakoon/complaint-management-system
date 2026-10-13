@@ -477,4 +477,90 @@ class ComplaintsController extends Controller {
             redirect('dashboard');
         }
     }
+
+    /**
+     * AJAX action: send complaint details via email to an external organisation.
+     * Route: POST /complaints/sendEmail/{id}
+     */
+    public function sendEmail($id) {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
+            exit;
+        }
+
+        // ── Auth & complaint lookup ──────────────────────────────────
+        $complaint = $this->complaintModel->getComplaintById($id);
+        $eligible = $complaint && (
+            $complaint->status === 'Approved by GS' ||
+            strpos(strtolower($complaint->status), 'department') !== false
+        );
+        if (!$eligible) {
+            echo json_encode(['success' => false, 'message' => 'Complaint not found or not eligible for email dispatch.']);
+            exit;
+        }
+
+        // ── Input validation ─────────────────────────────────────────
+        $orgName  = isset($_POST['org_name'])  ? trim($_POST['org_name'])  : '';
+        $orgEmail = isset($_POST['org_email']) ? trim($_POST['org_email']) : '';
+
+        if (empty($orgName)) {
+            echo json_encode(['success' => false, 'message' => 'Organisation name is required.']);
+            exit;
+        }
+        if (empty($orgEmail) || !filter_var($orgEmail, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['success' => false, 'message' => 'A valid email address is required.']);
+            exit;
+        }
+
+        // ── Load signatory ───────────────────────────────────────────
+        require_once APPROOT . '/models/Signatory.php';
+        $signatoryModel  = new Signatory();
+        $activeSignatory = null;
+        if (!empty($complaint->signatory_id)) {
+            $activeSignatory = $signatoryModel->getSignatoryById($complaint->signatory_id);
+        }
+        if (!$activeSignatory) {
+            $activeSignatory = $signatoryModel->getDefaultSignatory();
+        }
+
+        // ── Build email data ─────────────────────────────────────────
+        $emailData = [
+            'org_name'        => $orgName,
+            'complaint_no'    => $complaint->complaint_no,
+            'applicant_name'  => $complaint->applicant_name,
+            'nic'             => $complaint->nic,
+            'mobile'          => $complaint->mobile,
+            'address'         => $complaint->address,
+            'subject'         => $complaint->subject,
+            'category_name'   => $complaint->category_name ?? '',
+            'district'        => $complaint->district       ?? '',
+            'date'            => $complaint->date,
+            'description'     => $complaint->description    ?? '',
+            'signatory_name'  => ($activeSignatory && !empty($activeSignatory->name))  ? $activeSignatory->name  : ($complaint->signatory_name  ?? 'නන්දන ගලබොඩ'),
+            'signatory_title' => ($activeSignatory && !empty($activeSignatory->title)) ? $activeSignatory->title : ($complaint->signatory_title ?? ''),
+            'sent_date'       => date('d F Y'),
+        ];
+
+        // ── Render email template to string ─────────────────────────
+        ob_start();
+        require APPROOT . '/views/complaints/email_template.php';
+        $htmlBody = ob_get_clean();
+
+        // ── Send email ───────────────────────────────────────────────
+        require_once APPROOT . '/helpers/mailer_helper.php';
+        $mailSubject = 'Complaint Reference: ' . $complaint->complaint_no . ' — ' . ($complaint->subject ?? 'Complaint Forwarding Notice');
+        $result = sendComplaintEmail($orgEmail, $orgName, $mailSubject, $htmlBody);
+
+        if ($result['success']) {
+            // Log to workflow_logs
+            $this->complaintModel->logEmailSent((int)$id, (int)$_SESSION['user_id'], $orgName, $orgEmail);
+            echo json_encode(['success' => true, 'message' => 'Email sent successfully to ' . htmlspecialchars($orgEmail) . '.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => $result['message']]);
+        }
+        exit;
+    }
 }
+

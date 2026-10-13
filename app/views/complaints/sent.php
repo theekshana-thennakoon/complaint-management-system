@@ -36,11 +36,10 @@
                 <table class="table table-hover align-middle mb-0" id="complaintsTable">
                     <thead class="table-light text-muted small text-uppercase">
                         <tr>
-                            <th class="py-3 rounded-start">Reference No</th>
+                            <th class="py-3 rounded-start">Complaint No</th>
                             <th class="py-3">Date</th>
-                            <th class="py-3">Applicant Name</th>
+                            <th class="py-3">Name</th>
                             <th class="py-3">Subject</th>
-                            <th class="py-3">Category</th>
                             <th class="py-3">Status</th>
                             <th class="py-3 text-end rounded-end">Actions</th>
                         </tr>
@@ -48,7 +47,7 @@
                     <tbody class="border-top-0">
                         <?php if(empty($data['complaints'])): ?>
                             <tr>
-                                <td colspan="7" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="fas fa-folder-open fa-3x mb-3 text-light"></i>
                                     <h5>No dispatched complaints found</h5>
                                 </td>
@@ -60,11 +59,6 @@
                                     <td class="py-3"><?php echo htmlspecialchars($complaint->date); ?></td>
                                     <td class="py-3 fw-semibold"><?php echo htmlspecialchars($complaint->applicant_name); ?></td>
                                     <td class="py-3 text-muted"><?php echo htmlspecialchars($complaint->subject); ?></td>
-                                    <td class="py-3">
-                                        <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3 py-1">
-                                            <?php echo htmlspecialchars($complaint->category_name); ?>
-                                        </span>
-                                    </td>
                                     <td class="py-3">
                                         <?php 
                                             $status = $complaint->status;
