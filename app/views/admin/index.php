@@ -81,6 +81,205 @@
             </div>
         </div>
 
+        <?php
+        $adminComplaints = $data['all_complaints'] ?? [];
+        $adminPending = 0;
+        $adminApproved = 0;
+        $adminRejected = 0;
+        $adminCatCount = [];
+        $adminDeptBreakdown = [];
+        $adminStatusCounts = [
+            'Draft' => 0,
+            'Pending CC' => 0,
+            'Pending AO' => 0,
+            'Pending GS' => 0,
+            'Approved by GS' => 0,
+            'Sent to Dept' => 0,
+            'Reply Received' => 0,
+            'Rejected' => 0
+        ];
+
+        foreach($adminComplaints as $c) {
+            $st = $c->status ?? '';
+            $stLower = strtolower($st);
+            if (strpos($st, 'Pending') !== false || $st === 'Draft') {
+                $adminPending++;
+            } elseif (strpos($st, 'Approve') !== false || strpos($st, 'Department') !== false || $st === 'Replied' || strpos($stLower, 'reply received') !== false) {
+                $adminApproved++;
+            } elseif (strpos($stLower, 'reject') !== false) {
+                $adminRejected++;
+            }
+            $cat = !empty($c->category_name) ? $c->category_name : 'General';
+            $adminCatCount[$cat] = ($adminCatCount[$cat] ?? 0) + 1;
+
+            // Department breakdown
+            $dept = !empty($c->department_name) ? $c->department_name : 'General / Direct';
+            if(!isset($adminDeptBreakdown[$dept])) {
+                $adminDeptBreakdown[$dept] = [
+                    'total' => 0,
+                    'approved' => 0,
+                    'pending' => 0,
+                    'replied' => 0,
+                    'rejected' => 0
+                ];
+            }
+            $adminDeptBreakdown[$dept]['total']++;
+            if(strpos($stLower, 'reply received') !== false || $st === 'Replied') {
+                $adminDeptBreakdown[$dept]['replied']++;
+            } elseif(strpos($stLower, 'approve') !== false || strpos($stLower, 'department') !== false) {
+                $adminDeptBreakdown[$dept]['approved']++;
+            } elseif(strpos($stLower, 'reject') !== false) {
+                $adminDeptBreakdown[$dept]['rejected']++;
+            } else {
+                $adminDeptBreakdown[$dept]['pending']++;
+            }
+
+            // Status counts
+            if($st === 'Draft') {
+                $adminStatusCounts['Draft']++;
+            } elseif(strpos($st, 'Pending CC') !== false) {
+                $adminStatusCounts['Pending CC']++;
+            } elseif(strpos($st, 'Approved by CC') !== false) {
+                $adminStatusCounts['Pending AO']++;
+            } elseif(strpos($st, 'Approved by AO') !== false) {
+                $adminStatusCounts['Pending GS']++;
+            } elseif($st === 'Approved by GS') {
+                $adminStatusCounts['Approved by GS']++;
+            } elseif($st === 'Sent to Department' || strpos($stLower, 'sent to dept') !== false) {
+                $adminStatusCounts['Sent to Dept']++;
+            } elseif(strpos($stLower, 'reply received') !== false || $st === 'Replied') {
+                $adminStatusCounts['Reply Received']++;
+            } elseif(strpos($stLower, 'reject') !== false) {
+                $adminStatusCounts['Rejected']++;
+            } else {
+                $adminStatusCounts['Draft']++;
+            }
+        }
+        arsort($adminCatCount);
+        uasort($adminDeptBreakdown, function($a, $b) {
+            return $b['total'] <=> $a['total'];
+        });
+
+        $adminDeptLabels = array_slice(array_keys($adminDeptBreakdown), 0, 7);
+        $adminDeptReplied  = [];
+        $adminDeptApproved = [];
+        $adminDeptPending  = [];
+        $adminDeptRejected = [];
+        foreach($adminDeptLabels as $adl) {
+            $adinfo = $adminDeptBreakdown[$adl] ?? ['replied'=>0,'approved'=>0,'pending'=>0,'rejected'=>0];
+            $adminDeptReplied[]  = $adinfo['replied'];
+            $adminDeptApproved[] = $adinfo['approved'];
+            $adminDeptPending[]  = $adinfo['pending'];
+            $adminDeptRejected[] = $adinfo['rejected'];
+        }
+        ?>
+
+        <!-- Admin Visual Charts Row 1: Roles & Category -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4 col-md-5">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-id-badge me-2 text-primary"></i>User Distribution</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">Role ratio of managed staff</small>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1 small"><?php echo $data['stats']['total']; ?> Total</span>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center flex-grow-1" style="min-height: 200px;">
+                        <canvas id="adminRoleChart" style="max-height: 200px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-8 col-md-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-chart-bar me-2 text-success"></i>System Complaints by Category</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">Total workload distributed by category</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2.5 py-1 small" onclick="applyStatusFilter('Approved')" style="cursor:pointer;" title="Click to view Approved complaints">
+                                <i class="fas fa-check-circle me-1"></i><?php echo $adminApproved; ?> Approved
+                            </span>
+                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-2.5 py-1 small" onclick="applyStatusFilter('Pending')" style="cursor:pointer;" title="Click to view Pending complaints">
+                                <i class="fas fa-clock me-1"></i><?php echo $adminPending; ?> In Review
+                            </span>
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-2.5 py-1 small" onclick="applyStatusFilter('Rejected')" style="cursor:pointer;" title="Click to view Rejected complaints">
+                                <i class="fas fa-times-circle me-1"></i><?php echo $adminRejected; ?> Rejected
+                            </span>
+                        </div>
+                    </div>
+                    <?php if (empty($adminCatCount)): ?>
+                        <div class="text-center py-4 text-muted"><i class="fas fa-inbox fa-3x mb-2 opacity-25"></i><p class="mb-0 small">No complaints recorded yet</p></div>
+                    <?php else: ?>
+                        <div style="min-height: 200px;">
+                            <canvas id="adminCategoryChart" style="max-height: 200px;"></canvas>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Visual Charts Row 2: Department-wise & Status-wise -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-7 col-md-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-building me-2 text-primary"></i>Department-wise Complaints & Status</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">Complaint distribution across departments</small>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1 small"><?php echo count($adminDeptBreakdown); ?> Departments</span>
+                    </div>
+                    <?php if (empty($adminDeptLabels)): ?>
+                        <div class="text-center py-4 text-muted"><i class="fas fa-building fa-3x mb-2 opacity-25"></i><p class="mb-0 small">No department data</p></div>
+                    <?php else: ?>
+                        <div style="min-height: 220px;">
+                            <canvas id="adminDeptChart" style="max-height: 220px;"></canvas>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="col-lg-5 col-md-5">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-tasks me-2 text-warning"></i>Status-wise Lifecycle Distribution</h6>
+                            <small class="text-muted" style="font-size: 0.75rem;">Count of complaints by current status</small>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center" style="min-height: 180px;">
+                        <canvas id="adminStatusChart" style="max-height: 180px;"></canvas>
+                    </div>
+                    <div class="row g-1 pt-2 border-top mt-2">
+                        <?php
+                        $stPillColors = [
+                            'Draft' => 'secondary',
+                            'Pending CC' => 'warning',
+                            'Pending AO' => 'info',
+                            'Pending GS' => 'primary',
+                            'Approved by GS' => 'success',
+                            'Sent to Dept' => 'dark',
+                            'Reply Received' => 'info',
+                            'Rejected' => 'danger'
+                        ];
+                        foreach($adminStatusCounts as $stK => $stV):
+                            $bgC = $stPillColors[$stK] ?? 'secondary';
+                        ?>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center justify-content-between p-1 px-2 rounded-2 bg-light" onclick="applyStatusFilter('<?php echo $stK; ?>')" style="cursor:pointer;" title="Click to view <?php echo $stK; ?> complaints">
+                                <span class="small text-truncate me-1 text-muted fw-medium" style="font-size:0.75rem;"><?php echo $stK; ?></span>
+                                <span class="badge bg-<?php echo $bgC; ?> rounded-pill" style="font-size:0.72rem;"><?php echo $stV; ?></span>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card shadow-sm border-0 rounded-4 mb-5">
             <div class="card-header bg-white py-3 border-bottom-0 pt-4 px-4">
                 <ul class="nav nav-pills nav-fill bg-light p-1 rounded-pill" id="managementTabs" role="tablist">
@@ -595,5 +794,215 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 </script>
 <?php endif; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart === 'undefined') return;
+    Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+    Chart.defaults.font.size = 11;
+
+    // Interactive status filter function
+    window.applyStatusFilter = function(statusLabel) {
+        if (!statusLabel) return;
+        window.location.href = '<?php echo URLROOT; ?>/dashboard?status=' + encodeURIComponent(statusLabel) + '#dashboardTabs';
+    };
+
+    // Role Distribution Chart
+    const roleCtx = document.getElementById('adminRoleChart');
+    if (roleCtx) {
+        new Chart(roleCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Gov. Secretary', 'Admin. Officer', 'Chief Clerk', 'Subject Officers', 'Dept. Officers'],
+                datasets: [{
+                    data: [
+                        <?php echo (int)($data['stats']['gs'] ?? 0); ?>,
+                        <?php echo (int)($data['stats']['ao'] ?? 0); ?>,
+                        <?php echo (int)($data['stats']['cc'] ?? 0); ?>,
+                        <?php echo (int)($data['stats']['subject_officer'] ?? 0); ?>,
+                        <?php echo (int)($data['stats']['dept_officer'] ?? 0); ?>
+                    ],
+                    backgroundColor: ['#2563eb', '#06b6d4', '#10b981', '#64748b', '#f59e0b'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 10, padding: 8, font: { size: 10 } }
+                    }
+                },
+                cutout: '62%'
+            }
+        });
+    }
+
+    // Category Complaints Chart
+    const catCtx = document.getElementById('adminCategoryChart');
+    if (catCtx) {
+        new Chart(catCtx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode(array_keys($adminCatCount)); ?>,
+                datasets: [{
+                    label: 'Total Complaints',
+                    data: <?php echo json_encode(array_values($adminCatCount)); ?>,
+                    backgroundColor: 'rgba(45, 145, 80, 0.75)',
+                    borderColor: '#2d9150',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // Department-wise Complaints Chart
+    const deptCtx = document.getElementById('adminDeptChart');
+    if (deptCtx) {
+        new Chart(deptCtx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($adminDeptLabels); ?>,
+                datasets: [
+                    {
+                        label: 'Replied',
+                        data: <?php echo json_encode($adminDeptReplied); ?>,
+                        backgroundColor: '#10b981',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Approved / Sent',
+                        data: <?php echo json_encode($adminDeptApproved); ?>,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'In Review',
+                        data: <?php echo json_encode($adminDeptPending); ?>,
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Rejected',
+                        data: <?php echo json_encode($adminDeptRejected); ?>,
+                        backgroundColor: '#ef4444',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        ticks: { stepSize: 1 }
+                    },
+                    y: {
+                        stacked: true,
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 10, padding: 8, font: { size: 10 } } },
+                    tooltip: { callbacks: { afterLabel: () => 'Click to filter by status' } }
+                },
+                onClick: (e, elements, chart) => {
+                    if (elements.length > 0) {
+                        const el = elements[0];
+                        const dataset = chart.data.datasets[el.datasetIndex];
+                        if (dataset && dataset.label) {
+                            applyStatusFilter(dataset.label);
+                        }
+                    }
+                },
+                onHover: (e, elements) => {
+                    e.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                }
+            }
+        });
+    }
+
+    // Status-wise Distribution Chart
+    const statusCtx = document.getElementById('adminStatusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: <?php echo json_encode(array_keys($adminStatusCounts)); ?>,
+                datasets: [{
+                    data: <?php echo json_encode(array_values($adminStatusCounts)); ?>,
+                    backgroundColor: [
+                        '#94a3b8', // Draft
+                        '#f59e0b', // Pending CC
+                        '#0284c7', // Pending AO
+                        '#6366f1', // Pending GS
+                        '#22c55e', // Approved by GS
+                        '#1e3c72', // Sent to Dept
+                        '#0d9488', // Reply Received
+                        '#ef4444'  // Rejected
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: ctx => {
+                                const sum = ctx.dataset.data.reduce((a,b)=>a+b, 0);
+                                const pct = sum > 0 ? Math.round((ctx.parsed / sum) * 100) : 0;
+                                return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+                            },
+                            afterLabel: () => 'Click to filter and view details'
+                        }
+                    }
+                },
+                onClick: (e, elements, chart) => {
+                    if (elements.length > 0) {
+                        const lbl = chart.data.labels[elements[0].index];
+                        applyStatusFilter(lbl);
+                    }
+                },
+                onHover: (e, elements) => {
+                    e.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                }
+            }
+        });
+    }
+});
+</script>
 
 <?php require APPROOT . '/views/layout/footer.php'; ?>

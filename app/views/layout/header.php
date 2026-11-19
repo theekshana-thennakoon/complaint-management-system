@@ -24,9 +24,10 @@ $route_param = $_GET['url'] ?? '';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/style.css">
     
-    <!-- JS Dependencies (jQuery & SweetAlert) -->
+    <!-- JS Dependencies (jQuery, SweetAlert, Chart.js) -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
         const BASE_URL = '<?php echo URLROOT; ?>';
     </script>

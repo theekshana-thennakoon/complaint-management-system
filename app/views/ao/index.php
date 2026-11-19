@@ -11,44 +11,117 @@
                 <h2 class="mb-0">Assistant Officer Dashboard</h2>
             </div>
             
-            <div class="row mb-4">
-                <div class="col">
-                    <div class="card bg-primary text-white h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="me-3">
-                                    <div class="text-white-75 small">Pending Approval</div>
-                                    <div class="text-lg fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['pending']; ?></div>
+            <!-- ── Stat Cards ── -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card text-white border-0 shadow rounded-4 h-100" style="background:linear-gradient(135deg,#b45309,#f59e0b); cursor:pointer;" onclick="filterAoByStatus('Pending')" title="Click to view Pending review">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-inbox fa-lg"></i></div>
+                                <div>
+                                    <div style="font-size:2rem;font-weight:800;line-height:1;"><?php echo $data['stats']['pending']; ?></div>
+                                    <div class="small fw-semibold text-uppercase" style="letter-spacing:.5px;opacity:.85;">Pending</div>
                                 </div>
-                                <i class="fas fa-inbox fa-2x text-white-50"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="card bg-success text-white h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="me-3">
-                                    <div class="text-white-75 small">Approved by You</div>
-                                    <div class="text-lg fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['approved']; ?></div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card text-white border-0 shadow rounded-4 h-100" style="background:linear-gradient(135deg,#166534,#22c55e); cursor:pointer;" onclick="filterAoByStatus('Approved')" title="Click to view Approved reports">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-check-double fa-lg"></i></div>
+                                <div>
+                                    <div style="font-size:2rem;font-weight:800;line-height:1;"><?php echo $data['stats']['approved']; ?></div>
+                                    <div class="small fw-semibold text-uppercase" style="letter-spacing:.5px;opacity:.85;">Approved</div>
                                 </div>
-                                <i class="fas fa-check-double fa-2x text-white-50"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="card bg-danger text-white h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="me-3">
-                                    <div class="text-white-75 small">Rejected by You</div>
-                                    <div class="text-lg fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['rejected']; ?></div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card text-white border-0 shadow rounded-4 h-100" style="background:linear-gradient(135deg,#991b1b,#ef4444); cursor:pointer;" onclick="filterAoByStatus('Rejected')" title="Click to view Rejected reports">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-times-circle fa-lg"></i></div>
+                                <div>
+                                    <div style="font-size:2rem;font-weight:800;line-height:1;"><?php echo $data['stats']['rejected']; ?></div>
+                                    <div class="small fw-semibold text-uppercase" style="letter-spacing:.5px;opacity:.85;">Rejected</div>
                                 </div>
-                                <i class="fas fa-times-circle fa-2x text-white-50"></i>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-6 col-lg-4 d-flex align-items-center">
+                    <?php
+                    $aoTotal = $data['stats']['approved'] + $data['stats']['rejected'];
+                    $aoRate  = $aoTotal > 0 ? round($data['stats']['approved'] / $aoTotal * 100, 1) : 0;
+                    ?>
+                    <div class="bg-white rounded-4 shadow-sm border p-3 w-100">
+                        <div class="small fw-bold text-muted text-uppercase mb-2">Your Approval Rate</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="font-size:1.9rem;font-weight:800;color:var(--primary-color);"><?php echo $aoRate; ?>%</div>
+                            <div class="flex-grow-1">
+                                <div style="height:8px;border-radius:99px;background:#e2e8f0;overflow:hidden;">
+                                    <div style="width:<?php echo $aoRate; ?>%;height:100%;background:var(--primary-color);border-radius:99px;transition:width 1s;"></div>
+                                </div>
+                                <div class="small text-muted mt-1"><?php echo $data['stats']['approved']; ?> approved / <?php echo $aoTotal; ?> total decisions</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Charts Row ── -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="bg-white rounded-4 shadow-sm border p-3 h-100">
+                        <div class="fw-bold mb-1" style="font-size:.88rem;"><i class="fas fa-chart-pie me-2 text-primary"></i>Decision Breakdown</div>
+                        <div class="text-muted mb-2" style="font-size:.72rem;">Your approve / reject / pending split</div>
+                        <canvas id="aoDonut" style="max-height:200px;"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-white rounded-4 shadow-sm border p-3 h-100">
+                        <div class="fw-bold mb-1" style="font-size:.88rem;"><i class="fas fa-chart-bar me-2 text-info"></i>Pending Queue by Category</div>
+                        <div class="text-muted mb-2" style="font-size:.72rem;">Current AO review queue breakdown</div>
+                        <?php
+                        $aoCatCount = [];
+                        foreach(($data['complaints'] ?? []) as $c){
+                            $n = !empty($c->category_name) ? $c->category_name : 'General';
+                            $aoCatCount[$n] = ($aoCatCount[$n] ?? 0) + 1;
+                        }
+                        arsort($aoCatCount);
+                        ?>
+                        <?php if(empty($aoCatCount)): ?>
+                        <div class="text-center py-4 text-muted"><i class="fas fa-check-circle fa-3x mb-2 opacity-25 text-success"></i><p class="mb-0 small">Queue is empty!</p></div>
+                        <?php else: ?>
+                        <canvas id="aoCatBar" style="max-height:200px;"></canvas>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="bg-white rounded-4 shadow-sm border p-3 h-100">
+                        <div class="fw-bold mb-1" style="font-size:.88rem;"><i class="fas fa-building me-2 text-primary"></i>Pending by Department</div>
+                        <div class="text-muted mb-2" style="font-size:.72rem;">Department queue workload</div>
+                        <?php
+                        $aoDeptCount = [];
+                        foreach(($data['complaints'] ?? []) as $c){
+                            $d = !empty($c->department_name) ? $c->department_name : 'General / Direct';
+                            $aoDeptCount[$d] = ($aoDeptCount[$d] ?? 0) + 1;
+                        }
+                        arsort($aoDeptCount);
+                        $aoDeptLabels = array_slice(array_keys($aoDeptCount), 0, 5);
+                        $aoDeptVals = [];
+                        foreach($aoDeptLabels as $adl) {
+                            $aoDeptVals[] = $aoDeptCount[$adl] ?? 0;
+                        }
+                        ?>
+                        <?php if(empty($aoDeptVals)): ?>
+                        <div class="text-center py-4 text-muted"><i class="fas fa-building fa-3x mb-2 opacity-25 text-primary"></i><p class="mb-0 small">No department data</p></div>
+                        <?php else: ?>
+                        <canvas id="aoDeptBar" style="max-height:200px;"></canvas>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -314,4 +387,76 @@
     </div>
 </div>
 
+<script>
+Chart.defaults.font.family = "'Inter','Outfit',sans-serif";
+
+window.filterAoByStatus = function(statusLabel) {
+    let tabId = 'pending-tab';
+    if (statusLabel === 'Approved') tabId = 'submitted-tab';
+    else if (statusLabel === 'Rejected') tabId = 'rejected-tab';
+    
+    const tabEl = document.getElementById(tabId);
+    if (tabEl && typeof bootstrap !== 'undefined') {
+        const tab = new bootstrap.Tab(tabEl);
+        tab.show();
+        const tabsContainer = document.getElementById('aoDashboardTabs');
+        if (tabsContainer) {
+            tabsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+};
+
+(function(){
+    const ctx = document.getElementById('aoDonut');
+    if(!ctx) return;
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels: ['Pending', 'Approved', 'Rejected'],
+            datasets: [{ data: [<?php echo $data['stats']['pending']; ?>, <?php echo $data['stats']['approved']; ?>, <?php echo $data['stats']['rejected']; ?>],
+                backgroundColor: ['#f59e0b','#22c55e','#ef4444'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }] },
+        options: {
+            responsive:true, maintainAspectRatio:true, cutout:'65%',
+            plugins: {
+                legend:{ position:'bottom', labels:{ padding:12, font:{size:11} } },
+                tooltip:{ cornerRadius:8, callbacks:{ afterLabel: () => 'Click to switch to this tab' } }
+            },
+            onClick: (e, elements, chart) => {
+                if (elements.length > 0) {
+                    const lbl = chart.data.labels[elements[0].index];
+                    filterAoByStatus(lbl);
+                }
+            },
+            onHover: (e, elements) => {
+                e.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+            }
+        }
+    });
+})();
+(function(){
+    const ctx = document.getElementById('aoCatBar');
+    if(!ctx) return;
+    const labels = <?php echo json_encode(array_keys($aoCatCount)); ?>;
+    const vals   = <?php echo json_encode(array_values($aoCatCount)); ?>;
+    new Chart(ctx, {
+        type:'bar', data:{ labels, datasets:[{ label:'Pending', data:vals,
+            backgroundColor:'rgba(59,130,246,.75)', borderColor:'#3b82f6', borderWidth:1.5, borderRadius:8 }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:true,
+            plugins:{ legend:{display:false}, tooltip:{cornerRadius:8} },
+            scales:{ x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{stepSize:1}}, y:{grid:{display:false}} } }
+    });
+})();
+(function(){
+    const ctx = document.getElementById('aoDeptBar');
+    if(!ctx) return;
+    const labels = <?php echo json_encode($aoDeptLabels ?? []); ?>;
+    const vals   = <?php echo json_encode($aoDeptVals ?? []); ?>;
+    new Chart(ctx, {
+        type:'bar', data:{ labels, datasets:[{ label:'Complaints', data:vals,
+            backgroundColor:'rgba(16,185,129,.75)', borderColor:'#10b981', borderWidth:1.5, borderRadius:8 }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:true,
+            plugins:{ legend:{display:false}, tooltip:{cornerRadius:8} },
+            scales:{ x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{stepSize:1}}, y:{grid:{display:false}} } }
+    });
+})();
+</script>
 <?php require APPROOT . '/views/layout/footer.php'; ?>

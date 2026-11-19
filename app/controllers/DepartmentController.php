@@ -24,11 +24,19 @@ class DepartmentController extends Controller {
 
         $total = count($dispatched);
         $this_month = 0;
+        $replied = 0;
+        $pending_reply = 0;
         foreach ($dispatched as $c) {
             if (date('Y-m') === date('Y-m', strtotime($c->dispatched_at))) {
                 $this_month++;
             }
+            if ($c->status === 'Reply Received') {
+                $replied++;
+            } else {
+                $pending_reply++;
+            }
         }
+        $reply_rate = $total > 0 ? round(($replied / $total) * 100, 1) : 0;
 
         $data = [
             'title' => 'Department Letters',
@@ -36,6 +44,9 @@ class DepartmentController extends Controller {
             'stats' => [
                 'total' => $total,
                 'this_month' => $this_month,
+                'replied' => $replied,
+                'pending_reply' => $pending_reply,
+                'reply_rate' => $reply_rate
             ]
         ];
 

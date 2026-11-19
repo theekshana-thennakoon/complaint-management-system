@@ -11,44 +11,122 @@
                 <h2 class="mb-0">Chief Clerk Dashboard</h2>
             </div>
             
-            <div class="row mb-4">
-                <div class="col">
-                    <div class="card bg-primary text-white h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="me-3">
-                                    <div class="text-white-75 small">Pending Approval</div>
-                                    <div class="text-lg fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['pending']; ?></div>
+            <!-- ── Stat Cards ── -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card text-white border-0 shadow rounded-4 h-100" style="background:linear-gradient(135deg,#b45309,#f59e0b); cursor:pointer;" onclick="filterCcByStatus('Pending')" title="Click to view Pending review">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-inbox fa-lg"></i></div>
+                                <div>
+                                    <div style="font-size:2rem;font-weight:800;line-height:1;"><?php echo $data['stats']['pending']; ?></div>
+                                    <div class="small fw-semibold text-uppercase" style="letter-spacing:.5px;opacity:.85;">Pending</div>
                                 </div>
-                                <i class="fas fa-inbox fa-2x text-white-50"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="card bg-success text-white h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="me-3">
-                                    <div class="text-white-75 small">Approved by You</div>
-                                    <div class="text-lg fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['approved']; ?></div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card text-white border-0 shadow rounded-4 h-100" style="background:linear-gradient(135deg,#166534,#22c55e); cursor:pointer;" onclick="filterCcByStatus('Approved')" title="Click to view Approved reports">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-check-double fa-lg"></i></div>
+                                <div>
+                                    <div style="font-size:2rem;font-weight:800;line-height:1;"><?php echo $data['stats']['approved']; ?></div>
+                                    <div class="small fw-semibold text-uppercase" style="letter-spacing:.5px;opacity:.85;">Approved</div>
                                 </div>
-                                <i class="fas fa-check-double fa-2x text-white-50"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col">
-                    <div class="card bg-danger text-white h-100">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="me-3">
-                                    <div class="text-white-75 small">Rejected by You</div>
-                                    <div class="text-lg fw-bold" style="font-size: 2rem;"><?php echo $data['stats']['rejected']; ?></div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card text-white border-0 shadow rounded-4 h-100" style="background:linear-gradient(135deg,#991b1b,#ef4444); cursor:pointer;" onclick="filterCcByStatus('Rejected')" title="Click to view Rejected reports">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-times-circle fa-lg"></i></div>
+                                <div>
+                                    <div style="font-size:2rem;font-weight:800;line-height:1;"><?php echo $data['stats']['rejected']; ?></div>
+                                    <div class="small fw-semibold text-uppercase" style="letter-spacing:.5px;opacity:.85;">Rejected</div>
                                 </div>
-                                <i class="fas fa-times-circle fa-2x text-white-50"></i>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <!-- Approval Rate pill -->
+                <div class="col-6 col-md-6 col-lg-4 d-flex align-items-center">
+                    <?php
+                    $ccTotal = $data['stats']['approved'] + $data['stats']['rejected'];
+                    $ccRate  = $ccTotal > 0 ? round($data['stats']['approved'] / $ccTotal * 100, 1) : 0;
+                    $pendPct = ($data['stats']['pending'] + $ccTotal) > 0 ? round($data['stats']['pending'] / ($data['stats']['pending'] + $ccTotal) * 100, 1) : 0;
+                    ?>
+                    <div class="bg-white rounded-4 shadow-sm border p-3 w-100">
+                        <div class="small fw-bold text-muted text-uppercase mb-2">Your Approval Rate</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="font-size:1.9rem;font-weight:800;color:var(--primary-color);"><?php echo $ccRate; ?>%</div>
+                            <div class="flex-grow-1">
+                                <div style="height:8px;border-radius:99px;background:#e2e8f0;overflow:hidden;">
+                                    <div style="width:<?php echo $ccRate; ?>%;height:100%;background:var(--primary-color);border-radius:99px;transition:width 1s;"></div>
+                                </div>
+                                <div class="small text-muted mt-1"><?php echo $data['stats']['approved']; ?> approved / <?php echo $ccTotal; ?> total decisions</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Charts Row ── -->
+            <div class="row g-3 mb-4">
+                <!-- Doughnut -->
+                <div class="col-md-4">
+                    <div class="bg-white rounded-4 shadow-sm border p-3 h-100">
+                        <div class="fw-bold mb-1" style="font-size:.88rem;"><i class="fas fa-chart-pie me-2 text-primary"></i>Decision Breakdown</div>
+                        <div class="text-muted mb-2" style="font-size:.72rem;">Your approve / reject / pending split</div>
+                        <canvas id="ccDonut" style="max-height:200px;"></canvas>
+                    </div>
+                </div>
+                <!-- Horizontal pending bar by category -->
+                <div class="col-md-4">
+                    <div class="bg-white rounded-4 shadow-sm border p-3 h-100">
+                        <div class="fw-bold mb-1" style="font-size:.88rem;"><i class="fas fa-chart-bar me-2 text-warning"></i>Pending by Category</div>
+                        <div class="text-muted mb-2" style="font-size:.72rem;">Current queue by category</div>
+                        <?php
+                        $ccCatCount = [];
+                        foreach(($data['complaints'] ?? []) as $c){
+                            $n = !empty($c->category_name) ? $c->category_name : 'General';
+                            $ccCatCount[$n] = ($ccCatCount[$n] ?? 0) + 1;
+                        }
+                        arsort($ccCatCount);
+                        ?>
+                        <?php if(empty($ccCatCount)): ?>
+                        <div class="text-center py-4 text-muted"><i class="fas fa-check-circle fa-3x mb-2 opacity-25 text-success"></i><p class="mb-0 small">Queue is empty!</p></div>
+                        <?php else: ?>
+                        <canvas id="ccCatBar" style="max-height:200px;"></canvas>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <!-- Horizontal pending bar by department -->
+                <div class="col-md-4">
+                    <div class="bg-white rounded-4 shadow-sm border p-3 h-100">
+                        <div class="fw-bold mb-1" style="font-size:.88rem;"><i class="fas fa-building me-2 text-primary"></i>Pending by Department</div>
+                        <div class="text-muted mb-2" style="font-size:.72rem;">Department queue workload</div>
+                        <?php
+                        $ccDeptCount = [];
+                        foreach(($data['complaints'] ?? []) as $c){
+                            $d = !empty($c->department_name) ? $c->department_name : 'General / Direct';
+                            $ccDeptCount[$d] = ($ccDeptCount[$d] ?? 0) + 1;
+                        }
+                        arsort($ccDeptCount);
+                        $ccDeptLabels = array_slice(array_keys($ccDeptCount), 0, 5);
+                        $ccDeptVals = [];
+                        foreach($ccDeptLabels as $cdl) {
+                            $ccDeptVals[] = $ccDeptCount[$cdl] ?? 0;
+                        }
+                        ?>
+                        <?php if(empty($ccDeptVals)): ?>
+                        <div class="text-center py-4 text-muted"><i class="fas fa-building fa-3x mb-2 opacity-25 text-primary"></i><p class="mb-0 small">No department data</p></div>
+                        <?php else: ?>
+                        <canvas id="ccDeptBar" style="max-height:200px;"></canvas>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -320,8 +398,83 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 </div>
 
+<script>
+Chart.defaults.font.family = "'Inter','Outfit',sans-serif";
+
+window.filterCcByStatus = function(statusLabel) {
+    let tabId = 'pending-tab';
+    if (statusLabel === 'Approved') tabId = 'submitted-tab';
+    else if (statusLabel === 'Rejected') tabId = 'rejected-tab';
+    
+    const tabEl = document.getElementById(tabId);
+    if (tabEl && typeof bootstrap !== 'undefined') {
+        const tab = new bootstrap.Tab(tabEl);
+        tab.show();
+        const tabsContainer = document.getElementById('ccDashboardTabs');
+        if (tabsContainer) {
+            tabsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+};
+
+// CC Donut
+(function(){
+    const ctx = document.getElementById('ccDonut');
+    if(!ctx) return;
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Approved', 'Rejected'],
+            datasets: [{ data: [<?php echo $data['stats']['pending']; ?>, <?php echo $data['stats']['approved']; ?>, <?php echo $data['stats']['rejected']; ?>],
+                backgroundColor: ['#f59e0b','#22c55e','#ef4444'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:true, cutout:'65%',
+            plugins: {
+                legend:{ position:'bottom', labels:{ padding:12, font:{ size:11 } } },
+                tooltip:{ cornerRadius:8, callbacks:{ afterLabel: () => 'Click to switch to this tab' } }
+            },
+            onClick: (e, elements, chart) => {
+                if (elements.length > 0) {
+                    const lbl = chart.data.labels[elements[0].index];
+                    filterCcByStatus(lbl);
+                }
+            },
+            onHover: (e, elements) => {
+                e.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+            }
+        }
+    });
+})();
+// CC Category Bar
+(function(){
+    const ctx = document.getElementById('ccCatBar');
+    if(!ctx) return;
+    const labels = <?php echo json_encode(array_keys($ccCatCount)); ?>;
+    const vals   = <?php echo json_encode(array_values($ccCatCount)); ?>;
+    new Chart(ctx, {
+        type:'bar', data:{ labels, datasets:[{ label:'Pending', data:vals,
+            backgroundColor:'rgba(245,158,11,.75)', borderColor:'#f59e0b', borderWidth:1.5, borderRadius:8 }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:true,
+            plugins:{ legend:{display:false}, tooltip:{cornerRadius:8} },
+            scales:{ x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{stepSize:1}}, y:{grid:{display:false}} } }
+    });
+})();
+// CC Department Bar
+(function(){
+    const ctx = document.getElementById('ccDeptBar');
+    if(!ctx) return;
+    const labels = <?php echo json_encode($ccDeptLabels ?? []); ?>;
+    const vals   = <?php echo json_encode($ccDeptVals ?? []); ?>;
+    new Chart(ctx, {
+        type:'bar', data:{ labels, datasets:[{ label:'Complaints', data:vals,
+            backgroundColor:'rgba(37,99,235,.75)', borderColor:'#2563eb', borderWidth:1.5, borderRadius:8 }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:true,
+            plugins:{ legend:{display:false}, tooltip:{cornerRadius:8} },
+            scales:{ x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{stepSize:1}}, y:{grid:{display:false}} } }
+    });
+})();
+</script>
 <?php require APPROOT . '/views/layout/footer.php'; ?>

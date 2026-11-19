@@ -132,14 +132,29 @@ class Complaint {
             $sql .= ' AND c.category_id = :category_id ';
         }
         if ($status) {
-            if ($status === 'Rejected') {
+            $sl = strtolower($status);
+            if ($sl === 'rejected' || strpos($sl, 'reject') !== false) {
                 $sql .= ' AND c.status LIKE "%Reject%" ';
-            } elseif ($status === 'Approved') {
+            } elseif ($sl === 'approved') {
                 $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
-            } elseif ($status === 'Pending') {
+            } elseif ($sl === 'pending') {
                 $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
-            } elseif (strpos(strtolower($status), 'department') !== false) {
+            } elseif (strpos($sl, 'department') !== false || strpos($sl, 'sent to dept') !== false) {
                 $sql .= ' AND (c.status LIKE "%Department%" OR c.id IN (SELECT complaint_id FROM complaint_dispatches)) ';
+            } elseif (strpos($sl, 'reply received') !== false || $sl === 'replied') {
+                $sql .= ' AND (c.status LIKE "%Reply Received%" OR c.status = "Replied") ';
+            } elseif (strpos($sl, 'pending ao') !== false || strpos($sl, 'approved by cc') !== false || strpos($sl, 'approved cc') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approved by CC%" OR c.status LIKE "%Pending AO%") ';
+            } elseif (strpos($sl, 'pending gs') !== false || strpos($sl, 'approved by ao') !== false || strpos($sl, 'approved ao') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approved by AO%" OR c.status LIKE "%Pending GS%") ';
+            } elseif (strpos($sl, 'pending cc') !== false) {
+                $sql .= ' AND c.status LIKE "%Pending CC%" ';
+            } elseif (strpos($sl, 'approved by gs') !== false || strpos($sl, 'approved gs') !== false) {
+                $sql .= ' AND c.status LIKE "%Approved by GS%" ';
+            } elseif (strpos($sl, 'approved / sent') !== false || strpos($sl, 'approved/sent') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
+            } elseif (strpos($sl, 'pending review') !== false) {
+                $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
             } else {
                 $sql .= ' AND c.status = :status ';
             }
@@ -156,7 +171,18 @@ class Complaint {
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
-        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending']) && strpos(strtolower($status), 'department') === false) {
+        $handledStatuses = ['rejected', 'approved', 'pending', 'department', 'sent to dept', 'reply received', 'replied', 'pending ao', 'approved by cc', 'approved cc', 'pending gs', 'approved by ao', 'approved ao', 'pending cc', 'approved by gs', 'approved gs', 'approved / sent', 'approved/sent', 'pending review'];
+        $isHandled = false;
+        if ($status) {
+            $sl = strtolower($status);
+            foreach ($handledStatuses as $hs) {
+                if (strpos($sl, $hs) !== false) {
+                    $isHandled = true;
+                    break;
+                }
+            }
+        }
+        if ($status && !$isHandled) {
             $this->db->bind(':status', $status);
         }
         return $this->db->resultSet();
@@ -185,14 +211,29 @@ class Complaint {
             $sql .= ' AND c.category_id = :category_id ';
         }
         if ($status) {
-            if ($status === 'Rejected') {
+            $sl = strtolower($status);
+            if ($sl === 'rejected' || strpos($sl, 'reject') !== false) {
                 $sql .= ' AND c.status LIKE "%Reject%" ';
-            } elseif ($status === 'Approved') {
+            } elseif ($sl === 'approved') {
                 $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
-            } elseif ($status === 'Pending') {
+            } elseif ($sl === 'pending') {
                 $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
-            } elseif (strpos(strtolower($status), 'department') !== false) {
+            } elseif (strpos($sl, 'department') !== false || strpos($sl, 'sent to dept') !== false) {
                 $sql .= ' AND (c.status LIKE "%Department%" OR c.id IN (SELECT complaint_id FROM complaint_dispatches)) ';
+            } elseif (strpos($sl, 'reply received') !== false || $sl === 'replied') {
+                $sql .= ' AND (c.status LIKE "%Reply Received%" OR c.status = "Replied") ';
+            } elseif (strpos($sl, 'pending ao') !== false || strpos($sl, 'approved by cc') !== false || strpos($sl, 'approved cc') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approved by CC%" OR c.status LIKE "%Pending AO%") ';
+            } elseif (strpos($sl, 'pending gs') !== false || strpos($sl, 'approved by ao') !== false || strpos($sl, 'approved ao') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approved by AO%" OR c.status LIKE "%Pending GS%") ';
+            } elseif (strpos($sl, 'pending cc') !== false) {
+                $sql .= ' AND c.status LIKE "%Pending CC%" ';
+            } elseif (strpos($sl, 'approved by gs') !== false || strpos($sl, 'approved gs') !== false) {
+                $sql .= ' AND c.status LIKE "%Approved by GS%" ';
+            } elseif (strpos($sl, 'approved / sent') !== false || strpos($sl, 'approved/sent') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
+            } elseif (strpos($sl, 'pending review') !== false) {
+                $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
             } else {
                 $sql .= ' AND c.status = :status ';
             }
@@ -209,7 +250,18 @@ class Complaint {
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
-        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending']) && strpos(strtolower($status), 'department') === false) {
+        $handledStatuses = ['rejected', 'approved', 'pending', 'department', 'sent to dept', 'reply received', 'replied', 'pending ao', 'approved by cc', 'approved cc', 'pending gs', 'approved by ao', 'approved ao', 'pending cc', 'approved by gs', 'approved gs', 'approved / sent', 'approved/sent', 'pending review'];
+        $isHandled = false;
+        if ($status) {
+            $sl = strtolower($status);
+            foreach ($handledStatuses as $hs) {
+                if (strpos($sl, $hs) !== false) {
+                    $isHandled = true;
+                    break;
+                }
+            }
+        }
+        if ($status && !$isHandled) {
             $this->db->bind(':status', $status);
         }
         return $this->db->resultSet();
@@ -314,14 +366,29 @@ class Complaint {
             $sql .= ' AND c.category_id = :category_id ';
         }
         if ($status) {
-            if ($status === 'Rejected') {
+            $sl = strtolower($status);
+            if ($sl === 'rejected' || strpos($sl, 'reject') !== false) {
                 $sql .= ' AND c.status LIKE "%Reject%" ';
-            } elseif ($status === 'Approved') {
+            } elseif ($sl === 'approved') {
                 $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
-            } elseif ($status === 'Pending') {
+            } elseif ($sl === 'pending') {
                 $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
-            } elseif (strpos(strtolower($status), 'department') !== false) {
+            } elseif (strpos($sl, 'department') !== false || strpos($sl, 'sent to dept') !== false) {
                 $sql .= ' AND (c.status LIKE "%Department%" OR c.id IN (SELECT complaint_id FROM complaint_dispatches)) ';
+            } elseif (strpos($sl, 'reply received') !== false || $sl === 'replied') {
+                $sql .= ' AND (c.status LIKE "%Reply Received%" OR c.status = "Replied") ';
+            } elseif (strpos($sl, 'pending ao') !== false || strpos($sl, 'approved by cc') !== false || strpos($sl, 'approved cc') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approved by CC%" OR c.status LIKE "%Pending AO%") ';
+            } elseif (strpos($sl, 'pending gs') !== false || strpos($sl, 'approved by ao') !== false || strpos($sl, 'approved ao') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approved by AO%" OR c.status LIKE "%Pending GS%") ';
+            } elseif (strpos($sl, 'pending cc') !== false) {
+                $sql .= ' AND c.status LIKE "%Pending CC%" ';
+            } elseif (strpos($sl, 'approved by gs') !== false || strpos($sl, 'approved gs') !== false) {
+                $sql .= ' AND c.status LIKE "%Approved by GS%" ';
+            } elseif (strpos($sl, 'approved / sent') !== false || strpos($sl, 'approved/sent') !== false) {
+                $sql .= ' AND (c.status LIKE "%Approve%" OR c.status LIKE "%Department%") ';
+            } elseif (strpos($sl, 'pending review') !== false) {
+                $sql .= ' AND (c.status LIKE "%Pending%" OR c.status = "Draft") ';
             } else {
                 $sql .= ' AND c.status = :status ';
             }
@@ -339,7 +406,18 @@ class Complaint {
         if ($category_id) {
             $this->db->bind(':category_id', $category_id);
         }
-        if ($status && !in_array($status, ['Rejected', 'Approved', 'Pending']) && strpos(strtolower($status), 'department') === false) {
+        $handledStatuses = ['rejected', 'approved', 'pending', 'department', 'sent to dept', 'reply received', 'replied', 'pending ao', 'approved by cc', 'approved cc', 'pending gs', 'approved by ao', 'approved ao', 'pending cc', 'approved by gs', 'approved gs', 'approved / sent', 'approved/sent', 'pending review'];
+        $isHandled = false;
+        if ($status) {
+            $sl = strtolower($status);
+            foreach ($handledStatuses as $hs) {
+                if (strpos($sl, $hs) !== false) {
+                    $isHandled = true;
+                    break;
+                }
+            }
+        }
+        if ($status && !$isHandled) {
             $this->db->bind(':status', $status);
         }
         return $this->db->resultSet();
@@ -445,6 +523,84 @@ class Complaint {
         }
 
         return $summary;
+    }
+
+    public function getCategoryStats($month = null, $date = null, $user_id = null) {
+        $province = $_SESSION['user_province'] ?? '';
+        $sql = '
+            SELECT COALESCE(cat.name, "Uncategorized") as category_name, COUNT(c.id) as total
+            FROM complaints c
+            LEFT JOIN complaint_categories cat ON c.category_id = cat.id
+            WHERE (:province = "" OR c.province = :province)
+        ';
+        if ($user_id !== null) {
+            $sql .= ' AND c.created_by = :user_id ';
+        }
+        if ($date) {
+            $sql .= ' AND (c.date = :date OR DATE(c.created_at) = :date) ';
+        } elseif ($month) {
+            $sql .= ' AND (DATE_FORMAT(c.created_at, "%Y-%m") = :month OR DATE_FORMAT(c.date, "%Y-%m") = :month) ';
+        }
+        $sql .= ' GROUP BY category_name ORDER BY total DESC LIMIT 8';
+
+        $this->db->query($sql);
+        $this->db->bind(':province', $province);
+        if ($user_id !== null) {
+            $this->db->bind(':user_id', $user_id);
+        }
+        if ($date) {
+            $this->db->bind(':date', $date);
+        } elseif ($month) {
+            $this->db->bind(':month', $month);
+        }
+        return $this->db->resultSet();
+    }
+
+    public function getMonthlyTrends($months = 6, $user_id = null) {
+        $province = $_SESSION['user_province'] ?? '';
+        $sql = '
+            SELECT 
+                DATE_FORMAT(c.created_at, "%Y-%m") as month_key,
+                DATE_FORMAT(c.created_at, "%b %Y") as month_label,
+                COUNT(*) as total,
+                SUM(CASE WHEN c.status LIKE "%Approve%" OR c.status LIKE "%Department%" THEN 1 ELSE 0 END) as approved_count,
+                SUM(CASE WHEN c.status LIKE "%Pending%" OR c.status = "Draft" THEN 1 ELSE 0 END) as pending_count,
+                SUM(CASE WHEN c.status LIKE "%Reject%" THEN 1 ELSE 0 END) as rejected_count
+            FROM complaints c
+            WHERE (:province = "" OR c.province = :province)
+              AND c.created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+        ';
+        if ($user_id !== null) {
+            $sql .= ' AND c.created_by = :user_id ';
+        }
+        $sql .= ' GROUP BY month_key, month_label ORDER BY month_key ASC';
+
+        $this->db->query($sql);
+        $this->db->bind(':province', $province);
+        if ($user_id !== null) {
+            $this->db->bind(':user_id', $user_id);
+        }
+        return $this->db->resultSet();
+    }
+
+    public function getDepartmentDispatchStats($month = null) {
+        $sql = '
+            SELECT d.name as dept_name, COUNT(cd.id) as total_dispatched,
+                   SUM(CASE WHEN c.status = "Reply Received" THEN 1 ELSE 0 END) as replies_count
+            FROM complaint_dispatches cd
+            JOIN departments d ON cd.department_id = d.id
+            JOIN complaints c ON cd.complaint_id = c.id
+        ';
+        if ($month) {
+            $sql .= ' WHERE DATE_FORMAT(cd.dispatched_at, "%Y-%m") = :month ';
+        }
+        $sql .= ' GROUP BY d.id, d.name ORDER BY total_dispatched DESC LIMIT 6';
+
+        $this->db->query($sql);
+        if ($month) {
+            $this->db->bind(':month', $month);
+        }
+        return $this->db->resultSet();
     }
 
     public function logWorkflow($complaint_id, $from_role_id, $to_role_id, $action, $remarks, $action_by) {

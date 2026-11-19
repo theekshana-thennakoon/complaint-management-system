@@ -16,14 +16,16 @@ class GovernorController extends Controller {
         $date = isset($_GET['date']) ? trim($_GET['date']) : '';
         $month = isset($_GET['month']) ? trim($_GET['month']) : ($date ? '' : date('Y-m'));
         $category_id = isset($_GET['category_id']) ? trim($_GET['category_id']) : '';
-        $all_complaints = $this->complaintModel->getComplaints($month, $category_id, $date);
+        $status = isset($_GET['status']) ? trim($_GET['status']) : '';
+        
+        $raw_complaints = $this->complaintModel->getComplaints($month, $category_id, $date);
 
         $pending = 0;
         $approved = 0;
         $rejected = 0;
         $approved_reports = [];
 
-        foreach($all_complaints as $c) {
+        foreach($raw_complaints as $c) {
             if(strpos($c->status, 'Pending') !== false) {
                 $pending++;
             } elseif(strpos($c->status, 'Approved by GS') !== false) {
@@ -34,17 +36,21 @@ class GovernorController extends Controller {
             }
         }
 
+        $all_complaints = !empty($status) ? $this->complaintModel->getComplaints($month, $category_id, $date, $status) : $raw_complaints;
+
         $data = [
             'title' => 'Governor Dashboard',
             'reports' => $approved_reports,
+            'all_complaints' => $all_complaints,
             'stats' => [
-                'total' => count($all_complaints),
+                'total' => count($raw_complaints),
                 'pending' => $pending,
                 'approved' => $approved,
                 'rejected' => $rejected
             ],
             'month' => $month,
             'date' => $date,
+            'status_filter' => $status,
             'category_id' => $category_id,
             'categories' => $this->complaintModel->getCategories()
         ];

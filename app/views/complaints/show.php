@@ -179,6 +179,23 @@
                 </div>
             </div>
 
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h4 style="color: var(--primary-color); margin: 0;">Letter Preview</h4>
+                    <button onclick="window.open('<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $data['complaint']->id; ?>?action=print', 'PrintPDF', 'width=1000,height=800');" class="btn btn-sm btn-primary">
+                        <i class="fas fa-print"></i> Print PDF
+                    </button>
+                </div>
+                <div style="border: 1px solid var(--panel-border); background: #fff; border-radius: 8px; overflow-x: auto; overflow-y: hidden; margin-bottom: 30px;">
+                    <?php
+                    ob_start();
+                    require APPROOT . '/views/complaints/pdf_template.php';
+                    $letter_html = ob_get_clean();
+                    ?>
+                    <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = (this.contentWindow.document.documentElement.scrollHeight + 50) + 'px';" style="border: none; display: block; overflow: hidden;"></iframe>
+                </div>
+            </div>
+
             <?php if (!empty($data['reply']) || $data['complaint']->status == 'Reply Received'): ?>
             <div class="card mb-4 border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid rgba(2,132,199,0.25) !important;">
                 <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
@@ -226,23 +243,6 @@
                 </div>
             </div>
             <?php endif; ?>
-
-            <div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <h4 style="color: var(--primary-color); margin: 0;">Letter Preview</h4>
-                    <button onclick="window.open('<?php echo URLROOT; ?>/complaints/generate_pdf/<?php echo $data['complaint']->id; ?>?action=print', 'PrintPDF', 'width=1000,height=800');" class="btn btn-sm btn-primary">
-                        <i class="fas fa-print"></i> Print PDF
-                    </button>
-                </div>
-                <div style="border: 1px solid var(--panel-border); background: #fff; border-radius: 8px; overflow-x: auto; overflow-y: hidden;">
-                    <?php
-                    ob_start();
-                    require APPROOT . '/views/complaints/pdf_template.php';
-                    $letter_html = ob_get_clean();
-                    ?>
-                    <iframe srcdoc="<?php echo htmlspecialchars($letter_html, ENT_QUOTES, 'UTF-8'); ?>" width="100%" scrolling="no" onload="this.style.height = (this.contentWindow.document.documentElement.scrollHeight + 50) + 'px';" style="border: none; display: block; overflow: hidden;"></iframe>
-                </div>
-            </div>
         </div>
 
 
