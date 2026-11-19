@@ -159,7 +159,7 @@ class Complaint {
                 $sql .= ' AND c.status = :status ';
             }
         }
-        $sql .= ' ORDER BY c.created_at DESC';
+        $sql .= ' ORDER BY c.created_at ASC';
 
         $this->db->query($sql);
         $this->db->bind(':province', $province);
@@ -238,7 +238,7 @@ class Complaint {
                 $sql .= ' AND c.status = :status ';
             }
         }
-        $sql .= ' ORDER BY c.created_at DESC';
+        $sql .= ' ORDER BY c.created_at ASC';
 
         $this->db->query($sql);
         $this->db->bind(':province', $province);
@@ -328,7 +328,7 @@ class Complaint {
                 $sql .= ' AND c.status = :status ';
             }
         }
-        $sql .= ' ORDER BY c.created_at DESC';
+        $sql .= ' ORDER BY c.created_at ASC';
 
         $this->db->query($sql);
         $this->db->bind(':role_id', $role_id);
@@ -393,7 +393,7 @@ class Complaint {
                 $sql .= ' AND c.status = :status ';
             }
         }
-        $sql .= ' ORDER BY c.created_at DESC';
+        $sql .= ' ORDER BY c.created_at ASC';
 
         $this->db->query($sql);
         $this->db->bind(':user_id', $user_id);
@@ -439,7 +439,7 @@ class Complaint {
         } elseif ($month) {
             $sql .= ' AND (DATE_FORMAT(c.created_at, "%Y-%m") = :month OR DATE_FORMAT(c.date, "%Y-%m") = :month) ';
         }
-        $sql .= ' GROUP BY c.id ORDER BY c.created_at DESC';
+        $sql .= ' GROUP BY c.id ORDER BY c.created_at ASC';
 
         $this->db->query($sql);
         $this->db->bind(':user_id', $user_id);

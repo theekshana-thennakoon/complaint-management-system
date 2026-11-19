@@ -71,7 +71,13 @@ $workflow_vals   = [
     font-size: 1.45rem; flex-shrink: 0;
     background: rgba(255,255,255,0.22);
 }
-.stat-card .stat-num { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+.stat-card .stat-num {
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #ffffff !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
 .stat-card .stat-lbl { font-size: .78rem; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; opacity: .82; }
 .stat-card .card-footer { background: rgba(0,0,0,.12); border: none; padding: 8px 20px; }
 .stat-card .card-footer a { color: rgba(255,255,255,.88); font-size: .78rem; font-weight: 600; text-decoration: none; }
@@ -114,7 +120,58 @@ $workflow_vals   = [
 .workflow-step .step-bar { flex: 1; max-width: 90px; }
 
 /* ── Filter bar ─────────────────────────── */
-.filter-bar { background:#fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+.filter-bar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px -2px rgba(15,45,26,.06);
+    padding: 12px 18px;
+    transition: all 0.2s ease;
+}
+.filter-bar:hover {
+    box-shadow: 0 6px 20px -2px rgba(15,45,26,.09);
+    border-color: #cbd5e1;
+}
+.filter-pill-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    padding: 3px 12px;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.filter-pill-item:focus-within, .filter-pill-item:hover {
+    border-color: var(--primary-color);
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(30, 60, 114, 0.08);
+}
+.filter-pill-item .form-select,
+.filter-pill-item .form-control {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #334155;
+    padding: 4px 6px;
+    height: auto;
+}
+.filter-pill-item .filter-icon {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+.filter-pill-item .filter-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-right: 4px;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
 
 /* ── Tab improvements ─────────────────────────── */
 .dashboard-tabs .nav-link {
@@ -161,8 +218,124 @@ canvas { max-height: 240px !important; }
 <?php flash('complaint_error'); ?>
 
 <!-- ══════════════════════════════════════════════════════════════
-     ROW 1 — STAT CARDS (6 cards)
+     ROW 1 — FILTER BAR (Clean & User-Friendly)
      ══════════════════════════════════════════════════════════════ -->
+<div class="filter-bar mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        
+        <!-- Filter Controls Form -->
+        <form method="GET" action="" class="d-flex flex-wrap align-items-center gap-2 mb-0" id="filterForm">
+            <input type="hidden" name="status" value="<?php echo htmlspecialchars($data['status_filter'] ?? ''); ?>">
+
+            <!-- Filter Label / Icon -->
+            <div class="d-flex align-items-center gap-2 me-1">
+                <span class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 32px; height: 32px;">
+                    <i class="fas fa-sliders-h fa-sm"></i>
+                </span>
+                <span class="fw-bold text-dark small text-uppercase d-none d-sm-inline" style="letter-spacing: 0.5px;">Filter:</span>
+            </div>
+
+            <!-- Status Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-sm filter-pill-item dropdown-toggle text-start" type="button" id="statusSummaryDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                    <i class="fas fa-chart-pie filter-icon me-2"></i>
+                    <span class="filter-label">Status:</span>
+                    <strong class="text-primary me-1"><?php echo !empty($data['status_filter']) ? htmlspecialchars($data['status_filter']) : 'All'; ?></strong>
+                </button>
+                <ul class="dropdown-menu shadow-lg border-0 rounded-4 p-2" aria-labelledby="statusSummaryDropdown" style="min-width:270px; z-index:1060;">
+                    <li><h6 class="dropdown-header small fw-bold text-muted text-uppercase">Filter by Status</h6></li>
+                    <?php
+                    $sf = $data['status_filter'] ?? '';
+                    $qs = 'month='.urlencode($data['month']).'&date='.urlencode($data['date'] ?? '').'&category_id='.urlencode($data['category_id']);
+                    $statusLinks = [
+                        '' => ['All Complaints', 'fas fa-list-ul', 'secondary', $ss['total']],
+                        'Draft' => ['Draft', 'fas fa-file-alt', 'secondary', $ss['draft']],
+                        'Pending CC' => ['Pending CC', 'fas fa-clock', 'warning', $ss['pending_cc']],
+                        'Approved by CC (Pending AO)' => ['Approved by CC', 'fas fa-check', 'info', $ss['approved_cc']],
+                        'Approved by AO (Pending GS)' => ['Approved by AO', 'fas fa-user-check', 'primary', $ss['approved_ao']],
+                        'Approved by GS' => ['Approved by GS', 'fas fa-check-circle', 'success', $ss['approved_gs']],
+                        'Rejected' => ['Rejected', 'fas fa-times-circle', 'danger', $ss['rejected_total']],
+                        'Sent to Department' => ['Sent to Dept', 'fas fa-paper-plane', 'dark', $ss['dispatched']],
+                        'Reply Received' => ['Reply Received', 'fas fa-reply', 'info', $ss['reply_received'] ?? 0],
+                    ];
+                    foreach($statusLinks as $key => [$label, $icon, $color, $count]):
+                        $active = ($sf === $key) ? 'active bg-primary text-white' : '';
+                        $href = URLROOT.'/dashboard?status='.urlencode($key).'&'.$qs;
+                    ?>
+                    <li>
+                        <a class="dropdown-item rounded-3 d-flex justify-content-between align-items-center py-2 <?php echo $active; ?>" href="<?php echo $href; ?>">
+                            <span><i class="<?php echo $icon; ?> me-2 text-<?php echo $active ? 'white' : $color; ?>"></i><?php echo $label; ?></span>
+                            <span class="badge bg-<?php echo $active ? 'white text-primary' : $color; ?> rounded-pill"><?php echo $count; ?></span>
+                        </a>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-pill-item" style="max-width: 220px;">
+                <i class="fas fa-folder filter-icon me-1"></i>
+                <span class="filter-label d-none d-md-inline">Category:</span>
+                <select name="category_id" class="form-select form-select-sm" onchange="this.form.submit()" style="cursor: pointer;">
+                    <option value="">All Categories</option>
+                    <?php foreach($data['categories'] as $cat): ?>
+                        <option value="<?php echo $cat->id; ?>" <?php echo ($data['category_id'] == $cat->id) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($cat->name); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <!-- Specific Date Filter -->
+            <div class="filter-pill-item" style="max-width: 195px;" title="Filter by specific day">
+                <i class="fas fa-calendar-day filter-icon me-1"></i>
+                <span class="filter-label">Date:</span>
+                <input type="date" name="date" id="dateFilter" class="form-control form-control-sm" value="<?php echo htmlspecialchars($data['date'] ?? ''); ?>" onchange="if(this.value){document.getElementById('monthFilter').value='';}this.form.submit()">
+            </div>
+
+            <span class="text-muted small fw-bold d-none d-lg-inline text-uppercase" style="font-size:0.68rem; opacity:0.6;">or</span>
+
+            <!-- Month Filter -->
+            <div class="filter-pill-item" style="max-width: 195px;" title="Filter by entire month">
+                <i class="fas fa-calendar-alt filter-icon me-1"></i>
+                <span class="filter-label">Month:</span>
+                <input type="month" name="month" id="monthFilter" class="form-control form-control-sm" value="<?php echo htmlspecialchars($data['month'] ?? ''); ?>" onchange="if(this.value){document.getElementById('dateFilter').value='';}this.form.submit()">
+            </div>
+
+            <!-- Clear Button -->
+            <?php if(!empty($data['date']) || !empty($data['month']) || !empty($data['category_id']) || !empty($data['status_filter'])): ?>
+            <a href="<?php echo URLROOT; ?>/dashboard?month=&date=&category_id=&status=" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1" title="Reset all filters">
+                <i class="fas fa-times"></i>
+                <span class="small fw-semibold">Reset</span>
+            </a>
+            <?php endif; ?>
+        </form>
+
+        <!-- Resolution & Reply Rate Pills -->
+        <div class="d-flex align-items-center gap-2 flex-wrap ms-auto">
+            <span class="rate-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25" title="Overall Resolution Rate">
+                <i class="fas fa-check-circle"></i> Resolution: <strong><?php echo $data['resolution_rate']; ?>%</strong>
+            </span>
+            <span class="rate-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25" title="Department Reply Rate">
+                <i class="fas fa-reply"></i> Reply Rate: <strong><?php echo $data['reply_rate']; ?>%</strong>
+            </span>
+        </div>
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     ROW 2 — STAT CARDS (6 cards)
+     ══════════════════════════════════════════════════════════════ -->
+<?php
+$ass = $data['all_status_summary'] ?? [];
+$allTotal    = $ass['total']          ?? 0;
+$allPending  = $ass['pending_total']  ?? 0;
+$allApproved = $ass['approved_total'] ?? 0;
+$allRejected = $ass['rejected_total'] ?? 0;
+$allSent     = $ass['dispatched']     ?? 0;
+$allReplied  = $ass['reply_received'] ?? 0;
+?>
 <div class="row g-3 mb-4">
 
     <!-- Total -->
@@ -175,6 +348,10 @@ canvas { max-height: 240px !important; }
                         <div class="stat-num"><?php echo $data['stats']['total']; ?></div>
                         <div class="stat-lbl">Total Letters</div>
                     </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-1 border-top border-white border-opacity-25 mt-1">
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-user me-1"></i>Mine</span>
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-globe me-1"></i>Total: <strong><?php echo $allTotal; ?></strong></span>
                 </div>
             </div>
             <div class="card-footer"><a href="<?php echo URLROOT; ?>/dashboard">View All &rarr;</a></div>
@@ -192,6 +369,10 @@ canvas { max-height: 240px !important; }
                         <div class="stat-lbl">Pending</div>
                     </div>
                 </div>
+                <div class="d-flex justify-content-between align-items-center pt-1 border-top border-white border-opacity-25 mt-1">
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-user me-1"></i>Mine</span>
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-globe me-1"></i>Total: <strong><?php echo $allPending; ?></strong></span>
+                </div>
             </div>
             <div class="card-footer"><a href="<?php echo URLROOT; ?>/dashboard?status=Pending">View &rarr;</a></div>
         </div>
@@ -207,6 +388,10 @@ canvas { max-height: 240px !important; }
                         <div class="stat-num"><?php echo $data['stats']['approved']; ?></div>
                         <div class="stat-lbl">Approved</div>
                     </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-1 border-top border-white border-opacity-25 mt-1">
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-user me-1"></i>Mine</span>
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-globe me-1"></i>Total: <strong><?php echo $allApproved; ?></strong></span>
                 </div>
             </div>
             <div class="card-footer"><a href="<?php echo URLROOT; ?>/dashboard?status=Approved">View &rarr;</a></div>
@@ -224,6 +409,10 @@ canvas { max-height: 240px !important; }
                         <div class="stat-lbl">Rejected</div>
                     </div>
                 </div>
+                <div class="d-flex justify-content-between align-items-center pt-1 border-top border-white border-opacity-25 mt-1">
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-user me-1"></i>Mine</span>
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-globe me-1"></i>Total: <strong><?php echo $allRejected; ?></strong></span>
+                </div>
             </div>
             <div class="card-footer"><a href="<?php echo URLROOT; ?>/dashboard?status=Rejected">View &rarr;</a></div>
         </div>
@@ -239,6 +428,10 @@ canvas { max-height: 240px !important; }
                         <div class="stat-num"><?php echo $data['stats']['sent']; ?></div>
                         <div class="stat-lbl">Sent to Dept</div>
                     </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center pt-1 border-top border-white border-opacity-25 mt-1">
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-user me-1"></i>Mine</span>
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-globe me-1"></i>Total: <strong><?php echo $allSent; ?></strong></span>
                 </div>
             </div>
             <div class="card-footer"><a href="<?php echo URLROOT; ?>/complaints/sent">View &rarr;</a></div>
@@ -256,90 +449,13 @@ canvas { max-height: 240px !important; }
                         <div class="stat-lbl">Replied</div>
                     </div>
                 </div>
+                <div class="d-flex justify-content-between align-items-center pt-1 border-top border-white border-opacity-25 mt-1">
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-user me-1"></i>Mine</span>
+                    <span style="font-size:.7rem;opacity:.8;"><i class="fas fa-globe me-1"></i>Total: <strong><?php echo $allReplied; ?></strong></span>
+                </div>
             </div>
             <div class="card-footer"><a href="<?php echo URLROOT; ?>/dashboard?status=Reply+Received">View &rarr;</a></div>
         </div>
-    </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════
-     ROW 2 — FILTER BAR
-     ══════════════════════════════════════════════════════════════ -->
-<div class="filter-bar p-3 mb-4 d-flex flex-wrap align-items-center gap-3">
-    <!-- Status Dropdown -->
-    <div class="dropdown">
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 d-flex align-items-center gap-2 dropdown-toggle" type="button" id="statusSummaryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-chart-pie text-primary"></i>
-            <span>Status: <strong class="text-primary"><?php echo !empty($data['status_filter']) ? htmlspecialchars($data['status_filter']) : 'All'; ?></strong></span>
-        </button>
-        <ul class="dropdown-menu shadow-lg border-0 rounded-4 p-2" aria-labelledby="statusSummaryDropdown" style="min-width:270px; z-index:1060;">
-            <li><h6 class="dropdown-header small fw-bold text-muted text-uppercase">Filter by Status</h6></li>
-            <?php
-            $sf = $data['status_filter'] ?? '';
-            $qs = 'month='.urlencode($data['month']).'&date='.urlencode($data['date'] ?? '').'&category_id='.urlencode($data['category_id']);
-            $statusLinks = [
-                '' => ['All Complaints', 'fas fa-list-ul', 'secondary', $ss['total']],
-                'Draft' => ['Draft', 'fas fa-file-alt', 'secondary', $ss['draft']],
-                'Pending CC' => ['Pending CC', 'fas fa-clock', 'warning', $ss['pending_cc']],
-                'Approved by CC (Pending AO)' => ['Approved by CC', 'fas fa-check', 'info', $ss['approved_cc']],
-                'Approved by AO (Pending GS)' => ['Approved by AO', 'fas fa-user-check', 'primary', $ss['approved_ao']],
-                'Approved by GS' => ['Approved by GS', 'fas fa-check-circle', 'success', $ss['approved_gs']],
-                'Rejected' => ['Rejected', 'fas fa-times-circle', 'danger', $ss['rejected_total']],
-                'Sent to Department' => ['Sent to Dept', 'fas fa-paper-plane', 'dark', $ss['dispatched']],
-                'Reply Received' => ['Reply Received', 'fas fa-reply', 'info', $ss['reply_received'] ?? 0],
-            ];
-            foreach($statusLinks as $key => [$label, $icon, $color, $count]):
-                $active = ($sf === $key) ? 'active bg-primary text-white' : '';
-                $href = URLROOT.'/dashboard?status='.urlencode($key).'&'.$qs;
-            ?>
-            <li>
-                <a class="dropdown-item rounded-3 d-flex justify-content-between align-items-center py-2 <?php echo $active; ?>" href="<?php echo $href; ?>">
-                    <span><i class="<?php echo $icon; ?> me-2 text-<?php echo $active ? 'white' : $color; ?>"></i><?php echo $label; ?></span>
-                    <span class="badge bg-<?php echo $active ? 'white text-primary' : $color; ?> rounded-pill"><?php echo $count; ?></span>
-                </a>
-            </li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-
-    <div class="vr opacity-25 d-none d-md-block" style="height:26px;"></div>
-
-    <!-- Filter Form -->
-    <form method="GET" action="" class="d-flex flex-wrap align-items-center gap-2" id="filterForm">
-        <input type="hidden" name="status" value="<?php echo htmlspecialchars($data['status_filter'] ?? ''); ?>">
-
-        <select name="category_id" class="form-select form-select-sm border-0 bg-light rounded-pill" style="min-width:160px;" onchange="this.form.submit()">
-            <option value="">All Categories</option>
-            <?php foreach($data['categories'] as $cat): ?>
-                <option value="<?php echo $cat->id; ?>" <?php echo ($data['category_id'] == $cat->id) ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($cat->name); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-
-        <div class="d-flex align-items-center gap-1">
-            <i class="fas fa-calendar-day text-primary small"></i>
-            <input type="date" name="date" id="dateFilter" class="form-control form-control-sm border-0 bg-light rounded-pill" value="<?php echo htmlspecialchars($data['date'] ?? ''); ?>" onchange="if(this.value){document.getElementById('monthFilter').value='';}this.form.submit()">
-        </div>
-        <div class="d-flex align-items-center gap-1">
-            <i class="fas fa-calendar-alt text-primary small"></i>
-            <input type="month" name="month" id="monthFilter" class="form-control form-control-sm border-0 bg-light rounded-pill" value="<?php echo htmlspecialchars($data['month'] ?? ''); ?>" onchange="if(this.value){document.getElementById('dateFilter').value='';}this.form.submit()">
-        </div>
-        <?php if(!empty($data['date']) || !empty($data['month']) || !empty($data['category_id']) || !empty($data['status_filter'])): ?>
-        <a href="<?php echo URLROOT; ?>/dashboard?month=&date=&category_id=&status=" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-            <i class="fas fa-times me-1"></i>Clear
-        </a>
-        <?php endif; ?>
-    </form>
-
-    <!-- Resolution Rate pills -->
-    <div class="ms-auto d-flex gap-2 flex-wrap">
-        <span class="rate-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25">
-            <i class="fas fa-check-circle"></i> Resolution <?php echo $data['resolution_rate']; ?>%
-        </span>
-        <span class="rate-pill bg-info bg-opacity-10 text-info border border-info border-opacity-25">
-            <i class="fas fa-reply"></i> Reply Rate <?php echo $data['reply_rate']; ?>%
-        </span>
     </div>
 </div>
 

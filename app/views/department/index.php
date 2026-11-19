@@ -7,12 +7,57 @@
             <?php flash('auth_error'); ?>
 
             <!-- Page Header -->
-            <div class="d-flex align-items-center mb-4">
+            <div class="d-flex align-items-center mb-3">
                 <i class="fas fa-building fa-2x me-3 text-primary"></i>
                 <div>
                     <h4 class="mb-0 fw-bold text-primary">Department Letters</h4>
                     <small class="text-muted">Letters dispatched to your department</small>
                 </div>
+            </div>
+
+            <!-- ── Filter Bar (Clean & User-Friendly) ── -->
+            <div class="filter-bar mb-4">
+                <form method="GET" action="" class="d-flex flex-wrap align-items-center gap-2 mb-0" id="deptFilterForm">
+                    <div class="d-flex align-items-center gap-2 me-1">
+                        <span class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 32px; height: 32px;">
+                            <i class="fas fa-sliders-h fa-sm"></i>
+                        </span>
+                        <span class="fw-bold text-dark small text-uppercase d-none d-sm-inline" style="letter-spacing: 0.5px;">Filter:</span>
+                    </div>
+
+                    <!-- Date Filter -->
+                    <div class="filter-pill-item" style="max-width: 195px;" title="Filter by specific day">
+                        <i class="fas fa-calendar-day filter-icon me-1"></i>
+                        <span class="filter-label">Date:</span>
+                        <input type="date" name="date" id="deptDateFilter" class="form-control form-control-sm" value="<?php echo htmlspecialchars($_GET['date'] ?? ''); ?>" onchange="if(this.value){document.getElementById('deptMonthFilter').value='';}this.form.submit()">
+                    </div>
+
+                    <span class="text-muted small fw-bold d-none d-lg-inline text-uppercase" style="font-size:0.68rem; opacity:0.6;">or</span>
+
+                    <!-- Month Filter -->
+                    <div class="filter-pill-item" style="max-width: 195px;" title="Filter by month">
+                        <i class="fas fa-calendar-alt filter-icon me-1"></i>
+                        <span class="filter-label">Month:</span>
+                        <input type="month" name="month" id="deptMonthFilter" class="form-control form-control-sm" value="<?php echo htmlspecialchars($_GET['month'] ?? ''); ?>" onchange="if(this.value){document.getElementById('deptDateFilter').value='';}this.form.submit()">
+                    </div>
+
+                    <!-- Clear Filter -->
+                    <?php if(!empty($_GET['date']) || !empty($_GET['month'])): ?>
+                    <a href="<?php echo URLROOT; ?>/department" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1" title="Reset all filters">
+                        <i class="fas fa-times"></i>
+                        <span class="small fw-semibold">Reset</span>
+                    </a>
+                    <?php endif; ?>
+
+                    <div class="ms-auto d-flex gap-2 flex-wrap">
+                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-2 small">
+                            <i class="fas fa-hourglass-half me-1"></i><?php echo $data['stats']['pending_reply'] ?? 0; ?> Pending
+                        </span>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 small">
+                            <i class="fas fa-check-circle me-1"></i><?php echo $data['stats']['replied'] ?? 0; ?> Replied
+                        </span>
+                    </div>
+                </form>
             </div>
 
             <!-- Stats -->

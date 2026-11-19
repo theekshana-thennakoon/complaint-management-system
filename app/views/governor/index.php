@@ -18,6 +18,58 @@
                 </div>
             </div>
 
+            <!-- ── Filter Bar (Clean & User-Friendly) ── -->
+            <div class="filter-bar mb-4">
+                <form method="GET" action="" class="d-flex flex-wrap align-items-center gap-2 mb-0" id="govFilterForm">
+                    <input type="hidden" name="status" value="<?php echo htmlspecialchars($data['status_filter'] ?? ''); ?>">
+
+                    <div class="d-flex align-items-center gap-2 me-1">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 32px; height: 32px; background: rgba(111,66,193,0.12); color: #6f42c1;">
+                            <i class="fas fa-sliders-h fa-sm"></i>
+                        </span>
+                        <span class="fw-bold text-dark small text-uppercase d-none d-sm-inline" style="letter-spacing: 0.5px;">Filter:</span>
+                    </div>
+
+                    <!-- Category Filter -->
+                    <div class="filter-pill-item" style="max-width: 220px;">
+                        <i class="fas fa-folder filter-icon me-1" style="color: #6f42c1;"></i>
+                        <span class="filter-label d-none d-md-inline">Category:</span>
+                        <select name="category_id" id="categoryFilter" class="form-select form-select-sm" style="cursor: pointer;" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            <?php foreach($data['categories'] as $category): ?>
+                                <option value="<?php echo $category->id; ?>" <?php echo (isset($data['category_id']) && $data['category_id'] == $category->id) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($category->name); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <!-- Date Filter -->
+                    <div class="filter-pill-item" style="max-width: 195px;" title="Filter by specific date">
+                        <i class="fas fa-calendar-day filter-icon me-1" style="color: #6f42c1;"></i>
+                        <span class="filter-label">Date:</span>
+                        <input type="date" name="date" id="dateFilter" class="form-control form-control-sm" value="<?php echo htmlspecialchars($data['date'] ?? ''); ?>" onchange="if(this.value) { const m = document.getElementById('monthFilter'); if(m) m.value = ''; } this.form.submit()">
+                    </div>
+
+                    <span class="text-muted small fw-bold d-none d-lg-inline text-uppercase" style="font-size:0.68rem; opacity:0.6;">or</span>
+
+                    <!-- Month Filter -->
+                    <div class="filter-pill-item" style="max-width: 195px;" title="Filter by entire month">
+                        <i class="fas fa-calendar-alt filter-icon me-1" style="color: #6f42c1;"></i>
+                        <span class="filter-label">Month:</span>
+                        <input type="month" name="month" id="monthFilter" class="form-control form-control-sm" value="<?php echo htmlspecialchars($data['month'] ?? ''); ?>" onchange="if(this.value) { const d = document.getElementById('dateFilter'); if(d) d.value = ''; } this.form.submit()">
+                    </div>
+
+                    <!-- Clear Filter -->
+                    <?php if(!empty($data['date']) || !empty($data['month']) || !empty($data['category_id']) || !empty($data['status_filter'])): ?>
+                    <a href="<?php echo URLROOT; ?>/governor?month=&date=&category_id=&status=" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 shadow-sm d-inline-flex align-items-center gap-1" title="Reset all filters">
+                        <i class="fas fa-times"></i>
+                        <span class="small fw-semibold">Reset</span>
+                    </a>
+                    <?php endif; ?>
+                </form>
+            </div>
+
             <!-- Stats Cards -->
             <div class="row g-3 mb-4">
                 <div class="col-6 col-md-3">
@@ -79,50 +131,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-12 d-flex justify-content-end">
-                    <form method="GET" action="" class="d-flex flex-wrap align-items-center bg-white py-2 px-3 rounded-4 shadow-sm border" style="gap: 12px; border-color: rgba(0,0,0,0.06) !important;">
-                        <div class="input-group input-group-sm" style="width: auto; min-width: 170px;">
-                            <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-1">
-                                <i class="fas fa-filter"></i>
-                            </span>
-                            <select name="category_id" id="categoryFilter" class="form-select border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer;" onchange="this.form.submit()">
-                                <option value="">All Categories</option>
-                                <?php foreach($data['categories'] as $category): ?>
-                                    <option value="<?php echo $category->id; ?>" <?php echo (isset($data['category_id']) && $data['category_id'] == $category->id) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($category->name); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        
-                        <div class="vr bg-secondary opacity-25 d-none d-md-block" style="width: 1px; height: 26px;"></div>
-                        
-                        <!-- Date Filter -->
-                        <div class="input-group input-group-sm" style="width: auto;">
-                            <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-1" title="Filter by date">
-                                <i class="fas fa-calendar-day"></i> <span class="d-none d-xl-inline ms-1 small">Date:</span>
-                            </span>
-                            <input type="date" name="date" id="dateFilter" class="form-control border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer;" value="<?php echo htmlspecialchars($data['date'] ?? ''); ?>" onchange="if(this.value) { const m = document.getElementById('monthFilter'); if(m) m.value = ''; } this.form.submit()">
-                        </div>
-
-                        <!-- Month Filter -->
-                        <div class="input-group input-group-sm" style="width: auto;">
-                            <span class="input-group-text bg-transparent border-0 text-primary fw-semibold pe-1" title="Filter by month">
-                                <i class="fas fa-calendar-alt"></i> <span class="d-none d-xl-inline ms-1 small">Month:</span>
-                            </span>
-                            <input type="month" name="month" id="monthFilter" class="form-control border-0 bg-light rounded-pill px-3 fw-medium text-secondary" style="cursor: pointer;" value="<?php echo htmlspecialchars($data['month'] ?? ''); ?>" onchange="if(this.value) { const d = document.getElementById('dateFilter'); if(d) d.value = ''; } this.form.submit()">
-                        </div>
-
-                        <?php if(!empty($data['date']) || !empty($data['month']) || !empty($data['category_id'])): ?>
-                            <a href="<?php echo URLROOT; ?>/governor?month=&date=&category_id=" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="Clear filters">
-                                <i class="fas fa-times me-1"></i> Clear
-                            </a>
-                        <?php endif; ?>
-                    </form>
                 </div>
             </div>
 
